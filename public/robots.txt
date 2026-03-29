@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# 部署后把下面改成你的实际地址，并取消注释：
+# Sitemap: https://YOUR_USERNAME.github.io/YOUR_REPO/sitemap.xml

@@ -1,0 +1,2 @@
+# SPA 回退：Cloudflare Pages / Netlify 等会读取此文件（构建后位于 dist 根目录）
+/*    /index.html   200

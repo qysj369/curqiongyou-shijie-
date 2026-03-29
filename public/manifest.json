@@ -1,0 +1,17 @@
+{
+  "name": "穷游世界 - 背包客的省钱攻略",
+  "short_name": "穷游世界",
+  "description": "用最少的钱看世界。穷游攻略、预算筛选、目的地指南。",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#f59e0b",
+  "background_color": "#f8fafc",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
