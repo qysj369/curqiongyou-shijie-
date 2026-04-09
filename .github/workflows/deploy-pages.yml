@@ -35,8 +35,8 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # 项目站为 /repo名/；用户站可改为 BASE=/
-          BASE: /${{ github.event.repository.name }}/
+          # 绑定自定义域名时，前端资源应从根路径加载
+          BASE: /
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
