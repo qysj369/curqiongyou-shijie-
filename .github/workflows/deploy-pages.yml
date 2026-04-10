@@ -37,6 +37,8 @@ jobs:
         env:
           # 绑定自定义域名时，前端资源应从根路径加载
           BASE: /
+          # 省事用 github.io 时填你的线上根地址（勿尾斜杠），详情页 canonical/og:url 才正确
+          VITE_SITE_URL: https://qysj369.github.io/curqiongyou-shijie-
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

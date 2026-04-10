@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ToastProvider } from './contexts/ToastContext'
+import { SeoOverrideProvider } from './contexts/SeoOverrideContext'
 import SkipLink from './components/SkipLink'
 import Header from './components/Header'
 import BackToTop from './components/BackToTop'
@@ -8,6 +9,7 @@ import Footer from './components/Footer'
 import Home from './pages/Home'
 import ErrorBoundary from './components/ErrorBoundary'
 import AIChatWidget from './components/AIChatWidget'
+import SeoHead from './components/SeoHead'
 import { isAiChatEnabled } from './services/aiChat'
 
 const Destinations = lazy(() => import('./pages/Destinations'))
@@ -39,6 +41,8 @@ function App() {
   return (
     <BrowserRouter basename={basename}>
       <ToastProvider>
+      <SeoOverrideProvider>
+      <SeoHead />
       <div className="min-h-screen bg-slate-50 flex flex-col">
         <SkipLink />
         <Header />
@@ -68,6 +72,7 @@ function App() {
         <BackToTop />
         {isAiChatEnabled() && <AIChatWidget />}
       </div>
+      </SeoOverrideProvider>
       </ToastProvider>
     </BrowserRouter>
   )

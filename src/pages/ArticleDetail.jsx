@@ -11,10 +11,13 @@ import JsonLd from '../components/JsonLd'
 import CommentSection from '../components/CommentSection'
 import UserGuideForm from '../components/UserGuideForm'
 import ServiceLinks from '../components/ServiceLinks'
+import { useSeoOverride } from '../contexts/SeoOverrideContext'
+import { excerptForMeta } from '../utils/seoExcerpt'
 
 export default function ArticleDetail() {
   const { t } = useTranslation()
   const { id } = useParams()
+  const { setOverride, clear } = useSeoOverride()
   const articleRef = useRef(null)
   const [userGuidesRefresh, setUserGuidesRefresh] = useState(0)
 
@@ -28,10 +31,26 @@ export default function ArticleDetail() {
   const shareText = article ? `${article.title} · ${article.destination} ¥${article.budget}` : (userGuide ? `${userGuide.title} · ${userGuide.destinationName} ¥${userGuide.budget}` : '')
 
   useEffect(() => {
-    if (article) document.title = `${article.title} - 穷游世界`
-    else if (userGuide) document.title = `${userGuide.title} - 穷游世界`
-    return () => { document.title = '穷游世界 - 背包客的省钱攻略' }
-  }, [article, userGuide])
+    if (article) {
+      const raw = detail?.content || ''
+      const desc = excerptForMeta(raw, { stripMarkdown: true }) || t('seo.description')
+      setOverride({
+        title: t('seo.pageTitleTemplate', { page: article.title, site: t('common.siteName') }),
+        description: desc,
+      })
+      return () => clear()
+    }
+    if (userGuide) {
+      const desc = excerptForMeta(userGuide.content) || t('seo.description')
+      setOverride({
+        title: t('seo.pageTitleTemplate', { page: userGuide.title, site: t('common.siteName') }),
+        description: desc,
+      })
+      return () => clear()
+    }
+    clear()
+    return () => clear()
+  }, [article, userGuide, detail, t, setOverride, clear])
 
   const related = useMemo(() => {
     if (!article) return []

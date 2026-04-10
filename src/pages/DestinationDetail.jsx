@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { destinations, articles } from '../data/mockData'
@@ -7,16 +7,42 @@ import { getUserGuidesByDestination } from '../data/userGuidesStore'
 import Breadcrumbs from '../components/Breadcrumbs'
 import UserGuideForm from '../components/UserGuideForm'
 import ServiceLinks from '../components/ServiceLinks'
+import { useSeoOverride } from '../contexts/SeoOverrideContext'
 
 export default function DestinationDetail() {
   const { t } = useTranslation()
   const { id } = useParams()
   const [ugcRefresh, setUgcRefresh] = useState(0)
+  const { setOverride, clear } = useSeoOverride()
+
   const dest = destinations.find(d => d.id === id)
+
+  const relatedArticles = useMemo(
+    () => (dest ? articles.filter((a) => a.destination === dest.name) : []),
+    [dest],
+  )
+  const relatedUserGuides = useMemo(
+    () => (dest ? getUserGuidesByDestination(dest.name) : []),
+    [dest, ugcRefresh],
+  )
+  const guide = dest ? destinationGuides[dest.id] : undefined
+
+  useEffect(() => {
+    if (!dest) {
+      clear()
+      return undefined
+    }
+    const tagPart = dest.tags?.length ? ` — ${dest.tags.slice(0, 4).join('、')}` : ''
+    const desc = `${dest.name} · ${dest.country} · ${dest.continent}${dest.description ? ` — ${dest.description}` : ''}${tagPart}`.slice(0, 160)
+    setOverride({
+      title: t('seo.pageTitleTemplate', { page: dest.name, site: t('common.siteName') }),
+      description: desc || t('seo.description'),
+    })
+    return () => clear()
+  }, [dest, t, setOverride, clear])
+
   if (!dest) return <div className="p-8 text-center">{t('destinationDetail.notFound')}</div>
-  const relatedArticles = articles.filter(a => a.destination === dest.name)
-  const relatedUserGuides = useMemo(() => getUserGuidesByDestination(dest.name), [dest.name, ugcRefresh])
-  const guide = destinationGuides[dest.id]
+
   const breadcrumbs = [
     { label: t('common.home'), to: '/' },
     { label: t('common.destinations'), to: '/destinations' },
@@ -83,7 +109,19 @@ export default function DestinationDetail() {
           </div>
         )}
 
-        <h2 className="text-xl font-bold text-slate-800 mb-4">{t('destinationDetail.guides')}</h2>
+        <div className="flex flex-wrap items-baseline justify-between gap-3 mb-4">
+          <h2 className="text-xl font-bold text-slate-800">
+            {t('destinationDetail.guidesHeading', {
+              count: relatedArticles.length + relatedUserGuides.length,
+            })}
+          </h2>
+          <Link
+            to={`/articles?destination=${encodeURIComponent(dest.name)}`}
+            className="text-sm font-medium text-amber-600 hover:text-amber-700 whitespace-nowrap"
+          >
+            {t('destinationDetail.openArticlesFiltered')}
+          </Link>
+        </div>
         <div className="space-y-4">
           {relatedArticles.length > 0 ? (
             relatedArticles.map(a => (

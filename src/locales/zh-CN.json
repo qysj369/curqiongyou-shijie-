@@ -10,6 +10,7 @@
     "favorites": "我的收藏",
     "community": "社区",
     "board": "网友留言板",
+    "brand": "品牌",
     "favorite": "收藏",
     "favorited": "已收藏",
     "lang": "语言"
@@ -123,7 +124,8 @@
   },
   "notFound": {
     "text": "这一页还没被写出来呢",
-    "backHome": "返回首页"
+    "backHome": "返回首页",
+    "pageTitle": "页面未找到"
   },
   "toast": {
     "favorited": "已收藏",
@@ -135,12 +137,29 @@
     "budgetAsc": "预算从低到高",
     "nameAsc": "名称 A-Z",
     "dateDesc": "最新优先",
+    "viewsDesc": "浏览量从高到低",
     "daysAsc": "天数从少到多"
   },
   "home": {
     "heroTitle": "用最少的钱，看最美的世界",
     "heroSubtitle": "这里没有天花乱坠的广告，只有真实预算与路线。愿你安心出发，少踩坑。",
+    "sloganTag": "品牌主张",
+    "sloganPrimaryEn": "Less Luggage, More Life.",
+    "sloganPrimaryZh": "行囊虽轻，生命厚重。",
+    "sloganRationale": "我们相信，预算旅行不是廉价旅行。少一点物质负担，多一点真实体验；用智慧代替金钱，用勇气拥抱世界。",
+    "sloganAlt1En": "Travel Smart, See More.",
+    "sloganAlt1Zh": "智行天下，见所未见。",
+    "sloganAlt2En": "Value Every Mile.",
+    "sloganAlt2Zh": "不负每一公里。",
+    "sloganAlt3En": "Budget is Limited, Dreams are Not.",
+    "sloganAlt3Zh": "预算有价，梦想无疆。",
+    "sloganAlt4En": "Citizen of the World.",
+    "sloganAlt4Zh": "世界公民。",
+    "viewSloganPlaybook": "查看完整口号全案 →",
     "searchPlaceholder": "搜索目的地...",
+    "searchResultsTitle": "搜索结果",
+    "searchResultsCount": "共 {{count}} 条匹配",
+    "searchNoResults": "没有匹配的攻略。可换关键词，或试试英文地名（如 Thailand、Japan、Vietnam）。",
     "budgetAny": "预算不限",
     "budget0_2000": "0-2000元",
     "budget2000_5000": "2000-5000元",
@@ -160,8 +179,14 @@
     "joinCommunity": "加入社区",
     "joinCommunityDesc": "问答、找旅伴、话题互动 — 世界博爱，大同一家人"
   },
+  "seo": {
+    "title": "穷游世界 · Less Luggage, More Life.",
+    "description": "行囊虽轻，生命厚重。用最少的钱看世界：真实穷游攻略、预算与路线筛选、民俗禁忌与旅行风险提示，陪你安心出发。",
+    "keywords": "穷游,背包旅行,Less Luggage More Life,预算旅行,自由行,旅行攻略,目的地指南",
+    "pageTitleTemplate": "{{page}} · {{site}}"
+  },
   "footer": {
-    "tagline": "用最少的钱看世界。每一段旅程都值得被认真对待。",
+    "taglineSub": "用最少的钱看世界。每一段旅程都值得被认真对待。",
     "boardAndGuidelines": "网友留言板 · 社区公约",
     "about": "关于",
     "copyright": "© 2026 穷游世界. 保留所有权利."
@@ -177,6 +202,9 @@
   "destinations": {
     "title": "穷游目的地",
     "subtitle": "按大洲和标签筛选，找到最适合你的穷游目的地",
+    "searchPlaceholder": "搜索国家/地区、大洲或标签（支持英文关键词）",
+    "resultsCount": "共 {{count}} 个目的地",
+    "noResults": "没有匹配的目的地。可清空搜索框、选「全部」大洲/标签，或换个关键词试试。",
     "continent": "大洲：",
     "tag": "标签：",
     "all": "全部",
@@ -213,6 +241,9 @@
   "articles": {
     "title": "穷游攻略",
     "subtitle": "背包客真实分享，按目的地与预算筛选",
+    "searchPlaceholder": "关键词：标题、目的地、作者、标签（支持英文别名）",
+    "resetFilters": "重置全部筛选",
+    "resultsCount": "共 {{count}} 条攻略",
     "daysBudget": "{{dest}} · ¥{{budget}} · {{days}}天",
     "authorDate": "{{author}} · {{date}}",
     "destinationAny": "全部目的地",
@@ -255,7 +286,15 @@
     "send": "发送",
     "toggle": "打开/关闭 AI 助手",
     "close": "关闭",
-    "error": "暂时无法回复，请稍后再试或到社区留言。"
+    "error": "暂时无法回复，请稍后再试或到社区留言。",
+    "quotaHint": "今日免费额度：{{used}} / {{total}}（每日 0 点重置）",
+    "limitTitle": "已达到今日使用上限",
+    "limitBody": "你今日的免费额度已用完。升级到 Cursor Pro 可获得不限量使用和更多高级能力。",
+    "limitFeatureUnlimited": "不限量使用 AI 助手",
+    "limitFeatureFast": "更快、更稳定的响应体验",
+    "limitFeatureAdvanced": "解锁更多高级功能和模型",
+    "limitLater": "稍后再说",
+    "limitUpgrade": "升级到 Cursor Pro"
   },
   "comments": {
     "title": "网友简评",
@@ -315,6 +354,8 @@
     "recommendedStay": "推荐停留",
     "recommendedDays": "7–14 天",
     "guides": "穷游攻略",
+    "guidesHeading": "穷游攻略（{{count}}）",
+    "openArticlesFiltered": "在攻略列表中筛选此地",
     "noGuides": "暂无攻略，快来分享你的穷游经历吧！",
     "notFound": "目的地不存在",
     "daysBudgetAuthor": "{{days}}天 · ¥{{budget}} · {{author}}",

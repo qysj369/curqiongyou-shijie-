@@ -1,7 +1,7 @@
 {
-  "name": "穷游世界 - 背包客的省钱攻略",
+  "name": "穷游世界 · Less Luggage, More Life.",
   "short_name": "穷游世界",
-  "description": "用最少的钱看世界。穷游攻略、预算筛选、目的地指南。",
+  "description": "行囊虽轻，生命厚重。穷游攻略、预算筛选与目的地指南。",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#f59e0b",

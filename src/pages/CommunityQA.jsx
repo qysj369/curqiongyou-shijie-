@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useToast } from '../contexts/ToastContext'
@@ -7,6 +7,8 @@ import { getAllQuestions, addQuestion, getQuestionById, getAnswersByQuestionId, 
 import { destinations } from '../data/mockData'
 import Breadcrumbs from '../components/Breadcrumbs'
 import CommunityGuidelines from '../components/CommunityGuidelines'
+import { useSeoOverride } from '../contexts/SeoOverrideContext'
+import { excerptForMeta } from '../utils/seoExcerpt'
 
 const destinationNames = [...new Set(destinations.map((d) => d.name).filter(Boolean))].sort()
 
@@ -171,10 +173,32 @@ export function QADetail() {
   const { t } = useTranslation()
   const { toast } = useToast()
   const { id } = useParams()
+  const { setOverride, clear } = useSeoOverride()
   const question = id ? getQuestionById(id) : null
   const [answers, setAnswers] = useState(() => (id ? getAnswersByQuestionId(id) : []))
   const [answerContent, setAnswerContent] = useState('')
   const [answerAuthor, setAnswerAuthor] = useState('')
+
+  useEffect(() => {
+    if (!question) {
+      clear()
+      return undefined
+    }
+    let desc = excerptForMeta(question.content)
+    if (answers.length > 0) {
+      desc = `${desc}${desc ? ' · ' : ''}${answers.length} ${t('qa.answers')}`
+    }
+    if (question.destination) {
+      desc = `${desc}${desc ? ' · ' : ''}${question.destination}`
+    }
+    if (!desc) desc = t('seo.description')
+    desc = desc.slice(0, 160)
+    setOverride({
+      title: t('seo.pageTitleTemplate', { page: question.title, site: t('common.siteName') }),
+      description: desc,
+    })
+    return () => clear()
+  }, [question, answers.length, t, setOverride, clear])
 
   const handleAnswer = (e) => {
     e.preventDefault()

@@ -2,6 +2,48 @@ import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { sendMessage } from '../services/aiChat'
 
+const FREE_QUOTA = Number(import.meta.env?.VITE_AI_FREE_QUOTA ?? 10)
+const USAGE_STORAGE_KEY = 'ai_chat_free_usage_daily'
+const LEGACY_USAGE_KEY = 'ai_chat_free_usage_count'
+
+function localDateKey() {
+  const d = new Date()
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function readDailyUsageCount() {
+  try {
+    const raw = localStorage.getItem(USAGE_STORAGE_KEY)
+    if (raw) {
+      const o = JSON.parse(raw)
+      const day = o?.day
+      const n = Number(o?.count)
+      if (day === localDateKey() && Number.isFinite(n) && n >= 0) return n
+      return 0
+    }
+    if (localStorage.getItem(LEGACY_USAGE_KEY) != null) {
+      localStorage.removeItem(LEGACY_USAGE_KEY)
+    }
+  } catch {
+    // ignore
+  }
+  return 0
+}
+
+function persistDailyUsageCount(value) {
+  try {
+    localStorage.setItem(
+      USAGE_STORAGE_KEY,
+      JSON.stringify({ day: localDateKey(), count: Math.max(0, value) }),
+    )
+  } catch {
+    // Ignore storage errors and keep UI functional.
+  }
+}
+
 export default function AIChatWidget() {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
@@ -10,18 +52,42 @@ export default function AIChatWidget() {
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [usageCount, setUsageCountState] = useState(() => readDailyUsageCount())
+  const [showLimitModal, setShowLimitModal] = useState(false)
   const listRef = useRef(null)
 
   useEffect(() => {
     if (open && listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight
   }, [open, messages])
 
+  useEffect(() => {
+    if (open) setUsageCountState(readDailyUsageCount())
+  }, [open])
+
+  useEffect(() => {
+    if (!showLimitModal) return
+    const onKey = (e) => {
+      if (e.key === 'Escape') setShowLimitModal(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [showLimitModal])
+
   const handleSend = async () => {
     const text = input.trim()
     if (!text || loading) return
+    const used = readDailyUsageCount()
+    if (used !== usageCount) setUsageCountState(used)
+    if (used >= FREE_QUOTA) {
+      setShowLimitModal(true)
+      return
+    }
     setInput('')
     setMessages((prev) => [...prev, { role: 'user', text }])
     setLoading(true)
+    const nextUsageCount = used + 1
+    setUsageCountState(nextUsageCount)
+    persistDailyUsageCount(nextUsageCount)
     try {
       const reply = await sendMessage(text)
       setMessages((prev) => [...prev, { role: 'assistant', text: reply }])
@@ -105,6 +171,54 @@ export default function AIChatWidget() {
               {t('aiChat.send')}
             </button>
           </form>
+          <div className="px-3 pb-3 text-xs text-slate-500">
+            {t('aiChat.quotaHint', {
+              used: usageCount,
+              total: FREE_QUOTA,
+            })}
+          </div>
+        </div>
+      )}
+
+      {showLimitModal && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-900/55 flex items-center justify-center px-4"
+          role="presentation"
+          onClick={() => setShowLimitModal(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-slate-200 p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ai-limit-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 id="ai-limit-title" className="text-xl font-bold text-slate-900 mb-2">{t('aiChat.limitTitle')}</h3>
+            <p className="text-sm text-slate-600 mb-5">{t('aiChat.limitBody')}</p>
+            <ul className="list-disc pl-5 text-sm text-slate-700 space-y-1 mb-6">
+              <li>{t('aiChat.limitFeatureUnlimited')}</li>
+              <li>{t('aiChat.limitFeatureFast')}</li>
+              <li>{t('aiChat.limitFeatureAdvanced')}</li>
+            </ul>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowLimitModal(false)}
+                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition"
+              >
+                {t('aiChat.limitLater')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  window.open('https://www.cursor.com/pricing', '_blank', 'noopener,noreferrer')
+                }}
+                className="px-4 py-2 rounded-lg bg-amber-500 text-white font-medium hover:bg-amber-600 transition"
+              >
+                {t('aiChat.limitUpgrade')}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>

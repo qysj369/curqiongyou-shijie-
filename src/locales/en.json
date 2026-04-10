@@ -10,6 +10,7 @@
     "favorites": "My Favorites",
     "community": "Community",
     "board": "Message Board",
+    "brand": "Brand",
     "favorite": "Favorite",
     "favorited": "Favorited",
     "lang": "Language"
@@ -123,7 +124,8 @@
   },
   "notFound": {
     "text": "This page isn’t here yet",
-    "backHome": "Back to Home"
+    "backHome": "Back to Home",
+    "pageTitle": "Page not found"
   },
   "toast": {
     "favorited": "Added to favorites",
@@ -135,12 +137,29 @@
     "budgetAsc": "Budget low to high",
     "nameAsc": "Name A–Z",
     "dateDesc": "Newest first",
+    "viewsDesc": "Most viewed",
     "daysAsc": "Days (short first)"
   },
   "home": {
     "heroTitle": "See the world on a budget",
     "heroSubtitle": "No hype—just real budgets and routes. Plan with confidence.",
+    "sloganTag": "Brand manifesto",
+    "sloganPrimaryEn": "Less Luggage, More Life.",
+    "sloganPrimaryZh": "Travel light, live deep.",
+    "sloganRationale": "For us, budget travel is not cheap travel. Carry less, experience more — use wisdom over money and courage over comfort.",
+    "sloganAlt1En": "Travel Smart, See More.",
+    "sloganAlt1Zh": "Smarter routes, broader horizons.",
+    "sloganAlt2En": "Value Every Mile.",
+    "sloganAlt2Zh": "Make every mile meaningful.",
+    "sloganAlt3En": "Budget is Limited, Dreams are Not.",
+    "sloganAlt3Zh": "Your budget has limits, your dreams do not.",
+    "sloganAlt4En": "Citizen of the World.",
+    "sloganAlt4Zh": "Travel as a true global citizen.",
+    "viewSloganPlaybook": "View the full slogan playbook →",
     "searchPlaceholder": "Search destination...",
+    "searchResultsTitle": "Search results",
+    "searchResultsCount": "{{count}} matches",
+    "searchNoResults": "No guides matched. Try other keywords or English names (e.g. Thailand, Japan, Vietnam).",
     "budgetAny": "Any budget",
     "budget0_2000": "¥0-2000",
     "budget2000_5000": "¥2000-5000",
@@ -160,8 +179,14 @@
     "joinCommunity": "Join community",
     "joinCommunityDesc": "Q&A, find buddies, join the conversation — one world, one family"
   },
+  "seo": {
+    "title": "Budget Travel World · Less Luggage, More Life.",
+    "description": "Less Luggage, More Life — budget travel guides, destinations, routes, and honest tips so you can explore further with confidence.",
+    "keywords": "budget travel,backpacking,Less Luggage More Life,travel guides,destinations,routes",
+    "pageTitleTemplate": "{{page}} · {{site}}"
+  },
   "footer": {
-    "tagline": "See the world on a budget. Every trip deserves to be taken seriously.",
+    "taglineSub": "See the world on a budget. Every trip deserves to be taken seriously.",
     "boardAndGuidelines": "Message board · Guidelines",
     "about": "About",
     "copyright": "© 2026 Budget Travel World. All rights reserved."
@@ -177,6 +202,9 @@
   "destinations": {
     "title": "Budget destinations",
     "subtitle": "Filter by continent and tags to find your next trip",
+    "searchPlaceholder": "Search name, region, continent, or tags",
+    "resultsCount": "{{count}} destinations",
+    "noResults": "No destinations match. Clear the search or reset continent/tags.",
     "continent": "Continent:",
     "tag": "Tags:",
     "all": "All",
@@ -213,6 +241,9 @@
   "articles": {
     "title": "Budget travel guides",
     "subtitle": "Real stories from backpackers, filter by destination and budget",
+    "searchPlaceholder": "Search title, destination, author, tags",
+    "resetFilters": "Reset all filters",
+    "resultsCount": "{{count}} guides",
     "daysBudget": "{{dest}} · ¥{{budget}} · {{days}} days",
     "authorDate": "{{author}} · {{date}}",
     "destinationAny": "All destinations",
@@ -255,7 +286,15 @@
     "send": "Send",
     "toggle": "Open/close AI assistant",
     "close": "Close",
-    "error": "Couldn’t reply right now. Try again or post in the community."
+    "error": "Couldn’t reply right now. Try again or post in the community.",
+    "quotaHint": "Today’s free quota: {{used}} / {{total}} (resets at local midnight)",
+    "limitTitle": "Daily Limit Reached",
+    "limitBody": "You’ve used today’s free quota. Upgrade to Cursor Pro for unlimited usage and more powerful capabilities.",
+    "limitFeatureUnlimited": "Unlimited assistant usage",
+    "limitFeatureFast": "Faster and more stable responses",
+    "limitFeatureAdvanced": "Access to advanced features and models",
+    "limitLater": "Maybe later",
+    "limitUpgrade": "Upgrade to Cursor Pro"
   },
   "comments": {
     "title": "Comments & notes",
@@ -315,6 +354,8 @@
     "recommendedStay": "Recommended stay",
     "recommendedDays": "7–14 days",
     "guides": "Guides",
+    "guidesHeading": "Guides ({{count}})",
+    "openArticlesFiltered": "Filter in guide list",
     "noGuides": "No guides yet. Share your trip!",
     "notFound": "Destination not found",
     "daysBudgetAuthor": "{{days}} days · ¥{{budget}} · {{author}}",

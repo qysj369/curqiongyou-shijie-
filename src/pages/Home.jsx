@@ -1,36 +1,77 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { featuredRoutesForHome, latestArticles, popularDestinations } from '../data/mockData'
+import { featuredRoutesForHome, latestArticles, popularDestinations, articles } from '../data/mockData'
 import { getUserGuidesAsCards } from '../data/userGuidesStore'
 import FavoriteButton from '../components/FavoriteButton'
 import AdSlot from '../components/AdSlot'
+import { matchesGuideCard, matchesDestinationCard } from '../utils/searchMatch'
+
+const BUDGET_MAX = { any: null, '2000': 2000, '5000': 5000, '10000': 10000 }
+const DAYS_VALUE = { any: null, '3': 3, '7': 7, '15': 15 }
 
 export default function Home() {
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
+  const [budgetMax, setBudgetMax] = useState('any')
+  const [daysFilter, setDaysFilter] = useState('any')
 
-  const normalize = (val) => (val || '').toString().toLowerCase()
-  const matchesSearch = (text) =>
-    !search || normalize(text).includes(normalize(search))
+  const ugcList = useMemo(() => getUserGuidesAsCards(), [])
 
-  const filteredFeaturedRoutes = featuredRoutesForHome.filter((route) =>
-    matchesSearch(route.title) || matchesSearch(route.destination),
+  const matchesBudget = (budget) => {
+    const max = BUDGET_MAX[budgetMax]
+    if (max == null) return true
+    return typeof budget === 'number' && budget <= max
+  }
+
+  const matchesDays = (days) => {
+    const d = DAYS_VALUE[daysFilter]
+    if (d == null) return true
+    return typeof days === 'number' && days === d
+  }
+
+  const filteredFeaturedRoutes = featuredRoutesForHome.filter(
+    (route) =>
+      matchesGuideCard(route, search) && matchesBudget(route.budget) && matchesDays(route.days),
   )
 
   const filteredPopularDestinations = popularDestinations.filter((dest) =>
-    matchesSearch(dest.name) ||
-    matchesSearch(dest.country) ||
-    matchesSearch(dest.region),
+    matchesDestinationCard(dest, search),
   )
 
-  const filteredLatestArticles = latestArticles.filter((article) =>
-    matchesSearch(article.title) ||
-    matchesSearch(article.destination) ||
-    article.tags.some((tag) => matchesSearch(tag)),
+  const filteredLatestArticles = latestArticles.filter(
+    (article) =>
+      matchesGuideCard(article, search) &&
+      matchesBudget(article.budget) &&
+      matchesDays(article.days),
   )
 
-  const recentUserGuides = useMemo(() => getUserGuidesAsCards().slice(0, 6), [])
+  const searchTrimmed = search.trim()
+  const mergedSearchResults = useMemo(() => {
+    if (!searchTrimmed) return []
+    const mb = (budget) => {
+      const max = BUDGET_MAX[budgetMax]
+      if (max == null) return true
+      return typeof budget === 'number' && budget <= max
+    }
+    const md = (days) => {
+      const d = DAYS_VALUE[daysFilter]
+      if (d == null) return true
+      return typeof days === 'number' && days === d
+    }
+    const matchAll = (item) =>
+      matchesGuideCard(item, search) && mb(item.budget) && md(item.days)
+    return [...articles.filter(matchAll), ...ugcList.filter(matchAll)]
+  }, [search, searchTrimmed, budgetMax, daysFilter, ugcList, articles])
+
+  const recentUserGuides = useMemo(() => {
+    const list = getUserGuidesAsCards()
+    const narrowed = list.filter(
+      (item) =>
+        matchesGuideCard(item, search) && matchesBudget(item.budget) && matchesDays(item.days),
+    )
+    return narrowed.slice(0, 6)
+  }, [search, budgetMax, daysFilter])
 
   return (
     <div>
@@ -41,29 +82,143 @@ export default function Home() {
           </p>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('home.heroTitle')}</h1>
           <p className="text-lg opacity-95 mb-8">{t('home.heroSubtitle')}</p>
-          <div className="bg-white rounded-2xl p-4 shadow-xl flex flex-col md:flex-row gap-3">
+          <form
+            className="bg-white rounded-2xl p-4 shadow-xl flex flex-col md:flex-row gap-3"
+            onSubmit={(e) => {
+              e.preventDefault()
+              document.getElementById('home-search-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
+          >
             <input
-              type="text"
+              type="search"
               placeholder={t('home.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              autoComplete="off"
               className="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
             />
-            <select className="px-4 py-3 rounded-xl border border-slate-200 text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-400">
-              <option>{t('home.budgetAny')}</option>
-              <option>{t('home.budget0_2000')}</option>
-              <option>{t('home.budget2000_5000')}</option>
-              <option>{t('home.budget5000_10000')}</option>
+            <select
+              value={budgetMax}
+              onChange={(e) => setBudgetMax(e.target.value)}
+              className="px-4 py-3 rounded-xl border border-slate-200 text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-400"
+              aria-label={t('home.budgetAny')}
+            >
+              <option value="any">{t('home.budgetAny')}</option>
+              <option value="2000">{t('home.budget0_2000')}</option>
+              <option value="5000">{t('home.budget2000_5000')}</option>
+              <option value="10000">{t('home.budget5000_10000')}</option>
             </select>
-            <select className="px-4 py-3 rounded-xl border border-slate-200 text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-400">
-              <option>{t('home.daysAny')}</option>
-              <option>{t('home.days3')}</option>
-              <option>{t('home.days7')}</option>
-              <option>{t('home.days15')}</option>
+            <select
+              value={daysFilter}
+              onChange={(e) => setDaysFilter(e.target.value)}
+              className="px-4 py-3 rounded-xl border border-slate-200 text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-400"
+              aria-label={t('home.daysAny')}
+            >
+              <option value="any">{t('home.daysAny')}</option>
+              <option value="3">{t('home.days3')}</option>
+              <option value="7">{t('home.days7')}</option>
+              <option value="15">{t('home.days15')}</option>
             </select>
-            <button type="button" className="px-8 py-3 bg-amber-500 hover:bg-amber-600 rounded-xl font-semibold transition">
+            <button type="submit" className="px-8 py-3 bg-amber-500 hover:bg-amber-600 rounded-xl font-semibold text-white transition">
               {t('home.searchButton')}
             </button>
+          </form>
+        </div>
+      </section>
+
+      {searchTrimmed ? (
+        <section id="home-search-results" className="max-w-7xl mx-auto px-4 pt-6 pb-2 scroll-mt-24">
+          <h2 className="text-xl font-bold text-slate-800 mb-1">{t('home.searchResultsTitle')}</h2>
+          {mergedSearchResults.length > 0 ? (
+            <p className="text-slate-600 text-sm mb-4">{t('home.searchResultsCount', { count: mergedSearchResults.length })}</p>
+          ) : null}
+          {mergedSearchResults.length === 0 ? (
+            <p className="text-slate-600 py-10 px-4 text-center bg-white rounded-xl border border-slate-200">
+              {t('home.searchNoResults')}
+            </p>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mergedSearchResults.map((article) => (
+                <div key={article.id} className="relative">
+                  <Link
+                    to={`/articles/${article.id}`}
+                    className="group block bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition border border-slate-100"
+                  >
+                    <div className="h-48 overflow-hidden relative">
+                      <img
+                        src={article.cover}
+                        alt=""
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      {article.source === 'user' && (
+                        <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-amber-500/90 text-white text-xs font-medium">
+                          {t('userGuide.userBadge')}
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {(article.tags || []).slice(0, 4).map((tag) => (
+                          <span key={tag} className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                      <h3 className="font-semibold text-slate-800 line-clamp-2 group-hover:text-amber-600 transition">
+                        {article.title}
+                      </h3>
+                      <p className="text-slate-500 text-sm mt-1">
+                        {t('articles.daysBudget', { dest: article.destination, budget: article.budget, days: article.days })}
+                      </p>
+                    </div>
+                  </Link>
+                  <div className="absolute top-2 right-2 z-10">
+                    <FavoriteButton articleId={article.id} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      ) : null}
+
+      <section className="max-w-7xl mx-auto px-4 py-10">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-600 mb-2">
+            {t('home.sloganTag')}
+          </p>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
+            {t('home.sloganPrimaryEn')}
+          </h2>
+          <p className="text-lg md:text-xl text-slate-700 mb-4">{t('home.sloganPrimaryZh')}</p>
+          <p className="text-slate-600 leading-7">{t('home.sloganRationale')}</p>
+
+          <div className="mt-6 grid md:grid-cols-2 gap-4">
+            <div className="rounded-xl border border-slate-200 p-4">
+              <p className="text-slate-800 font-semibold">{t('home.sloganAlt1En')}</p>
+              <p className="text-slate-600 text-sm mt-1">{t('home.sloganAlt1Zh')}</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 p-4">
+              <p className="text-slate-800 font-semibold">{t('home.sloganAlt2En')}</p>
+              <p className="text-slate-600 text-sm mt-1">{t('home.sloganAlt2Zh')}</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 p-4">
+              <p className="text-slate-800 font-semibold">{t('home.sloganAlt3En')}</p>
+              <p className="text-slate-600 text-sm mt-1">{t('home.sloganAlt3Zh')}</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 p-4">
+              <p className="text-slate-800 font-semibold">{t('home.sloganAlt4En')}</p>
+              <p className="text-slate-600 text-sm mt-1">{t('home.sloganAlt4Zh')}</p>
+            </div>
+          </div>
+          <div className="mt-5 flex justify-end">
+            <Link
+              to="/about#slogan-playbook"
+              className="text-sm font-medium text-amber-700 hover:text-amber-800 underline underline-offset-2"
+            >
+              {t('home.viewSloganPlaybook')}
+            </Link>
           </div>
         </div>
       </section>

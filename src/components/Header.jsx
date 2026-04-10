@@ -15,6 +15,14 @@ export default function Header() {
       <Link to="/community" className="text-slate-600 hover:text-amber-600 transition" onClick={() => setMobileOpen(false)}>{t('common.community')}</Link>
       <Link to="/membership" className="text-slate-600 hover:text-amber-600 transition" onClick={() => setMobileOpen(false)}>{t('commerce.membership')}</Link>
       <Link to="/board" className="text-slate-600 hover:text-amber-600 transition" onClick={() => setMobileOpen(false)}>{t('common.board')}</Link>
+      <Link
+        to="/about#slogan-playbook"
+        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 hover:bg-amber-100 transition font-medium"
+        onClick={() => setMobileOpen(false)}
+      >
+        <span aria-hidden>✨</span>
+        {t('common.brand')}
+      </Link>
       <div className="flex items-center gap-2">
         <span className="text-slate-500 text-sm">{t('common.lang')}:</span>
         <button
