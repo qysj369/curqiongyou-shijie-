@@ -31,6 +31,7 @@ export default function SocialFollow({ className = '' }) {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-700/80 text-slate-200 text-sm hover:bg-amber-500/20 hover:text-amber-300 transition"
+              aria-label={`${t('a11y.openInNewTab')}: ${LABELS[key] || key}`}
             >
               {LABELS[key] || key}
             </a>

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const SHOW_AFTER = 400
 
 export default function BackToTop() {
+  const { t } = useTranslation()
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -20,10 +22,10 @@ export default function BackToTop() {
       type="button"
       onClick={scrollToTop}
       className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-amber-500 text-white shadow-lg hover:bg-amber-600 transition focus:outline-none focus:ring-2 focus:ring-amber-400"
-      title="返回顶部"
-      aria-label="返回顶部"
+      title={t('a11y.backToTop')}
+      aria-label={t('a11y.backToTop')}
     >
-      <span className="text-lg leading-none">↑</span>
+      <span className="text-lg leading-none" aria-hidden>↑</span>
     </button>
   )
 }

@@ -26,6 +26,10 @@ export function createUserGuideId() {
 }
 
 /**
+ * @typedef {'pending' | 'published'} ReviewStatus
+ */
+
+/**
  * @typedef {{
  *   id: string
  *   destinationName: string
@@ -36,8 +40,18 @@ export function createUserGuideId() {
  *   author: string
  *   createdAt: string
  *   linkedArticleId?: string | null
+ *   status?: ReviewStatus
+ *   reviewedAt?: string
  * }} UserGuide
  */
+
+function normalizeGuide(g) {
+  if (!g) return g
+  return {
+    ...g,
+    status: g.status || 'published',
+  }
+}
 
 /**
  * @param {Partial<UserGuide>} guide
@@ -57,6 +71,8 @@ export function addUserGuide(guide) {
     author: guide.author || '',
     createdAt,
     linkedArticleId: guide.linkedArticleId ?? null,
+    status: guide.status !== undefined ? guide.status : 'pending',
+    reviewedAt: guide.reviewedAt,
   }
   list.unshift(entry)
   saveAll(list)
@@ -65,19 +81,21 @@ export function addUserGuide(guide) {
 
 /** @returns {UserGuide[]} 按时间倒序 */
 export function getAllUserGuides() {
-  return [...loadAll()].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  return [...loadAll()].map(normalizeGuide).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 }
 
 /** @param {string} id 如 ug-xxx */
 export function getUserGuideById(id) {
   if (!id || !id.startsWith('ug-')) return null
-  return loadAll().find((g) => g.id === id) || null
+  const g = loadAll().find((x) => x.id === id)
+  return g ? normalizeGuide(g) : null
 }
 
 /** @param {string} destinationName 目的地名称，如 泰国 */
 export function getUserGuidesByDestination(destinationName) {
   if (!destinationName) return []
   return loadAll()
+    .map(normalizeGuide)
     .filter((g) => g.destinationName === destinationName)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 }
@@ -86,6 +104,7 @@ export function getUserGuidesByDestination(destinationName) {
 export function getUserGuidesByArticleId(articleId) {
   if (!articleId) return []
   return loadAll()
+    .map(normalizeGuide)
     .filter((g) => g.linkedArticleId === articleId)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 }
@@ -106,6 +125,7 @@ export function getUserGuidesAsCards() {
     cover: DEFAULT_COVER,
     tags: ['网友分享'],
     source: 'user',
+    reviewStatus: g.status || 'published',
   }))
 }
 

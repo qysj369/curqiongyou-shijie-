@@ -1,7 +1,7 @@
 {
-  "name": "穷游世界 · Less Luggage, More Life.",
-  "short_name": "穷游世界",
-  "description": "行囊虽轻，生命厚重。穷游攻略、预算筛选与目的地指南。",
+  "name": "Roamwise · 轻游世界",
+  "short_name": "Roamwise",
+  "description": "聪明省钱，走得更远。预算旅行攻略、目的地与社区。 Travel farther by spending smarter.",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#f59e0b",

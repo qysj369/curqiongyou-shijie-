@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { sendMessage } from '../services/aiChat'
 
@@ -46,6 +47,7 @@ function persistDailyUsageCount(value) {
 
 export default function AIChatWidget() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState(() => [
     { role: 'assistant', text: t('aiChat.welcome') },
@@ -89,8 +91,16 @@ export default function AIChatWidget() {
     setUsageCountState(nextUsageCount)
     persistDailyUsageCount(nextUsageCount)
     try {
-      const reply = await sendMessage(text)
-      setMessages((prev) => [...prev, { role: 'assistant', text: reply }])
+      const { reply, rollbackQuota, busy } = await sendMessage(text)
+      if (rollbackQuota) {
+        persistDailyUsageCount(used)
+        setUsageCountState(used)
+      }
+      const display =
+        busy && !(reply && String(reply).trim())
+          ? t('aiChat.serviceBusy')
+          : (reply && String(reply).trim()) || t('aiChat.error')
+      setMessages((prev) => [...prev, { role: 'assistant', text: display }])
     } catch {
       setMessages((prev) => [...prev, { role: 'assistant', text: t('aiChat.error') }])
     } finally {
@@ -110,13 +120,13 @@ export default function AIChatWidget() {
       </button>
 
       {open && (
-        <div className="fixed bottom-24 right-6 z-40 w-[360px] max-w-[calc(100vw-3rem)] rounded-2xl bg-white shadow-xl border border-slate-200 flex flex-col max-h-[480px]">
-          <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-            <span className="font-semibold text-slate-800">{t('aiChat.title')}</span>
+        <div className="fixed bottom-24 right-6 z-40 w-[360px] max-w-[calc(100vw-3rem)] rounded-2xl bg-white dark:bg-slate-900 shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col max-h-[480px]">
+          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+            <span className="font-semibold text-slate-800 dark:text-slate-100">{t('aiChat.title')}</span>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300"
               aria-label={t('aiChat.close')}
             >
               ✕
@@ -135,7 +145,7 @@ export default function AIChatWidget() {
                   className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${
                     m.role === 'user'
                       ? 'bg-amber-500 text-white'
-                      : 'bg-slate-100 text-slate-800'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100'
                   }`}
                 >
                   {m.text}
@@ -144,7 +154,7 @@ export default function AIChatWidget() {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="rounded-2xl px-4 py-2 bg-slate-100 text-slate-500 text-sm">
+                <div className="rounded-2xl px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-sm">
                   ...
                 </div>
               </div>
@@ -152,14 +162,14 @@ export default function AIChatWidget() {
           </div>
           <form
             onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-            className="p-3 border-t border-slate-100 flex gap-2"
+            className="p-3 border-t border-slate-100 dark:border-slate-700 flex gap-2"
           >
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={t('aiChat.placeholder')}
-              className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
               maxLength={500}
               disabled={loading}
             />
@@ -171,7 +181,7 @@ export default function AIChatWidget() {
               {t('aiChat.send')}
             </button>
           </form>
-          <div className="px-3 pb-3 text-xs text-slate-500">
+          <div className="px-3 pb-3 text-xs text-slate-500 dark:text-slate-400">
             {t('aiChat.quotaHint', {
               used: usageCount,
               total: FREE_QUOTA,
@@ -187,31 +197,32 @@ export default function AIChatWidget() {
           onClick={() => setShowLimitModal(false)}
         >
           <div
-            className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-slate-200 p-6"
+            className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-700 p-6"
             role="dialog"
             aria-modal="true"
             aria-labelledby="ai-limit-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 id="ai-limit-title" className="text-xl font-bold text-slate-900 mb-2">{t('aiChat.limitTitle')}</h3>
-            <p className="text-sm text-slate-600 mb-5">{t('aiChat.limitBody')}</p>
-            <ul className="list-disc pl-5 text-sm text-slate-700 space-y-1 mb-6">
+            <h3 id="ai-limit-title" className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">{t('aiChat.limitTitle')}</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-300 mb-5">{t('aiChat.limitBody')}</p>
+            <ul className="list-disc pl-5 text-sm text-slate-700 dark:text-slate-300 space-y-1 mb-6">
               <li>{t('aiChat.limitFeatureUnlimited')}</li>
               <li>{t('aiChat.limitFeatureFast')}</li>
               <li>{t('aiChat.limitFeatureAdvanced')}</li>
             </ul>
-            <div className="flex gap-3 justify-end">
+            <div className="flex gap-3 justify-end flex-wrap">
               <button
                 type="button"
                 onClick={() => setShowLimitModal(false)}
-                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition"
+                className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
               >
                 {t('aiChat.limitLater')}
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  window.open('https://www.cursor.com/pricing', '_blank', 'noopener,noreferrer')
+                  setShowLimitModal(false)
+                  navigate('/membership')
                 }}
                 className="px-4 py-2 rounded-lg bg-amber-500 text-white font-medium hover:bg-amber-600 transition"
               >

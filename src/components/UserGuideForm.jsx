@@ -3,9 +3,18 @@ import { useTranslation } from 'react-i18next'
 import { useToast } from '../contexts/ToastContext'
 import { containsProfanity } from '../utils/profanityFilter'
 import { addUserGuide } from '../data/userGuidesStore'
+import { pushInbox } from '../data/notificationsStore'
 import { destinations } from '../data/mockData'
 
 const destinationNames = [...new Set(destinations.map((d) => d.name).filter(Boolean))].sort()
+
+const inputClass =
+  'min-h-11 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400'
+const textareaClass =
+  'w-full min-h-[5.5rem] px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400 resize-y'
+const labelClass = 'block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1'
+const btnSubmitClass =
+  'min-h-11 px-6 py-2.5 rounded-xl bg-amber-500 text-white font-medium hover:bg-amber-600 dark:hover:bg-amber-600 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500'
 
 export default function UserGuideForm({
   initialDestination = '',
@@ -62,26 +71,36 @@ export default function UserGuideForm({
     setAuthor('')
     if (!initialDestination) setDestinationName('')
     toast(t('userGuide.submitSuccess'))
+    pushInbox({
+      title: t('notifications.submissionReceivedTitle'),
+      body: t('notifications.submissionReceivedBody'),
+      kind: 'review',
+    })
     onSuccess?.()
   }
 
   if (compact) {
     return (
-      <form onSubmit={handleSubmit} className={`bg-amber-50/80 rounded-xl p-4 border border-amber-100 ${className}`}>
-        <h3 className="text-sm font-semibold text-slate-800 mb-3">{t('userGuide.shareExperience')}</h3>
+      <form
+        onSubmit={handleSubmit}
+        className={`bg-amber-50/80 dark:bg-amber-950/25 rounded-xl p-4 border border-amber-100 dark:border-amber-900/50 ${className}`}
+      >
+        <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-1">{t('userGuide.shareExperience')}</h3>
+        <p className="text-xs text-slate-600 dark:text-slate-400 mb-2 leading-relaxed">{t('governance.submitCompactHint')}</p>
+        <p className="text-xs text-amber-800/90 dark:text-amber-300/95 mb-3">{t('governance.reviewHintShort')}</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t('userGuide.titlePlaceholder')}
-            className="col-span-full sm:col-span-1 px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-amber-400"
+            className={`col-span-full sm:col-span-1 ${inputClass}`}
             maxLength={80}
           />
           <select
             value={destinationName}
             onChange={(e) => setDestinationName(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-700 focus:ring-2 focus:ring-amber-400"
+            className={inputClass}
           >
             <option value="">{t('userGuide.destinationPlaceholder')}</option>
             {destinationNames.map((c) => (
@@ -94,7 +113,7 @@ export default function UserGuideForm({
             value={days}
             onChange={(e) => setDays(e.target.value)}
             placeholder={t('userGuide.daysPlaceholder')}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-amber-400"
+            className={inputClass}
           />
           <input
             type="number"
@@ -102,7 +121,7 @@ export default function UserGuideForm({
             value={budget}
             onChange={(e) => setBudget(e.target.value)}
             placeholder={t('userGuide.budgetPlaceholder')}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-amber-400"
+            className={inputClass}
           />
         </div>
         <textarea
@@ -110,7 +129,7 @@ export default function UserGuideForm({
           onChange={(e) => setContent(e.target.value)}
           placeholder={t('userGuide.contentPlaceholder')}
           rows={3}
-          className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-amber-400 mb-2 resize-y"
+          className={`${textareaClass} mb-2`}
           maxLength={2000}
         />
         <div className="flex flex-wrap items-center gap-2">
@@ -119,10 +138,10 @@ export default function UserGuideForm({
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
             placeholder={t('userGuide.authorPlaceholder')}
-            className="flex-1 min-w-[120px] px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-amber-400"
+            className={`flex-1 min-w-[120px] ${inputClass}`}
             maxLength={30}
           />
-          <button type="submit" className="px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition">
+          <button type="submit" className={`shrink-0 ${btnSubmitClass} text-sm`}>
             {t('userGuide.submit')}
           </button>
         </div>
@@ -131,16 +150,27 @@ export default function UserGuideForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className={`bg-white rounded-2xl shadow-sm p-6 ${className}`}>
-      <h2 className="text-lg font-semibold text-slate-800 mb-4">{t('userGuide.formTitle')}</h2>
-      <p className="text-slate-600 text-sm mb-4">{t('userGuide.formHint')}</p>
+    <form
+      onSubmit={handleSubmit}
+      className={`bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6 ${className}`}
+    >
+      <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">{t('userGuide.formTitle')}</h2>
+      <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">{t('userGuide.formHint')}</p>
+      <div
+        className="rounded-xl border border-amber-200/90 dark:border-amber-800/60 bg-amber-50/70 dark:bg-amber-950/30 px-4 py-3 mb-4"
+        role="note"
+      >
+        <p className="text-sm font-semibold text-amber-900 dark:text-amber-200 mb-1">{t('governance.submitSpecTitle')}</p>
+        <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{t('governance.submitSpecBody')}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-500 mt-2">{t('governance.reviewHintShort')}</p>
+      </div>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-slate-600 mb-1">{t('userGuide.destination')} *</label>
+          <label className={labelClass}>{t('userGuide.destination')} *</label>
           <select
             value={destinationName}
             onChange={(e) => setDestinationName(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 focus:ring-2 focus:ring-amber-400"
+            className={`w-full ${inputClass}`}
             required
           >
             <option value="">{t('userGuide.destinationPlaceholder')}</option>
@@ -150,66 +180,66 @@ export default function UserGuideForm({
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-600 mb-1">{t('userGuide.title')} *</label>
+          <label className={labelClass}>{t('userGuide.title')} *</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t('userGuide.titlePlaceholder')}
-            className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-800 focus:ring-2 focus:ring-amber-400"
+            className={`w-full ${inputClass}`}
             maxLength={80}
             required
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-600 mb-1">{t('userGuide.budget')}</label>
+            <label className={labelClass}>{t('userGuide.budget')}</label>
             <input
               type="number"
               min="0"
               value={budget}
               onChange={(e) => setBudget(e.target.value)}
               placeholder={t('userGuide.budgetPlaceholder')}
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-800 focus:ring-2 focus:ring-amber-400"
+              className={`w-full ${inputClass}`}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-600 mb-1">{t('userGuide.days')}</label>
+            <label className={labelClass}>{t('userGuide.days')}</label>
             <input
               type="number"
               min="0"
               value={days}
               onChange={(e) => setDays(e.target.value)}
               placeholder={t('userGuide.daysPlaceholder')}
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-800 focus:ring-2 focus:ring-amber-400"
+              className={`w-full ${inputClass}`}
             />
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-600 mb-1">{t('userGuide.content')} *</label>
+          <label className={labelClass}>{t('userGuide.content')} *</label>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={t('userGuide.contentPlaceholder')}
             rows={5}
-            className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-800 focus:ring-2 focus:ring-amber-400 resize-y"
+            className={textareaClass}
             maxLength={2000}
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-600 mb-1">{t('userGuide.author')}</label>
+          <label className={labelClass}>{t('userGuide.author')}</label>
           <input
             type="text"
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
             placeholder={t('userGuide.authorPlaceholder')}
-            className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-800 focus:ring-2 focus:ring-amber-400"
+            className={`w-full ${inputClass}`}
             maxLength={30}
           />
         </div>
-        <p className="text-amber-700 text-xs">{t('board.guidelinesShort')}</p>
-        <button type="submit" className="px-6 py-2.5 rounded-xl bg-amber-500 text-white font-medium hover:bg-amber-600 transition">
+        <p className="text-amber-700 dark:text-amber-400/95 text-xs">{t('board.guidelinesShort')}</p>
+        <button type="submit" className={btnSubmitClass}>
           {t('userGuide.submit')}
         </button>
       </div>

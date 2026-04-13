@@ -2,9 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 折叠面板：隐藏默认三角，统一用自定义箭头 */
+.collapse-panel summary {
+  list-style: none;
+}
+.collapse-panel summary::-webkit-details-marker {
+  display: none;
+}
+
 @layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
   body {
-    @apply bg-slate-50 text-slate-800 antialiased;
+    @apply bg-slate-50 text-slate-800 antialiased text-base;
+    @apply dark:bg-slate-950 dark:text-slate-100;
   }
   /* 键盘焦点可见，便于无障碍 */
   *:focus-visible {
@@ -19,6 +31,18 @@
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* 横向卡片区：触屏惯性滑动（iOS） */
+.touch-scroll-x {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin {
+    animation-duration: 1.5s;
+  }
 }
 
 @keyframes fadeIn {

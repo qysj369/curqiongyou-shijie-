@@ -23,3 +23,21 @@ export function absolutePageUrl(pathname) {
   const path = pathname.startsWith('/') ? pathname : `/${pathname}`
   return `${origin}${basePath}${path}`
 }
+
+/**
+ * 将站内路径或已是 https 的图片地址转为绝对 URL（用于 og:image）。
+ * @param {string} url
+ */
+export function toAbsoluteMediaUrl(url) {
+  if (!url || typeof url !== 'string') return ''
+  const u = url.trim()
+  if (/^https?:\/\//i.test(u)) return u
+  return absolutePageUrl(u.startsWith('/') ? u : `/${u}`)
+}
+
+/** 默认分享图：优先 VITE_OG_IMAGE（完整 https），否则用站点 favicon 的绝对地址 */
+export function getDefaultOgImageUrl() {
+  const custom = import.meta.env.VITE_OG_IMAGE?.trim()
+  if (custom && /^https?:\/\//i.test(custom)) return custom
+  return toAbsoluteMediaUrl('/favicon.svg')
+}

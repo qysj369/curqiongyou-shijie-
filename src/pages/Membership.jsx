@@ -1,7 +1,8 @@
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import Breadcrumbs from '../components/Breadcrumbs'
 import AdSlot from '../components/AdSlot'
-import PartnerShowcase from '../components/PartnerShowcase'
+import DiscoverShowcase from '../components/DiscoverShowcase'
 
 const BENEFITS = [
   { key: 'benefit1', icon: '📖' },
@@ -12,7 +13,7 @@ const BENEFITS = [
 
 export default function Membership() {
   const { t } = useTranslation()
-  const memberUrl = import.meta.env.VITE_MEMBERSHIP_URL || '#'
+  const memberUrl = (import.meta.env.VITE_MEMBERSHIP_URL || '').trim()
 
   const breadcrumbs = [
     { label: t('common.home'), to: '/' },
@@ -40,14 +41,23 @@ export default function Membership() {
               </li>
             ))}
           </ul>
-          <a
-            href={memberUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 inline-block px-8 py-3 rounded-xl bg-amber-500 text-white font-semibold hover:bg-amber-600 transition"
-          >
-            {t('commerce.ctaSubscribe')}
-          </a>
+          {memberUrl ? (
+            <a
+              href={memberUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 inline-block px-8 py-3 rounded-xl bg-amber-500 text-white font-semibold hover:bg-amber-600 transition min-h-11"
+            >
+              {t('commerce.ctaSubscribe')}
+            </a>
+          ) : (
+            <Link
+              to="/about"
+              className="mt-6 inline-block px-8 py-3 rounded-xl bg-amber-500 text-white font-semibold hover:bg-amber-600 transition min-h-11"
+            >
+              {t('commerce.ctaJoinInternal')}
+            </Link>
+          )}
           <p className="text-slate-500 text-sm mt-3">{t('commerce.membershipNote')}</p>
         </div>
 
@@ -55,7 +65,7 @@ export default function Membership() {
           <AdSlot slotId="membership-side" />
         </div>
 
-        <PartnerShowcase className="mb-8" />
+        <DiscoverShowcase className="mb-8" />
 
         <p className="text-slate-500 text-xs text-center">
           {t('commerce.disclosure')}

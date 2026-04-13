@@ -2,7 +2,12 @@ import { useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useSeoOverride } from '../contexts/SeoOverrideContext'
-import { absolutePageUrl, getSiteOrigin } from '../utils/siteUrl'
+import {
+  absolutePageUrl,
+  getSiteOrigin,
+  getDefaultOgImageUrl,
+  toAbsoluteMediaUrl,
+} from '../utils/siteUrl'
 
 function upsertMeta(attr, key, content) {
   const sel = attr === 'name' ? `meta[name="${key}"]` : `meta[property="${key}"]`
@@ -29,6 +34,42 @@ function upsertCanonical(href) {
   el.setAttribute('href', href)
 }
 
+function removeMeta(attr, key) {
+  const sel = attr === 'name' ? `meta[name="${key}"]` : `meta[property="${key}"]`
+  document.head.querySelector(sel)?.remove()
+}
+
+function removeOgImages() {
+  ;['og:image', 'og:image:secure_url'].forEach((k) => removeMeta('property', k))
+  removeMeta('name', 'twitter:image')
+}
+
+/** 各列表/静态路由独立 description，避免全站重复 meta description */
+const ROUTE_DESC_KEYS = [
+  [/^\/community\/qa\/?$/, 'seo.descCommunityQA'],
+  [/^\/community\/buddies/, 'seo.descCommunityBuddies'],
+  [/^\/community\/?$/, 'seo.descCommunity'],
+  [/^\/destinations\/?$/, 'seo.descDestinations'],
+  [/^\/articles\/?$/, 'seo.descArticles'],
+  [/^\/favorites/, 'seo.descFavorites'],
+  [/^\/board/, 'seo.descBoard'],
+  [/^\/membership/, 'seo.descMembership'],
+  [/^\/about/, 'seo.descAbout'],
+  [/^\/privacy\/?$/, 'seo.descPrivacy'],
+  [/^\/terms\/?$/, 'seo.descTerms'],
+]
+
+function resolveRouteDescription(pathname, t) {
+  if (!pathname || pathname === '/') return t('seo.descHome')
+  for (const [re, key] of ROUTE_DESC_KEYS) {
+    if (re.test(pathname)) return t(key)
+  }
+  if (/^\/articles\/[^/]+\/?$/.test(pathname)) return t('seo.descArticleDetail')
+  if (/^\/destinations\/[^/]+\/?$/.test(pathname)) return t('seo.descDestinationDetail')
+  if (/^\/community\/qa\/[^/]+\/?$/.test(pathname)) return t('seo.descCommunityQADetail')
+  return t('seo.descFallback')
+}
+
 /** 仅列表/静态页；详情页由 `useSeoOverride` 提供标题。顺序：先匹配更具体的路径。 */
 const ROUTE_TITLE_KEYS = [
   [/^\/community\/qa\/?$/, 'community.qa'],
@@ -40,6 +81,8 @@ const ROUTE_TITLE_KEYS = [
   [/^\/board/, 'common.board'],
   [/^\/membership/, 'commerce.membership'],
   [/^\/about/, 'footer.about'],
+  [/^\/privacy\/?$/, 'legal.privacyTitle'],
+  [/^\/terms\/?$/, 'legal.termsTitle'],
 ]
 
 function resolveRouteTitleKey(pathname) {
@@ -95,8 +138,14 @@ export default function SeoHead() {
   }, [pathname, t, i18n.language])
 
   const documentTitle = override?.title || defaultTitle
-  const metaDescription = override?.description || t('seo.description')
+  const metaDescription =
+    override?.description || resolveRouteDescription(pathname, t)
   const canonicalHref = getSiteOrigin() ? absolutePageUrl(pathname) : ''
+  const ogImageUrl = override?.image
+    ? toAbsoluteMediaUrl(override.image) || getDefaultOgImageUrl()
+    : getDefaultOgImageUrl()
+
+  const ogType = /^\/articles\/[^/]+\/?$/.test(pathname) ? 'article' : 'website'
 
   useEffect(() => {
     document.title = documentTitle
@@ -104,18 +153,40 @@ export default function SeoHead() {
     upsertMeta('name', 'keywords', t('seo.keywords'))
     upsertMeta('property', 'og:title', documentTitle)
     upsertMeta('property', 'og:description', metaDescription)
+    upsertMeta('property', 'og:type', ogType)
     if (canonicalHref) {
       upsertMeta('property', 'og:url', canonicalHref)
     } else {
-      const ogUrl = document.head.querySelector('meta[property="og:url"]')
-      if (ogUrl) ogUrl.remove()
+      document.head.querySelector('meta[property="og:url"]')?.remove()
     }
     upsertCanonical(canonicalHref || null)
+    if (ogImageUrl) {
+      upsertMeta('property', 'og:image', ogImageUrl)
+      upsertMeta('name', 'twitter:image', ogImageUrl)
+      upsertMeta('property', 'og:image:secure_url', ogImageUrl)
+    } else {
+      removeOgImages()
+    }
     upsertMeta('name', 'twitter:card', 'summary_large_image')
     upsertMeta('name', 'twitter:title', documentTitle)
     upsertMeta('name', 'twitter:description', metaDescription)
     upsertMeta('property', 'og:locale', i18n.language === 'zh-CN' ? 'zh_CN' : 'en_US')
-  }, [documentTitle, metaDescription, canonicalHref, t, i18n.language])
+  }, [documentTitle, metaDescription, canonicalHref, ogImageUrl, ogType, t, i18n.language])
+
+  useEffect(() => {
+    const el = document.getElementById('seo-ld-website')
+    if (!el) return
+    const base = {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: t('common.siteName'),
+      alternateName: t('common.brandTagline'),
+      description: t('seo.description'),
+    }
+    const siteUrl = absolutePageUrl('/')
+    if (siteUrl) base.url = siteUrl
+    el.textContent = JSON.stringify(base)
+  }, [t, i18n.language])
 
   return null
 }

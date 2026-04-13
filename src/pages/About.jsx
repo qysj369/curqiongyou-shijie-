@@ -10,14 +10,14 @@ export default function About() {
   ]
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="max-w-2xl mx-auto px-4 py-8">
         <Breadcrumbs items={breadcrumbs} />
-        <h1 className="text-3xl font-bold text-slate-800 mb-6">{t('about.title')}</h1>
+        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6">{t('about.title')}</h1>
 
-        <section className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-          <h2 className="text-xl font-semibold text-slate-800 mb-3">{t('about.introTitle')}</h2>
-          <p className="text-slate-600 leading-relaxed">{t('about.introBody')}</p>
+        <section className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 mb-6">
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-3">{t('about.introTitle')}</h2>
+          <p className="text-slate-600 dark:text-slate-300 leading-relaxed">{t('about.introBody')}</p>
         </section>
 
         <section className="bg-amber-50 rounded-2xl border border-amber-200 p-6 mb-6">
@@ -29,6 +29,27 @@ export default function About() {
           >
             {t('about.goToBoard')}
           </Link>
+        </section>
+
+        <section className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 mb-6" aria-labelledby="terminology-heading">
+          <h2 id="terminology-heading" className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">
+            {t('about.terminologyTitle')}
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 leading-relaxed">{t('terminology.sectionLead')}</p>
+          <dl className="space-y-4 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <div>
+              <dt className="font-semibold text-slate-800 dark:text-slate-100">{t('terminology.termGuide')}</dt>
+              <dd className="mt-1">{t('terminology.defGuide')}</dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-slate-800 dark:text-slate-100">{t('terminology.termSubmit')}</dt>
+              <dd className="mt-1">{t('terminology.defSubmit')}</dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-slate-800 dark:text-slate-100">{t('terminology.termReview')}</dt>
+              <dd className="mt-1">{t('terminology.defReview')}</dd>
+            </div>
+          </dl>
         </section>
 
         <section id="slogan-playbook" className="bg-white rounded-2xl shadow-sm p-6 mb-6">
@@ -97,13 +118,10 @@ export default function About() {
           </div>
 
           <div className="mt-6 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 p-5">
-            <h3 className="font-semibold text-amber-800 mb-2">最终推荐主口号</h3>
-            <p className="text-slate-900 font-bold text-lg">Less Luggage, More Life.</p>
-            <p className="text-slate-700 mb-2">行囊虽轻，生命厚重。</p>
-            <p className="text-sm text-slate-700 leading-relaxed">
-              这句话具备跨文化可理解性、清晰的价值对比和长期品牌记忆点，
-              能优雅传达我们“反廉价标签、重体验价值”的核心立场。
-            </p>
+            <h3 className="font-semibold text-amber-800 mb-2">{t('about.playbookFinalTitle')}</h3>
+            <p className="text-slate-900 font-bold text-lg">{t('home.sloganPrimaryEn')}</p>
+            <p className="text-slate-700 mb-2">{t('home.sloganPrimaryZh')}</p>
+            <p className="text-sm text-slate-700 leading-relaxed">{t('about.playbookFinalBlurb')}</p>
           </div>
         </section>
 

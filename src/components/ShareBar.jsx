@@ -67,11 +67,13 @@ export default function ShareBar({ articleRef, shareUrl, shareTitle, shareText }
     if (!articleRef?.current) return
     setScreenshotting(true)
     try {
+      const prefersDark =
+        typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches
       const canvas = await html2canvas(articleRef.current, {
         useCORS: true,
         scale: 2,
         logging: false,
-        backgroundColor: '#ffffff',
+        backgroundColor: prefersDark ? '#0f172a' : '#ffffff',
       })
       const link = document.createElement('a')
       link.download = `${shareTitle || 'guide'}.png`
@@ -84,29 +86,26 @@ export default function ShareBar({ articleRef, shareUrl, shareTitle, shareText }
     }
   }
 
+  const chipClass =
+    'inline-flex items-center justify-center gap-1.5 min-h-11 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500'
+  const chipLinkClass = `${chipClass} hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:text-amber-800 dark:hover:text-amber-300`
+
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <button
-        type="button"
-        onClick={handleShare}
-        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-sm font-medium transition"
-      >
+      <button type="button" onClick={handleShare} className={chipClass} aria-label={t('a11y.sharePage')}>
         <span aria-hidden>📤</span>
         <span>{t('share.share')}</span>
       </button>
       <button
         type="button"
         onClick={copyLink}
-        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-sm font-medium transition"
+        className={chipClass}
+        aria-label={linkCopied ? t('share.linkCopied') : t('a11y.copyPageLink')}
       >
         <span aria-hidden>{linkCopied ? '✓' : '🔗'}</span>
         <span>{linkCopied ? t('share.linkCopied') : t('share.copyLink')}</span>
       </button>
-      <button
-        type="button"
-        onClick={handlePrint}
-        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-sm font-medium transition"
-      >
+      <button type="button" onClick={handlePrint} className={chipClass} aria-label={t('a11y.printPage')}>
         <span aria-hidden>🖨️</span>
         <span>{t('share.print')}</span>
       </button>
@@ -114,20 +113,24 @@ export default function ShareBar({ articleRef, shareUrl, shareTitle, shareText }
         type="button"
         onClick={handleScreenshot}
         disabled={screenshotting}
-        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-sm font-medium transition disabled:opacity-50"
+        className={`${chipClass} disabled:opacity-50 disabled:pointer-events-none`}
+        aria-label={t('a11y.saveScreenshot')}
       >
         <span aria-hidden>📷</span>
         <span>{screenshotting ? '...' : t('share.screenshot')}</span>
       </button>
-      <span className="text-slate-400 text-sm mx-1">|</span>
-      <span className="text-slate-500 text-sm">{t('share.shareTo')}:</span>
+      <span className="text-slate-400 dark:text-slate-600 text-sm mx-1 select-none" aria-hidden>
+        |
+      </span>
+      <span className="text-slate-500 dark:text-slate-400 text-sm">{t('share.shareTo')}:</span>
       {getSharePlatforms(shareUrl, shareTitle, shareText).map((p) => (
         <a
           key={p.key}
           href={p.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-amber-100 hover:text-amber-700 text-sm font-medium transition"
+          className={chipLinkClass}
+          aria-label={`${t('a11y.openInNewTab')}: ${t(p.labelKey)}`}
         >
           {t(p.labelKey)}
         </a>
@@ -138,7 +141,8 @@ export default function ShareBar({ articleRef, shareUrl, shareTitle, shareText }
           href={p.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-amber-100 hover:text-amber-700 text-sm font-medium transition"
+          className={chipLinkClass}
+          aria-label={`${t('a11y.openInNewTab')}: ${t(p.labelKey)}`}
         >
           {t(p.labelKey)}
         </a>

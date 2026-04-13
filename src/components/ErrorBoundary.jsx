@@ -1,5 +1,6 @@
 import { Component } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 class ErrorBoundaryClass extends Component {
   state = { hasError: false }
@@ -21,23 +22,38 @@ class ErrorBoundaryClass extends Component {
 }
 
 function ErrorFallback({ onRetry }) {
-  // useTranslation 需要在 React 组件里用，这里用简单文案避免 hook 在 class 子组件里的问题
+  const { t } = useTranslation()
   return (
-    <div className="min-h-[50vh] flex flex-col items-center justify-center px-4 py-12">
-      <p className="text-amber-600 font-semibold mb-2">出了点小问题</p>
-      <p className="text-slate-600 text-sm text-center mb-6">
-        页面加载异常，请刷新或返回首页重试。
+    <div className="min-h-[50vh] flex flex-col items-center justify-center px-4 py-12 bg-slate-50 dark:bg-slate-950">
+      <p className="text-amber-600 dark:text-amber-400 font-semibold mb-2">{t('errorBoundary.title')}</p>
+      <p className="text-slate-600 dark:text-slate-400 text-sm text-center mb-6 max-w-sm">
+        {t('errorBoundary.body')}
       </p>
-      <div className="flex gap-3">
-        <Link to="/" className="px-4 py-2 rounded-lg bg-amber-500 text-white font-medium hover:bg-amber-600">
-          返回首页
+      <div className="flex flex-wrap gap-3 justify-center">
+        <Link
+          to="/"
+          className="inline-flex min-h-11 items-center px-5 py-2.5 rounded-xl bg-amber-500 text-white font-medium hover:bg-amber-600"
+          aria-label={t('errorBoundary.home')}
+        >
+          {t('errorBoundary.home')}
         </Link>
+        {typeof onRetry === 'function' ? (
+          <button
+            type="button"
+            onClick={() => onRetry()}
+            className="inline-flex min-h-11 items-center px-5 py-2.5 rounded-xl bg-slate-200 text-slate-800 font-medium hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
+            aria-label={t('errorBoundary.retry')}
+          >
+            {t('errorBoundary.retry')}
+          </button>
+        ) : null}
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="px-4 py-2 rounded-lg bg-slate-200 text-slate-700 font-medium hover:bg-slate-300"
+          className="inline-flex min-h-11 items-center px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-medium hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+          aria-label={t('errorBoundary.reload')}
         >
-          刷新页面
+          {t('errorBoundary.reload')}
         </button>
       </div>
     </div>

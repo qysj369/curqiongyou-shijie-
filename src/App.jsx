@@ -7,6 +7,7 @@ import Header from './components/Header'
 import BackToTop from './components/BackToTop'
 import Footer from './components/Footer'
 import Home from './pages/Home'
+import PageFallback from './components/PageFallback'
 import ErrorBoundary from './components/ErrorBoundary'
 import AIChatWidget from './components/AIChatWidget'
 import SeoHead from './components/SeoHead'
@@ -24,15 +25,9 @@ const CommunityBuddies = lazy(() => import('./pages/CommunityBuddies'))
 const MessageBoard = lazy(() => import('./pages/MessageBoard'))
 const Membership = lazy(() => import('./pages/Membership'))
 const About = lazy(() => import('./pages/About'))
+const LegalPrivacy = lazy(() => import('./pages/LegalPrivacy'))
+const LegalTerms = lazy(() => import('./pages/LegalTerms'))
 const NotFound = lazy(() => import('./pages/NotFound'))
-
-function PageFallback() {
-  return (
-    <div className="min-h-[40vh] flex items-center justify-center">
-      <p className="text-slate-500">加载中…</p>
-    </div>
-  )
-}
 
 // 子路径部署（如 GitHub Pages: /budget-travel/）时与 vite base 一致
 const basename = import.meta.env.BASE_URL === '/' ? '' : (import.meta.env.BASE_URL || '').replace(/\/$/, '')
@@ -43,7 +38,7 @@ function App() {
       <ToastProvider>
       <SeoOverrideProvider>
       <SeoHead />
-      <div className="min-h-screen bg-slate-50 flex flex-col">
+      <div className="min-h-screen bg-slate-50 flex flex-col dark:bg-slate-950">
         <SkipLink />
         <Header />
         <main id="main-content" tabIndex={-1}>
@@ -63,6 +58,8 @@ function App() {
             <Route path="/board" element={<MessageBoard />} />
             <Route path="/membership" element={<Membership />} />
             <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<LegalPrivacy />} />
+            <Route path="/terms" element={<LegalTerms />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

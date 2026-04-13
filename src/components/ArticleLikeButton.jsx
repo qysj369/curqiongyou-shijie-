@@ -68,10 +68,10 @@ export default function ArticleLikeButton({ articleId }) {
       }`}
       title={t('articleDetail.likeThis')}
       aria-pressed={isLiked}
+      aria-label={`${t('a11y.likeGuide')} · ${count}`}
     >
       <span aria-hidden>♥</span>
       <span>{count}</span>
-      <span className="sr-only">{t('articleDetail.likeThis')}</span>
     </button>
   )
 }
