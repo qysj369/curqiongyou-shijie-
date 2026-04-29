@@ -1,0 +1,78 @@
+import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import FavoriteButton from './FavoriteButton'
+import OptimizedImage from './OptimizedImage'
+import { approxUsdFromCny, formatDate, formatInteger } from '../utils/localeFormat'
+
+export default function RouteCard({ item, cover, showUsdApprox, language }) {
+  const { t } = useTranslation()
+
+  return (
+    <div className="relative">
+      <Link
+        to={`/routes/${item.id}`}
+        className="app-surface-card group block overflow-hidden motion-safe:transition motion-safe:hover:shadow-[0_8px_24px_rgba(2,6,23,0.12)]"
+      >
+        <div className="relative h-48 overflow-hidden">
+          <OptimizedImage
+            src={cover}
+            alt={item.title}
+            loading="lazy"
+            w={900}
+            h={384}
+            q={75}
+            className="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-105"
+          />
+          {item.source === 'user' && (
+            <div className="absolute left-2 top-2 z-[1] flex max-w-[75%] flex-col items-start gap-1.5">
+              <span className="rounded bg-sky-600/90 px-2 py-0.5 text-xs font-medium text-white">
+                {t('userGuide.userBadge')}
+              </span>
+              {item.reviewStatus === 'pending' && (
+                <span className="rounded bg-slate-900/90 px-2 py-0.5 text-xs font-medium text-sky-100 dark:bg-slate-950/95">
+                  {t('governance.reviewPending')}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+        <div className="p-4">
+          <div className="mb-2 flex flex-wrap gap-2">
+            {(item.tags || []).map((tag) => (
+              <span
+                key={tag}
+                className="rounded bg-sky-100 px-2 py-0.5 text-xs text-sky-700 dark:bg-sky-900/40 dark:text-sky-300"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+          <h3 className="line-clamp-2 font-semibold text-slate-800 transition group-hover:text-sky-700 dark:text-slate-100 dark:group-hover:text-sky-300">
+            {item.title}
+          </h3>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            {(() => {
+              const usd = approxUsdFromCny(item.budget)
+              const key = showUsdApprox && usd != null ? 'articles.daysBudgetWithUsd' : 'articles.daysBudget'
+              return t(key, {
+                dest: item.destination,
+                budget: formatInteger(item.budget, language),
+                usd,
+                days: formatInteger(item.days, language),
+              })
+            })()}
+          </p>
+          <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+            {t('articles.authorDate', {
+              author: item.author,
+              date: formatDate(item.date, language),
+            })}
+          </p>
+        </div>
+      </Link>
+      <div className="absolute right-2 top-2 z-10">
+        <FavoriteButton articleId={item.id} />
+      </div>
+    </div>
+  )
+}

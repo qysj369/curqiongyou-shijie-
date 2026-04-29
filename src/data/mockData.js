@@ -1,9 +1,23 @@
 // Roamwise 轻游世界 - 模拟数据
 
+import { articles } from './articlesData.js'
+import { DESTINATIONS_EXPANSION } from './destinationsExpansionData.js'
+
 // 大洲映射：东南亚/东亚/南亚/西亚 -> 亚洲
 const regionToContinent = { 东南亚: '亚洲', 东亚: '亚洲', 南亚: '亚洲', 西亚: '亚洲', 欧洲: '欧洲' }
 
-export const destinations = [
+function routeCountByDestination(articleList) {
+  const m = Object.create(null)
+  for (const a of articleList) {
+    if (!a.destination) continue
+    m[a.destination] = (m[a.destination] || 0) + 1
+  }
+  return m
+}
+
+const _articleRouteCounts = routeCountByDestination(articles)
+
+const destinationsBase = [
   {
     id: '1',
     name: '泰国',
@@ -52,7 +66,7 @@ export const destinations = [
     dailyBudget: 100,
     visaType: '落地签',
     tags: ['徒步', '雪山', '宗教'],
-    image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600',
+    image: 'https://images.unsplash.com/photo-1524492479098-5e0a4b2f52e0?w=600',
     routeCount: 6,
     description: '徒步天堂，预算极低',
   },
@@ -65,7 +79,7 @@ export const destinations = [
     dailyBudget: 200,
     visaType: '电子签',
     tags: ['热气球', '历史', '东西方交汇'],
-    image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=600',
+    image: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=600',
     routeCount: 9,
     description: '横跨欧亚的浪漫之旅',
   },
@@ -73,7 +87,7 @@ export const destinations = [
     id: '6',
     name: '葡萄牙',
     country: '葡萄牙',
-    region: '欧洲',
+    region: '地中海',
     continent: '欧洲',
     dailyBudget: 280,
     visaType: '申根签',
@@ -117,7 +131,7 @@ export const destinations = [
     dailyBudget: 320,
     visaType: '申根签',
     tags: ['艺术', '美食', '历史'],
-    image: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=600',
+    image: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600',
     routeCount: 10,
     description: '罗马、佛罗伦萨、威尼斯穷游',
   },
@@ -130,7 +144,7 @@ export const destinations = [
     dailyBudget: 250,
     visaType: '申根签',
     tags: ['海岛', '古迹', '物价友好'],
-    image: 'https://images.unsplash.com/photo-1533105077500-1b7a6ea907da?w=600',
+    image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=600',
     routeCount: 5,
     description: '圣托里尼、雅典、扎金索斯',
   },
@@ -221,7 +235,7 @@ export const destinations = [
     dailyBudget: 200,
     visaType: '免签',
     tags: ['沙漠', '古城', '色彩'],
-    image: 'https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?w=600',
+    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600',
     routeCount: 5,
     description: '撒哈拉、菲斯、舍夫沙万',
   },
@@ -247,7 +261,7 @@ export const destinations = [
     dailyBudget: 350,
     visaType: '电子签',
     tags: ['Safari', '动物', '自然'],
-    image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600',
+    image: 'https://images.unsplash.com/photo-1519659528534-7fd733a832a0?w=600',
     routeCount: 3,
     description: '马赛马拉、纳库鲁观兽',
   },
@@ -275,52 +289,52 @@ export const destinations = [
   { id: '29', name: '德国', country: '德国', region: '中欧', continent: '欧洲', dailyBudget: 380, visaType: '申根签', tags: ['历史', '建筑', '啤酒'], image: 'https://images.unsplash.com/photo-1560930950-5cc20e80e392?w=600', routeCount: 8, description: '柏林、慕尼黑、新天鹅堡' },
   { id: '30', name: '英国', country: '英国', region: '西欧', continent: '欧洲', dailyBudget: 500, visaType: '签证', tags: ['文化', '城市', '历史'], image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600', routeCount: 9, description: '伦敦、苏格兰、湖区' },
   { id: '31', name: '荷兰', country: '荷兰', region: '西欧', continent: '欧洲', dailyBudget: 420, visaType: '申根签', tags: ['运河', '艺术', '单车'], image: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=600', routeCount: 5, description: '阿姆斯特丹与郁金香' },
-  { id: '32', name: '捷克', country: '捷克', region: '东欧', continent: '欧洲', dailyBudget: 280, visaType: '申根签', tags: ['建筑', '物价友好', '啤酒'], image: 'https://images.unsplash.com/photo-1541849546-216549ae216d?w=600', routeCount: 4, description: '布拉格、CK小镇' },
-  { id: '33', name: '冰岛', country: '冰岛', region: '北欧', continent: '欧洲', dailyBudget: 700, visaType: '申根签', tags: ['极光', '自然', '小众'], image: 'https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=600', routeCount: 4, description: '环岛自驾与极光' },
+  { id: '32', name: '捷克', country: '捷克', region: '东欧', continent: '欧洲', dailyBudget: 280, visaType: '申根签', tags: ['建筑', '物价友好', '啤酒'], image: 'https://images.unsplash.com/photo-1592906209472-a36b1f3782ef?w=600', routeCount: 4, description: '布拉格、CK小镇' },
+  { id: '33', name: '冰岛', country: '冰岛', region: '北欧', continent: '欧洲', dailyBudget: 700, visaType: '申根签', tags: ['极光', '自然', '小众'], image: 'https://images.unsplash.com/photo-1476610182048-b716b8518aae?w=600', routeCount: 4, description: '环岛自驾与极光' },
   { id: '34', name: '加拿大', country: '加拿大', region: '北美', continent: '北美', dailyBudget: 450, visaType: '签证', tags: ['自然', '自驾', '多元'], image: 'https://images.unsplash.com/photo-1519832979-6fa011b87667?w=600', routeCount: 6, description: '落基山、多伦多、温哥华' },
   { id: '35', name: '墨西哥', country: '墨西哥', region: '北美', continent: '北美', dailyBudget: 280, visaType: '签证/美签', tags: ['古迹', '海滩', '文化'], image: 'https://images.unsplash.com/photo-1518638150340-f706e16654f4?w=600', routeCount: 6, description: '坎昆、玛雅遗迹、瓜纳华托' },
   { id: '36', name: '阿根廷', country: '阿根廷', region: '南美', continent: '南美', dailyBudget: 350, visaType: '电子签', tags: ['探戈', '冰川', '牛排'], image: 'https://images.unsplash.com/photo-1612296480922-207807b05c99?w=600', routeCount: 5, description: '布宜诺斯艾利斯、乌斯怀亚' },
-  { id: '37', name: '智利', country: '智利', region: '南美', continent: '南美', dailyBudget: 320, visaType: '免签', tags: ['沙漠', 'Patagonia', '葡萄酒'], image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600', routeCount: 4, description: '复活节岛、阿塔卡马' },
+  { id: '37', name: '智利', country: '智利', region: '南美', continent: '南美', dailyBudget: 320, visaType: '免签', tags: ['沙漠', 'Patagonia', '葡萄酒'], image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600', routeCount: 4, description: '复活节岛、阿塔卡马' },
   { id: '38', name: '哥伦比亚', country: '哥伦比亚', region: '南美', continent: '南美', dailyBudget: 220, visaType: '免签', tags: ['咖啡', '古城', '海岸'], image: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=600', routeCount: 4, description: '卡塔赫纳、麦德林' },
-  { id: '39', name: '南非', country: '南非', region: '南部非洲', continent: '非洲', dailyBudget: 300, visaType: '签证', tags: ['Safari', '海岸', '葡萄酒'], image: 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=600', routeCount: 6, description: '开普敦、克鲁格、花园大道' },
+  { id: '39', name: '南非', country: '南非', region: '南部非洲', continent: '非洲', dailyBudget: 300, visaType: '签证', tags: ['Safari', '海岸', '葡萄酒'], image: 'https://images.unsplash.com/photo-1708747956368-7583058615a0?w=600', routeCount: 6, description: '开普敦、克鲁格、花园大道' },
   { id: '40', name: '坦桑尼亚', country: '坦桑尼亚', region: '东非', continent: '非洲', dailyBudget: 400, visaType: '落地签', tags: ['Safari', '乞力马扎罗', '桑给巴尔'], image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600', routeCount: 4, description: '塞伦盖蒂与桑岛' },
   { id: '41', name: '斐济', country: '斐济', region: '太平洋', continent: '大洋洲', dailyBudget: 450, visaType: '免签', tags: ['海岛', '潜水', '度假'], image: 'https://images.unsplash.com/photo-1540202404-a2f29016b523?w=600', routeCount: 3, description: '南太平洋岛国穷游' },
-  { id: '42', name: '蒙古', country: '蒙古', region: '东亚', continent: '亚洲', dailyBudget: 200, visaType: '签证', tags: ['草原', '小众', '自然'], image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600', routeCount: 3, description: '乌兰巴托与戈壁' },
-  { id: '43', name: '格鲁吉亚', country: '格鲁吉亚', region: '高加索', continent: '亚洲', dailyBudget: 220, visaType: '电子签', tags: ['葡萄酒', '雪山', '物价友好'], image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=600', routeCount: 4, description: '第比利斯、卡兹别克' },
+  { id: '42', name: '蒙古', country: '蒙古', region: '东亚', continent: '亚洲', dailyBudget: 200, visaType: '签证', tags: ['草原', '小众', '自然'], image: 'https://images.unsplash.com/photo-1695554534096-71698cd028fc?w=600', routeCount: 3, description: '乌兰巴托与戈壁' },
+  { id: '43', name: '格鲁吉亚', country: '格鲁吉亚', region: '高加索', continent: '亚洲', dailyBudget: 220, visaType: '电子签', tags: ['葡萄酒', '雪山', '物价友好'], image: 'https://images.unsplash.com/photo-1603350576276-24747f7bbf40?w=600', routeCount: 4, description: '第比利斯、卡兹别克' },
   { id: '44', name: '挪威', country: '挪威', region: '北欧', continent: '欧洲', dailyBudget: 650, visaType: '申根签', tags: ['峡湾', '极光', '自然'], image: 'https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600', routeCount: 5, description: '峡湾与罗弗敦' },
   { id: '45', name: '克罗地亚', country: '克罗地亚', region: '东欧', continent: '欧洲', dailyBudget: 320, visaType: '申根签', tags: ['海岸', '古城', '权游'], image: 'https://images.unsplash.com/photo-1559827260-dc66d43bef33?w=600', routeCount: 4, description: '杜布罗夫尼克与十六湖' },
   { id: '46', name: '厄瓜多尔', country: '厄瓜多尔', region: '南美', continent: '南美', dailyBudget: 200, visaType: '免签', tags: ['加拉帕戈斯', '赤道', '雨林'], image: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600', routeCount: 4, description: '基多与加拉帕戈斯' },
   { id: '47', name: '玻利维亚', country: '玻利维亚', region: '南美', continent: '南美', dailyBudget: 180, visaType: '落地签', tags: ['天空之镜', '高原', '便宜'], image: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?w=600', routeCount: 3, description: '乌尤尼与拉巴斯' },
-  { id: '48', name: '纳米比亚', country: '纳米比亚', region: '南部非洲', continent: '非洲', dailyBudget: 350, visaType: '签证', tags: ['沙漠', '野生动物', '摄影'], image: 'https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?w=600', routeCount: 3, description: '红沙漠与埃托沙' },
-  { id: '49', name: '突尼斯', country: '突尼斯', region: '北非', continent: '非洲', dailyBudget: 220, visaType: '免签', tags: ['沙漠', '罗马遗迹', '地中海'], image: 'https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=600', routeCount: 3, description: '撒哈拉门户与蓝白小镇' },
+  { id: '48', name: '纳米比亚', country: '纳米比亚', region: '南部非洲', continent: '非洲', dailyBudget: 350, visaType: '签证', tags: ['沙漠', '野生动物', '摄影'], image: 'https://images.unsplash.com/photo-1587321174565-73cffc72e10a?w=600', routeCount: 3, description: '红沙漠与埃托沙' },
+  { id: '49', name: '突尼斯', country: '突尼斯', region: '撒哈拉以南/北非（行前分区核对）', continent: '非洲', dailyBudget: 220, visaType: '免签', tags: ['沙漠', '罗马遗迹', '地中海'], image: 'https://images.unsplash.com/photo-1712520151096-5f2fc1f735eb?w=600', routeCount: 3, description: '撒哈拉门户与蓝白小镇' },
   { id: '50', name: '老挝', country: '老挝', region: '东南亚', continent: '亚洲', dailyBudget: 140, visaType: '落地签', tags: ['便宜', '佛教', '自然'], image: 'https://images.unsplash.com/photo-1528181304800-259b08848526?w=600', routeCount: 4, description: '琅勃拉邦、万荣、四千美岛' },
   { id: '51', name: '缅甸', country: '缅甸', region: '东南亚', continent: '亚洲', dailyBudget: 150, visaType: '电子签', tags: ['佛塔', '小众', '人文'], image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600', routeCount: 4, description: '蒲甘、曼德勒、茵莱湖' },
-  { id: '52', name: '伊朗', country: '伊朗', region: '西亚', continent: '亚洲', dailyBudget: 200, visaType: '签证', tags: ['波斯', '古迹', '物价友好'], image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=600', routeCount: 4, description: '伊斯法罕、设拉子、波斯波利斯' },
-  { id: '53', name: '约旦', country: '约旦', region: '西亚', continent: '亚洲', dailyBudget: 280, visaType: '签证/落地签', tags: ['佩特拉', '沙漠', '死海'], image: 'https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=600', routeCount: 4, description: '佩特拉、瓦迪拉姆、死海' },
+  { id: '52', name: '伊朗', country: '伊朗', region: '西亚', continent: '亚洲', dailyBudget: 200, visaType: '签证', tags: ['波斯', '古迹', '物价友好'], image: 'https://images.unsplash.com/photo-1635800063077-ca924ec7fe58?w=600', routeCount: 4, description: '伊斯法罕、设拉子、波斯波利斯' },
+  { id: '53', name: '约旦', country: '约旦', region: '西亚', continent: '亚洲', dailyBudget: 280, visaType: '签证/落地签', tags: ['佩特拉', '沙漠', '死海'], image: 'https://images.unsplash.com/photo-1512632579908-17e19e3d2b3e?w=600', routeCount: 4, description: '佩特拉、瓦迪拉姆、死海' },
   { id: '54', name: '马尔代夫', country: '马尔代夫', region: '南亚', continent: '亚洲', dailyBudget: 600, visaType: '免签', tags: ['海岛', '潜水', '蜜月'], image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=600', routeCount: 3, description: '居民岛穷游与跳岛' },
-  { id: '55', name: '哈萨克斯坦', country: '哈萨克斯坦', region: '中亚', continent: '亚洲', dailyBudget: 250, visaType: '免签', tags: ['草原', '丝绸之路', '小众'], image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600', routeCount: 3, description: '阿拉木图、大阿拉木图湖' },
+  { id: '55', name: '哈萨克斯坦', country: '哈萨克斯坦', region: '中亚', continent: '亚洲', dailyBudget: 250, visaType: '免签', tags: ['草原', '丝绸之路', '小众'], image: 'https://images.unsplash.com/photo-1717486489848-5c79b4d45879?w=600', routeCount: 3, description: '阿拉木图、大阿拉木图湖' },
   { id: '56', name: '以色列', country: '以色列', region: '西亚', continent: '亚洲', dailyBudget: 450, visaType: '签证', tags: ['宗教', '死海', '历史'], image: 'https://images.unsplash.com/photo-1512632579908-17e19e3d2b3e?w=600', routeCount: 4, description: '耶路撒冷、特拉维夫、死海' },
   { id: '57', name: '瑞士', country: '瑞士', region: '中欧', continent: '欧洲', dailyBudget: 600, visaType: '申根签', tags: ['雪山', '湖光', '火车'], image: 'https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=600', routeCount: 6, description: '因特拉肯、采尔马特、卢塞恩' },
   { id: '58', name: '奥地利', country: '奥地利', region: '中欧', continent: '欧洲', dailyBudget: 380, visaType: '申根签', tags: ['音乐', '建筑', '阿尔卑斯'], image: 'https://images.unsplash.com/photo-1540840454462-646b2f466833?w=600', routeCount: 5, description: '维也纳、萨尔茨堡、哈尔施塔特' },
-  { id: '59', name: '波兰', country: '波兰', region: '东欧', continent: '欧洲', dailyBudget: 260, visaType: '申根签', tags: ['历史', '物价友好', '古城'], image: 'https://images.unsplash.com/photo-1541849546-216549ae216d?w=600', routeCount: 5, description: '克拉科夫、华沙、格但斯克' },
-  { id: '60', name: '匈牙利', country: '匈牙利', region: '东欧', continent: '欧洲', dailyBudget: 280, visaType: '申根签', tags: ['温泉', '建筑', '物价友好'], image: 'https://images.unsplash.com/photo-1559827260-dc66d43bef33?w=600', routeCount: 4, description: '布达佩斯、巴拉顿湖' },
+  { id: '59', name: '波兰', country: '波兰', region: '东欧', continent: '欧洲', dailyBudget: 260, visaType: '申根签', tags: ['历史', '物价友好', '古城'], image: 'https://images.unsplash.com/photo-1573157268794-d13e94d325e6?w=600', routeCount: 5, description: '克拉科夫、华沙、格但斯克' },
+  { id: '60', name: '匈牙利', country: '匈牙利', region: '东欧', continent: '欧洲', dailyBudget: 280, visaType: '申根签', tags: ['温泉', '建筑', '物价友好'], image: 'https://images.unsplash.com/photo-1622115469132-124ec9f88fca?w=600', routeCount: 4, description: '布达佩斯、巴拉顿湖' },
   { id: '61', name: '爱尔兰', country: '爱尔兰', region: '西欧', continent: '欧洲', dailyBudget: 450, visaType: '签证', tags: ['自然', '城堡', '威士忌'], image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600', routeCount: 4, description: '都柏林、高威、莫赫悬崖' },
   { id: '62', name: '瑞典', country: '瑞典', region: '北欧', continent: '欧洲', dailyBudget: 480, visaType: '申根签', tags: ['极光', '设计', '自然'], image: 'https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600', routeCount: 5, description: '斯德哥尔摩、基律纳、阿比斯库' },
   { id: '63', name: '古巴', country: '古巴', region: '加勒比', continent: '北美', dailyBudget: 250, visaType: '签证', tags: ['老爷车', '音乐', '复古'], image: 'https://images.unsplash.com/photo-1518638150340-f706e16654f4?w=600', routeCount: 4, description: '哈瓦那、特立尼达、巴拉德罗' },
   { id: '64', name: '哥斯达黎加', country: '哥斯达黎加', region: '中美洲', continent: '北美', dailyBudget: 350, visaType: '免签', tags: ['雨林', '火山', '生态'], image: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600', routeCount: 4, description: '蒙特韦尔德、曼努埃尔安东尼奥' },
   { id: '65', name: '巴拿马', country: '巴拿马', region: '中美洲', continent: '北美', dailyBudget: 320, visaType: '免签', tags: ['运河', '雨林', '海岸'], image: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=600', routeCount: 4, description: '巴拿马城、圣布拉斯、博卡斯' },
   { id: '66', name: '乌拉圭', country: '乌拉圭', region: '南美', continent: '南美', dailyBudget: 300, visaType: '免签', tags: ['海滩', '殖民', '安全'], image: 'https://images.unsplash.com/photo-1612296480922-207807b05c99?w=600', routeCount: 3, description: '蒙得维的亚、科洛尼亚' },
-  { id: '67', name: '乌干达', country: '乌干达', region: '东非', continent: '非洲', dailyBudget: 280, visaType: '电子签', tags: ['大猩猩', '野生动物', '小众'], image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600', routeCount: 3, description: '金贾、布温迪观猩猩' },
-  { id: '68', name: '卢旺达', country: '卢旺达', region: '东非', continent: '非洲', dailyBudget: 350, visaType: '落地签', tags: ['大猩猩', '火山', '清洁'], image: 'https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?w=600', routeCount: 3, description: '火山国家公园观猩猩' },
-  { id: '69', name: '博茨瓦纳', country: '博茨瓦纳', region: '南部非洲', continent: '非洲', dailyBudget: 450, visaType: '签证', tags: ['Safari', '奥卡万戈', '野生动物'], image: 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=600', routeCount: 3, description: '奥卡万戈三角洲、乔贝' },
-  { id: '70', name: '毛里求斯', country: '毛里求斯', region: '印度洋', continent: '非洲', dailyBudget: 400, visaType: '免签', tags: ['海岛', '潜水', '多元'], image: 'https://images.unsplash.com/photo-1540202404-a2f29016b523?w=600', routeCount: 4, description: '环岛与七色土' },
-  { id: '71', name: '马达加斯加', country: '马达加斯加', region: '东非', continent: '非洲', dailyBudget: 220, visaType: '落地签', tags: ['狐猴', '独特', '自然'], image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600', routeCount: 4, description: '狐猴、猴面包树、石林' },
+  { id: '67', name: '乌干达', country: '乌干达', region: '东非', continent: '非洲', dailyBudget: 280, visaType: '电子签', tags: ['大猩猩', '野生动物', '小众'], image: 'https://images.unsplash.com/photo-1614852897475-6533db8f3564?w=600', routeCount: 3, description: '金贾、布温迪观猩猩' },
+  { id: '68', name: '卢旺达', country: '卢旺达', region: '东非', continent: '非洲', dailyBudget: 350, visaType: '落地签', tags: ['大猩猩', '火山', '清洁'], image: 'https://images.unsplash.com/photo-1687986261123-b17f08f2796c?w=600', routeCount: 3, description: '火山国家公园观猩猩' },
+  { id: '69', name: '博茨瓦纳', country: '博茨瓦纳', region: '南部非洲', continent: '非洲', dailyBudget: 450, visaType: '签证', tags: ['Safari', '奥卡万戈', '野生动物'], image: 'https://images.unsplash.com/photo-1531208853003-c1ec1b8a81d7?w=600', routeCount: 3, description: '奥卡万戈三角洲、乔贝' },
+  { id: '70', name: '毛里求斯', country: '毛里求斯', region: '印度洋', continent: '非洲', dailyBudget: 400, visaType: '免签', tags: ['海岛', '潜水', '多元'], image: 'https://images.unsplash.com/photo-1513415277900-a62401e19be4?w=600', routeCount: 4, description: '环岛与七色土' },
+  { id: '71', name: '马达加斯加', country: '马达加斯加', region: '东非', continent: '非洲', dailyBudget: 220, visaType: '落地签', tags: ['狐猴', '独特', '自然'], image: 'https://images.unsplash.com/photo-1564198729838-cb82ee0c733c?w=600', routeCount: 4, description: '狐猴、猴面包树、石林' },
   { id: '72', name: '帕劳', country: '帕劳', region: '太平洋', continent: '大洋洲', dailyBudget: 500, visaType: '落地签', tags: ['潜水', '水母湖', '海岛'], image: 'https://images.unsplash.com/photo-1584118624014-d89a2c218c60?w=600', routeCount: 3, description: '潜水天堂与水母湖' },
   { id: '73', name: '瓦努阿图', country: '瓦努阿图', region: '太平洋', continent: '大洋洲', dailyBudget: 350, visaType: '免签', tags: ['火山', '文化', '小众'], image: 'https://images.unsplash.com/photo-1540202404-a2f29016b523?w=600', routeCount: 3, description: '火山与原始文化' },
   { id: '74', name: '文莱', country: '文莱', region: '东南亚', continent: '亚洲', dailyBudget: 350, visaType: '签证', tags: ['清真', '石油', '雨林'], image: 'https://images.unsplash.com/photo-1596422846543-75c6ee1976e5?w=600', routeCount: 2, description: '斯里巴加湾与水上村' },
   { id: '75', name: '巴基斯坦', country: '巴基斯坦', region: '南亚', continent: '亚洲', dailyBudget: 150, visaType: '电子签', tags: ['喀喇昆仑', '人文', '便宜'], image: 'https://images.unsplash.com/photo-1524492479098-5e0a4b2f52e0?w=600', routeCount: 4, description: '罕萨、拉合尔、卡拉奇' },
   { id: '76', name: '乌兹别克斯坦', country: '乌兹别克斯坦', region: '中亚', continent: '亚洲', dailyBudget: 200, visaType: '免签', tags: ['丝绸之路', '古城', '撒马尔罕'], image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=600', routeCount: 4, description: '撒马尔罕、布哈拉、希瓦' },
-  { id: '77', name: '阿塞拜疆', country: '阿塞拜疆', region: '高加索', continent: '亚洲', dailyBudget: 280, visaType: '电子签', tags: ['火之国', '现代', '古城'], image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=600', routeCount: 3, description: '巴库、戈布斯坦、舍基' },
+  { id: '77', name: '阿塞拜疆', country: '阿塞拜疆', region: '高加索', continent: '亚洲', dailyBudget: 280, visaType: '电子签', tags: ['火之国', '现代', '古城'], image: 'https://images.unsplash.com/photo-1596306499398-8d88944a5ec4?w=600', routeCount: 3, description: '巴库、戈布斯坦、舍基' },
   { id: '78', name: '比利时', country: '比利时', region: '西欧', continent: '欧洲', dailyBudget: 400, visaType: '申根签', tags: ['巧克力', '啤酒', '欧盟中心'], image: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=600', routeCount: 4, description: '布鲁塞尔、布鲁日、根特' },
   { id: '79', name: '丹麦', country: '丹麦', region: '北欧', continent: '欧洲', dailyBudget: 500, visaType: '申根签', tags: ['设计', '童话', '自行车'], image: 'https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600', routeCount: 4, description: '哥本哈根、欧登塞、乐高乐园' },
   { id: '80', name: '芬兰', country: '芬兰', region: '北欧', continent: '欧洲', dailyBudget: 480, visaType: '申根签', tags: ['极光', '桑拿', '圣诞老人'], image: 'https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600', routeCount: 5, description: '赫尔辛基、罗瓦涅米、拉普兰' },
@@ -330,48 +344,80 @@ export const destinations = [
   { id: '84', name: '危地马拉', country: '危地马拉', region: '中美洲', continent: '北美', dailyBudget: 200, visaType: '免签', tags: ['玛雅', '火山', '安提瓜'], image: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600', routeCount: 4, description: '蒂卡尔、安提瓜、阿蒂特兰湖' },
   { id: '85', name: '委内瑞拉', country: '委内瑞拉', region: '南美', continent: '南美', dailyBudget: 180, visaType: '签证', tags: ['天使瀑布', '加勒比', '小众'], image: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=600', routeCount: 3, description: '天使瀑布、洛斯罗克斯' },
   { id: '86', name: '巴拉圭', country: '巴拉圭', region: '南美', continent: '南美', dailyBudget: 180, visaType: '签证', tags: ['伊瓜苏', '内陆', '小众'], image: 'https://images.unsplash.com/photo-1612296480922-207807b05c99?w=600', routeCount: 3, description: '亚松森、伊泰普' },
-  { id: '87', name: '津巴布韦', country: '津巴布韦', region: '南部非洲', continent: '非洲', dailyBudget: 280, visaType: '落地签', tags: ['维多利亚瀑布', 'Safari', '古迹'], image: 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=600', routeCount: 4, description: '维多利亚瀑布、万基国家公园' },
-  { id: '88', name: '赞比亚', country: '赞比亚', region: '南部非洲', continent: '非洲', dailyBudget: 260, visaType: '电子签', tags: ['维多利亚瀑布', 'Safari', '河游'], image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600', routeCount: 4, description: '利文斯敦、南卢安瓜' },
-  { id: '89', name: '加纳', country: '加纳', region: '西非', continent: '非洲', dailyBudget: 220, visaType: '签证', tags: ['海岸', '历史', '文化'], image: 'https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?w=600', routeCount: 3, description: '阿克拉、海岸角、库马西' },
-  { id: '90', name: '塞内加尔', country: '塞内加尔', region: '西非', continent: '非洲', dailyBudget: 250, visaType: '签证', tags: ['玫瑰湖', '达喀尔', '文化'], image: 'https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?w=600', routeCount: 3, description: '达喀尔、圣路易、玫瑰湖' },
+  { id: '87', name: '津巴布韦', country: '津巴布韦', region: '南部非洲', continent: '非洲', dailyBudget: 280, visaType: '落地签', tags: ['维多利亚瀑布', 'Safari', '古迹'], image: 'https://images.unsplash.com/photo-1627347456206-d3df7d8484b0?w=600', routeCount: 4, description: '维多利亚瀑布、万基国家公园' },
+  { id: '88', name: '赞比亚', country: '赞比亚', region: '南部非洲', continent: '非洲', dailyBudget: 260, visaType: '电子签', tags: ['维多利亚瀑布', 'Safari', '河游'], image: 'https://images.unsplash.com/photo-1666732566977-8805c13a6ce2?w=600', routeCount: 4, description: '利文斯敦、南卢安瓜' },
+  { id: '89', name: '加纳', country: '加纳', region: '西非', continent: '非洲', dailyBudget: 220, visaType: '签证', tags: ['海岸', '历史', '文化'], image: 'https://images.unsplash.com/photo-1635188271987-377c330444de?w=600', routeCount: 3, description: '阿克拉、海岸角、库马西' },
+  { id: '90', name: '塞内加尔', country: '塞内加尔', region: '西非', continent: '非洲', dailyBudget: 250, visaType: '签证', tags: ['玫瑰湖', '达喀尔', '文化'], image: 'https://images.unsplash.com/photo-1648504735627-6af97e8337a9?w=600', routeCount: 3, description: '达喀尔、圣路易、玫瑰湖' },
   { id: '91', name: '汤加', country: '汤加', region: '太平洋', continent: '大洋洲', dailyBudget: 380, visaType: '免签', tags: ['观鲸', '海岛', '王室'], image: 'https://images.unsplash.com/photo-1540202404-a2f29016b523?w=600', routeCount: 2, description: '观鲸与南太平洋文化' },
   { id: '92', name: '萨摩亚', country: '萨摩亚', region: '太平洋', continent: '大洋洲', dailyBudget: 350, visaType: '免签', tags: ['海岛', '瀑布', '文化'], image: 'https://images.unsplash.com/photo-1540202404-a2f29016b523?w=600', routeCount: 3, description: '乌波卢与萨瓦伊' },
   { id: '93', name: '巴布亚新几内亚', country: '巴布亚新几内亚', region: '太平洋', continent: '大洋洲', dailyBudget: 400, visaType: '签证', tags: ['部落', '潜水', '小众'], image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600', routeCount: 3, description: '部落文化与珊瑚海' },
-  { id: '94', name: '亚美尼亚', country: '亚美尼亚', region: '高加索', continent: '亚洲', dailyBudget: 200, visaType: '电子签', tags: ['修道院', '葡萄酒', '物价友好'], image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=600', routeCount: 4, description: '埃里温、塞凡湖、塔特夫' },
+  { id: '94', name: '亚美尼亚', country: '亚美尼亚', region: '高加索', continent: '亚洲', dailyBudget: 200, visaType: '电子签', tags: ['修道院', '葡萄酒', '物价友好'], image: 'https://images.unsplash.com/photo-1582798144276-d6c2e81b3025?w=600', routeCount: 4, description: '埃里温、塞凡湖、塔特夫' },
   { id: '95', name: '黎巴嫩', country: '黎巴嫩', region: '西亚', continent: '亚洲', dailyBudget: 350, visaType: '落地签', tags: ['古迹', '地中海', '雪松'], image: 'https://images.unsplash.com/photo-1512632579908-17e19e3d2b3e?w=600', routeCount: 4, description: '贝鲁特、巴勒贝克、的黎波里' },
   { id: '96', name: '阿尔巴尼亚', country: '阿尔巴尼亚', region: '东欧', continent: '欧洲', dailyBudget: 220, visaType: '免签', tags: ['海岸', '物价友好', '小众'], image: 'https://images.unsplash.com/photo-1559827260-dc66d43bef33?w=600', routeCount: 4, description: '地拉那、萨兰达、培拉特' },
   { id: '97', name: '黑山', country: '黑山', region: '东欧', continent: '欧洲', dailyBudget: 280, visaType: '签证', tags: ['峡湾', '古城', '海岸'], image: 'https://images.unsplash.com/photo-1559827260-dc66d43bef33?w=600', routeCount: 4, description: '科托尔、布德瓦、杜米托尔' },
   { id: '98', name: '尼加拉瓜', country: '尼加拉瓜', region: '中美洲', continent: '北美', dailyBudget: 180, visaType: '落地签', tags: ['火山', '殖民', '便宜'], image: 'https://images.unsplash.com/photo-1518638150340-f706e16654f4?w=600', routeCount: 3, description: '格拉纳达、奥梅特佩、莱昂' },
-  { id: '99', name: '厄立特里亚', country: '厄立特里亚', region: '东非', continent: '非洲', dailyBudget: 200, visaType: '签证', tags: ['红海', '意式', '小众'], image: 'https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?w=600', routeCount: 2, description: '阿斯马拉与马萨瓦' },
+  { id: '99', name: '厄立特里亚', country: '厄立特里亚', region: '东非', continent: '非洲', dailyBudget: 200, visaType: '签证', tags: ['红海', '意式', '小众'], image: 'https://images.unsplash.com/photo-1712061377070-2800c603c402?w=600', routeCount: 2, description: '阿斯马拉与马萨瓦' },
   { id: '100', name: '阿曼', country: '阿曼', region: '西亚', continent: '亚洲', dailyBudget: 350, visaType: '电子签', tags: ['沙漠', '古堡', '海岸'], image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600', routeCount: 4, description: '马斯喀特、尼兹瓦、瓦希巴沙漠' },
-  { id: '101', name: '吉尔吉斯斯坦', country: '吉尔吉斯斯坦', region: '中亚', continent: '亚洲', dailyBudget: 180, visaType: '免签', tags: ['天山', '骑马', '湖泊'], image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600', routeCount: 4, description: '伊塞克湖、比什凯克、阿尔斯兰博布' },
-  { id: '102', name: '不丹', country: '不丹', region: '南亚', continent: '亚洲', dailyBudget: 250, visaType: '签证', tags: ['幸福', '寺庙', '徒步'], image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600', routeCount: 4, description: '廷布、帕罗、虎穴寺' },
+  { id: '101', name: '吉尔吉斯斯坦', country: '吉尔吉斯斯坦', region: '中亚', continent: '亚洲', dailyBudget: 180, visaType: '免签', tags: ['天山', '骑马', '湖泊'], image: 'https://images.unsplash.com/photo-1689788648053-cd482d1acd9c?w=600', routeCount: 4, description: '伊塞克湖、比什凯克、阿尔斯兰博布' },
+  { id: '102', name: '不丹', country: '不丹', region: '南亚', continent: '亚洲', dailyBudget: 250, visaType: '签证', tags: ['幸福', '寺庙', '徒步'], image: 'https://images.unsplash.com/photo-1524492479098-5e0a4b2f52e0?w=600', routeCount: 4, description: '廷布、帕罗、虎穴寺' },
   { id: '103', name: '东帝汶', country: '东帝汶', region: '东南亚', continent: '亚洲', dailyBudget: 150, visaType: '落地签', tags: ['潜水', '小众', '便宜'], image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600', routeCount: 3, description: '帝力与阿陶罗岛' },
   { id: '104', name: '孟加拉国', country: '孟加拉国', region: '南亚', continent: '亚洲', dailyBudget: 120, visaType: '签证', tags: ['便宜', '人文', '红树林'], image: 'https://images.unsplash.com/photo-1524492479098-5e0a4b2f52e0?w=600', routeCount: 3, description: '达卡、库卡塔、孙德尔本斯' },
   { id: '105', name: '卢森堡', country: '卢森堡', region: '西欧', continent: '欧洲', dailyBudget: 450, visaType: '申根签', tags: ['城堡', '欧盟', '小国'], image: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=600', routeCount: 3, description: '卢森堡城与 Mullerthal' },
-  { id: '106', name: '斯洛伐克', country: '斯洛伐克', region: '东欧', continent: '欧洲', dailyBudget: 260, visaType: '申根签', tags: ['城堡', '塔特拉山', '物价友好'], image: 'https://images.unsplash.com/photo-1541849546-216549ae216d?w=600', routeCount: 4, description: '布拉迪斯拉发、高塔特拉' },
-  { id: '107', name: '立陶宛', country: '立陶宛', region: '波罗的海', continent: '欧洲', dailyBudget: 280, visaType: '申根签', tags: ['十字架山', '琥珀', '古城'], image: 'https://images.unsplash.com/photo-1541849546-216549ae216d?w=600', routeCount: 4, description: '维尔纽斯、特拉凯、十字架山' },
+  { id: '106', name: '斯洛伐克', country: '斯洛伐克', region: '东欧', continent: '欧洲', dailyBudget: 260, visaType: '申根签', tags: ['城堡', '塔特拉山', '物价友好'], image: 'https://images.unsplash.com/photo-1568567259979-a39016d968c7?w=600', routeCount: 4, description: '布拉迪斯拉发、高塔特拉' },
+  { id: '107', name: '立陶宛', country: '立陶宛', region: '波罗的海', continent: '欧洲', dailyBudget: 280, visaType: '申根签', tags: ['十字架山', '琥珀', '古城'], image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600', routeCount: 4, description: '维尔纽斯、特拉凯、十字架山' },
   { id: '108', name: '爱沙尼亚', country: '爱沙尼亚', region: '波罗的海', continent: '欧洲', dailyBudget: 300, visaType: '申根签', tags: ['数字', '古城', '森林'], image: 'https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600', routeCount: 4, description: '塔林、拉赫马国家公园' },
   { id: '109', name: '塞尔维亚', country: '塞尔维亚', region: '东欧', continent: '欧洲', dailyBudget: 220, visaType: '免签', tags: ['物价友好', '夜生活', '修道院'], image: 'https://images.unsplash.com/photo-1559827260-dc66d43bef33?w=600', routeCount: 4, description: '贝尔格莱德、诺维萨德' },
-  { id: '110', name: '马耳他', country: '马耳他', region: '地中海', continent: '欧洲', dailyBudget: 350, visaType: '申根签', tags: ['海岛', '历史', '蓝洞'], image: 'https://images.unsplash.com/photo-1533105077500-1b7a6ea907da?w=600', routeCount: 4, description: '瓦莱塔、戈佐、蓝洞' },
-  { id: '111', name: '塞浦路斯', country: '塞浦路斯', region: '地中海', continent: '欧洲', dailyBudget: 320, visaType: '签证（常与申根衔接，行前确认）', tags: ['海滩', '古迹', '双文化'], image: 'https://images.unsplash.com/photo-1533105077500-1b7a6ea907da?w=600', routeCount: 4, description: '尼科西亚、帕福斯、阿依纳帕' },
+  { id: '110', name: '马耳他', country: '马耳他', region: '地中海', continent: '欧洲', dailyBudget: 350, visaType: '申根签', tags: ['海岛', '历史', '蓝洞'], image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600', routeCount: 4, description: '瓦莱塔、戈佐、蓝洞' },
+  { id: '111', name: '塞浦路斯', country: '塞浦路斯', region: '地中海', continent: '欧洲', dailyBudget: 320, visaType: '签证（常与申根衔接，行前确认）', tags: ['海滩', '古迹', '双文化'], image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600', routeCount: 4, description: '尼科西亚、帕福斯、阿依纳帕' },
   { id: '112', name: '多米尼加', country: '多米尼加', region: '加勒比', continent: '北美', dailyBudget: 280, visaType: '免签', tags: ['海滩', '殖民', '便宜'], image: 'https://images.unsplash.com/photo-1518638150340-f706e16654f4?w=600', routeCount: 4, description: '圣多明各、蓬塔卡纳' },
   { id: '113', name: '伯利兹', country: '伯利兹', region: '中美洲', continent: '北美', dailyBudget: 300, visaType: '签证', tags: ['大蓝洞', '玛雅', '潜水'], image: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600', routeCount: 4, description: '大蓝洞、伯利兹城、卡约' },
   { id: '114', name: '圭亚那', country: '圭亚那', region: '南美', continent: '南美', dailyBudget: 250, visaType: '签证', tags: ['凯厄图尔', '雨林', '小众'], image: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600', routeCount: 3, description: '凯厄图尔瀑布与乔治城' },
   { id: '115', name: '苏里南', country: '苏里南', region: '南美', continent: '南美', dailyBudget: 280, visaType: '签证', tags: ['雨林', '多元', '小众'], image: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=600', routeCount: 3, description: '帕拉马里博与内陆' },
-  { id: '116', name: '埃塞俄比亚', country: '埃塞俄比亚', region: '东非', continent: '非洲', dailyBudget: 180, visaType: '电子签', tags: ['咖啡', '拉利贝拉', '人文'], image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600', routeCount: 5, description: '拉利贝拉、阿克苏姆、奥莫河谷' },
-  { id: '117', name: '马拉维', country: '马拉维', region: '东部非洲', continent: '非洲', dailyBudget: 200, visaType: '落地签', tags: ['马拉维湖', '友好', '小众'], image: 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=600', routeCount: 3, description: '利隆圭、马拉维湖' },
-  { id: '118', name: '莫桑比克', country: '莫桑比克', region: '东南非洲', continent: '非洲', dailyBudget: 220, visaType: '落地签', tags: ['海滩', '海岛', '潜水'], image: 'https://images.unsplash.com/photo-1540202404-a2f29016b523?w=600', routeCount: 4, description: '马普托、巴扎鲁托、伊尼扬巴内' },
+  { id: '116', name: '埃塞俄比亚', country: '埃塞俄比亚', region: '东非', continent: '非洲', dailyBudget: 180, visaType: '电子签', tags: ['咖啡', '拉利贝拉', '人文'], image: 'https://images.unsplash.com/photo-1518079562269-53db1e4433b8?w=600', routeCount: 5, description: '拉利贝拉、阿克苏姆、奥莫河谷' },
+  { id: '117', name: '马拉维', country: '马拉维', region: '东部非洲', continent: '非洲', dailyBudget: 200, visaType: '落地签', tags: ['马拉维湖', '友好', '小众'], image: 'https://images.unsplash.com/photo-1744758039418-474a11a75bb3?w=600', routeCount: 3, description: '利隆圭、马拉维湖' },
+  { id: '118', name: '莫桑比克', country: '莫桑比克', region: '东南非洲', continent: '非洲', dailyBudget: 220, visaType: '落地签', tags: ['海滩', '海岛', '潜水'], image: 'https://images.unsplash.com/photo-1694124087978-de0233d0ead7?w=600', routeCount: 4, description: '马普托、巴扎鲁托、伊尼扬巴内' },
   { id: '119', name: '所罗门群岛', country: '所罗门群岛', region: '太平洋', continent: '大洋洲', dailyBudget: 350, visaType: '签证', tags: ['二战', '潜水', '小众'], image: 'https://images.unsplash.com/photo-1540202404-a2f29016b523?w=600', routeCount: 3, description: '瓜达尔卡纳尔与潜水' },
   { id: '120', name: '保加利亚', country: '保加利亚', region: '东欧', continent: '欧洲', dailyBudget: 220, visaType: '申根签', tags: ['玫瑰', '修道院', '物价友好'], image: 'https://images.unsplash.com/photo-1559827260-dc66d43bef33?w=600', routeCount: 4, description: '索菲亚、普罗夫迪夫、里拉修道院' },
   { id: '121', name: '北马其顿', country: '北马其顿', region: '东欧', continent: '欧洲', dailyBudget: 200, visaType: '签证', tags: ['奥赫里德', '物价友好', '历史'], image: 'https://images.unsplash.com/photo-1559827260-dc66d43bef33?w=600', routeCount: 4, description: '斯科普里、奥赫里德湖' },
   { id: '122', name: '拉脱维亚', country: '拉脱维亚', region: '波罗的海', continent: '欧洲', dailyBudget: 280, visaType: '申根签', tags: ['里加', '新艺术', '海滩'], image: 'https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600', routeCount: 4, description: '里加、尤尔马拉、锡古尔达' },
   { id: '123', name: '洪都拉斯', country: '洪都拉斯', region: '中美洲', continent: '北美', dailyBudget: 200, visaType: '签证', tags: ['科潘', '潜水', '玛雅'], image: 'https://images.unsplash.com/photo-1518638150340-f706e16654f4?w=600', routeCount: 4, description: '科潘遗址、罗阿坦岛' },
   { id: '124', name: '科威特', country: '科威特', region: '西亚', continent: '亚洲', dailyBudget: 400, visaType: '签证', tags: ['现代', '沙漠', '海湾'], image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600', routeCount: 3, description: '科威特城与沙漠' },
-  { id: '125', name: '塞舌尔', country: '塞舌尔', region: '印度洋', continent: '非洲', dailyBudget: 600, visaType: '免签', tags: ['海岛', '潜水', '蜜月'], image: 'https://images.unsplash.com/photo-1540202404-a2f29016b523?w=600', routeCount: 3, description: '马埃、普拉兰、拉迪格' },
-  { id: '126', name: '留尼汪', country: '留尼汪', region: '印度洋', continent: '非洲', dailyBudget: 450, visaType: '申根签', tags: ['火山', '徒步', '法属'], image: 'https://images.unsplash.com/photo-1523482580671-f216ba185ece?w=600', routeCount: 3, description: '火山与环岛' },
+  { id: '125', name: '塞舌尔', country: '塞舌尔', region: '印度洋', continent: '非洲', dailyBudget: 600, visaType: '免签', tags: ['海岛', '潜水', '蜜月'], image: 'https://images.unsplash.com/photo-1706088773588-98152aabeb81?w=600', routeCount: 3, description: '马埃、普拉兰、拉迪格' },
+  { id: '126', name: '留尼汪', country: '留尼汪', region: '印度洋', continent: '非洲', dailyBudget: 450, visaType: '申根签', tags: ['火山', '徒步', '法属'], image: 'https://images.unsplash.com/photo-1605477162496-e696844a64a3?w=600', routeCount: 3, description: '火山与环岛' },
   { id: '127', name: '卡塔尔', country: '卡塔尔', region: '西亚', continent: '亚洲', dailyBudget: 420, visaType: '免签', tags: ['沙漠', '现代', '博物馆'], image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600', routeCount: 2, description: '多哈城市与沙漠一日' },
+  {
+    id: '128',
+    name: '中国',
+    country: '中国',
+    region: '东亚',
+    continent: '亚洲',
+    dailyBudget: 280,
+    visaType: '依护照与最新政策办理',
+    tags: ['高铁', '美食', '多样地貌'],
+    image: 'https://images.unsplash.com/photo-1478865858807-4fd415904439?w=600',
+    routeCount: 40,
+    description: '从都市到高原与海岸，高铁与公交衔接效率高；行前核对签证与区域政策。',
+  },
+  {
+    id: '129',
+    name: '俄罗斯',
+    country: '俄罗斯',
+    region: '东欧/北亚',
+    continent: '欧洲',
+    dailyBudget: 320,
+    visaType: '签证（政策依行程与国籍变动，行前确认）',
+    tags: ['铁路', '博物馆', '冬季'],
+    image: 'https://images.unsplash.com/photo-1513326738671-b96407a66789?w=600',
+    routeCount: 40,
+    description: '莫斯科、圣彼得堡与西伯利亚铁路线经典；冬季装备与室内暖气需提前规划。',
+  },
+  ...DESTINATIONS_EXPANSION,
 ]
+
+export const destinations = destinationsBase.map((d) => ({
+  ...d,
+  routeCount: _articleRouteCounts[d.name] !== undefined ? _articleRouteCounts[d.name] : d.routeCount,
+}))
 
 export const featuredRoutes = [
   {
@@ -416,10 +462,34 @@ export const featuredRoutes = [
   },
 ]
 
-import { articles } from './articlesData.js'
 export { articles }
 
 export const latestArticles = articles
 export const popularDestinations = destinations
 export const routeToArticle = { r1: 'a1', r2: 'a2', r3: 'a3', r4: 'a4' }
-export const featuredRoutesForHome = articles.slice(0, 54).map((a) => ({ ...a, cover: a.cover, id: a.id }))
+
+function articleHeat(a) {
+  return (Number(a.views) || 0) + (Number(a.likes) || 0) * 2
+}
+
+/** 首页精选：优先各国各取一条高热攻略，再按热度补足，避免永远只有前 54 条里的少数国家 */
+function buildFeaturedRoutesForHome(articleList, limit = 72) {
+  const byDest = new Map()
+  for (const a of articleList) {
+    const d = a.destination || ''
+    const h = articleHeat(a)
+    const cur = byDest.get(d)
+    if (!cur || h > cur.heat) byDest.set(d, { article: a, heat: h })
+  }
+  const onePerDest = [...byDest.values()]
+    .sort((x, y) => y.heat - x.heat)
+    .map((x) => x.article)
+  const picked = new Set(onePerDest.map((a) => a.id))
+  const rest = articleList
+    .filter((a) => !picked.has(a.id))
+    .sort((a, b) => articleHeat(b) - articleHeat(a))
+  const merged = [...onePerDest, ...rest]
+  return merged.slice(0, limit).map((a) => ({ ...a, cover: a.cover, id: a.id }))
+}
+
+export const featuredRoutesForHome = buildFeaturedRoutesForHome(articles, 72)

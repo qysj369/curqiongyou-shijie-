@@ -64,7 +64,7 @@ export default function ArticleLikeButton({ articleId }) {
       type="button"
       onClick={handleClick}
       className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition print:hidden ${
-        isLiked ? 'bg-rose-500 text-white' : 'bg-slate-200 text-slate-600 hover:bg-rose-100 hover:text-rose-600'
+        isLiked ? 'bg-sky-600 text-white' : 'bg-slate-200 text-slate-600 hover:bg-sky-100 hover:text-sky-700'
       }`}
       title={t('articleDetail.likeThis')}
       aria-pressed={isLiked}

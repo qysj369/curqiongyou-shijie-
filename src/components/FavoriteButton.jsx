@@ -19,7 +19,7 @@ export default function FavoriteButton({ articleId, className = '' }) {
     <button
       type="button"
       onClick={handleClick}
-      className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition ${active ? 'bg-rose-500 text-white' : 'bg-slate-200 text-slate-600 hover:bg-rose-100 hover:text-rose-600'} ${className}`}
+      className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition ${active ? 'bg-sky-600 text-white' : 'bg-slate-200 text-slate-600 hover:bg-sky-100 hover:text-sky-700'} ${className}`}
       title={active ? t('common.favorited') : t('common.favorite')}
       aria-pressed={active}
       aria-label={active ? t('a11y.unfavoriteGuide') : t('a11y.favoriteGuide')}

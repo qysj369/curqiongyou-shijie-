@@ -56,6 +56,7 @@ export default function ShareBar({ articleRef, shareUrl, shareTitle, shareText }
       toastRef.current = setTimeout(() => setLinkCopied(false), 2000)
     } catch {
       setLinkCopied(false)
+      toast(t('common.copyFailed'))
     }
   }
 
@@ -87,8 +88,8 @@ export default function ShareBar({ articleRef, shareUrl, shareTitle, shareText }
   }
 
   const chipClass =
-    'inline-flex items-center justify-center gap-1.5 min-h-11 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500'
-  const chipLinkClass = `${chipClass} hover:bg-amber-100 dark:hover:bg-amber-900/40 hover:text-amber-800 dark:hover:text-amber-300`
+    'inline-flex items-center justify-center gap-1.5 min-h-11 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500'
+  const chipLinkClass = `${chipClass} hover:bg-sky-100 dark:hover:bg-sky-900/40 hover:text-sky-800 dark:hover:text-sky-300`
 
   return (
     <div className="flex flex-wrap items-center gap-2">

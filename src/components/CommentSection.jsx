@@ -132,7 +132,7 @@ export default function CommentSection({ articleId, discussionUrl }) {
           href={discussionUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 min-h-11 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 text-sm font-medium mb-6"
+          className="inline-flex items-center gap-1.5 min-h-11 text-sky-700 dark:text-sky-300 hover:text-sky-800 dark:hover:text-sky-200 text-sm font-medium mb-6"
         >
           <span>{t('comments.discussOnGitHub')}</span>
           <span aria-hidden>→</span>
@@ -141,19 +141,21 @@ export default function CommentSection({ articleId, discussionUrl }) {
 
       <div className="bg-slate-50 dark:bg-slate-900/80 rounded-xl p-4 border border-slate-200/80 dark:border-slate-700">
         <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">{t('comments.myNoteHint')}</p>
-        <p className="text-amber-700 dark:text-amber-400/95 text-xs mb-3">{t('board.guidelinesShort')}</p>
+        <p className="text-sky-700 dark:text-sky-400/95 text-xs mb-3">{t('board.guidelinesShort')}</p>
         <form onSubmit={handleSubmit} className="flex gap-2 flex-wrap items-stretch sm:items-center">
           <input
+            id="article-private-note-input"
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={t('comments.placeholder')}
-            className="flex-1 min-w-[min(100%,12rem)] min-h-11 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            aria-label={t('comments.placeholder')}
+            className="flex-1 min-w-[min(100%,12rem)] min-h-11 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400"
             maxLength={200}
           />
           <button
             type="submit"
-            className="min-h-11 px-5 rounded-lg bg-amber-500 text-white font-medium hover:bg-amber-600 transition text-sm shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
+            className="min-h-11 px-5 rounded-lg bg-sky-600 text-white font-medium hover:bg-sky-700 transition text-sm shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
           >
             {t('comments.submit')}
           </button>
@@ -163,7 +165,7 @@ export default function CommentSection({ articleId, discussionUrl }) {
             {notes.map((n, i) => (
               <li
                 key={i}
-                className="text-slate-700 dark:text-slate-300 text-sm pl-2 border-l-2 border-amber-200 dark:border-amber-700"
+                className="text-slate-700 dark:text-slate-300 text-sm pl-2 border-l-2 border-sky-200 dark:border-sky-700"
               >
                 {n.text}
                 <span className="text-slate-400 dark:text-slate-500 text-xs ml-2">

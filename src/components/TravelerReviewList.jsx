@@ -117,7 +117,7 @@ export default function TravelerReviewList({ reviews = [], destinationName = '',
               <span className="font-semibold text-slate-800 dark:text-slate-100">{r.author}</span>
               <span className="text-slate-400 text-sm">{r.date}</span>
               {sortBy === 'helpful' && helpfulTotal(r) >= 20 && (
-                <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-200 border border-amber-200/80 dark:border-amber-800">
+                <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-sky-100 text-sky-900 dark:bg-sky-900/40 dark:text-sky-200 border border-sky-200/80 dark:border-sky-800">
                   {t('travelerVoice.hotReview')}
                 </span>
               )}

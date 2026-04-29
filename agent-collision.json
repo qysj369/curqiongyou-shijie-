@@ -1,0 +1,203 @@
+﻿{
+  "summary": {
+    "totalDestinations": 199,
+    "uniquePhotoIds": 159,
+    "crossContinentClusters": 0,
+    "crossSubBucketClusters": 0,
+    "sameBucketDuplicateClusters": 10
+  },
+  "crossContinent": [],
+  "crossSubBucket": [],
+  "sameBucketDupesTop": [
+    {
+      "photoId": "1580060839134",
+      "photoSlug": "1580060839134-75a5edca2e99",
+      "count": 9,
+      "countries": [
+        "鍗氳尐鐡︾撼",
+        "甯冮殕杩?,
+        "鍘勭珛鐗归噷浜?,
+        "娲ュ反甯冮煢",
+        "鐣欏凹姹?,
+        "椹媺缁?,
+        "鑾姣斿厠",
+        "鍗楅潪",
+        "涔嶅緱"
+      ],
+      "continents": [
+        "闈炴床"
+      ],
+      "subBuckets": [
+        "闈炴床路娆℃拻鍝堟媺锛堢矖鍒嗭級"
+      ],
+      "sampleUrl": "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=600"
+    },
+    {
+      "photoId": "1469854523086",
+      "photoSlug": "1469854523086-cc02fe5d8800",
+      "count": 7,
+      "countries": [
+        "闃垮皵鍙婂埄浜?,
+        "浣涘緱瑙?,
+        "鍑犲唴浜?,
+        "鍠€楹﹂殕",
+        "鍒╂瘮浜?,
+        "姣涢噷濉斿凹浜?,
+        "绐佸凹鏂?
+      ],
+      "continents": [
+        "闈炴床"
+      ],
+      "subBuckets": [
+        "闈炴床路娆℃拻鍝堟媺锛堢矖鍒嗭級"
+      ],
+      "sampleUrl": "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600"
+    },
+    {
+      "photoId": "1540202404",
+      "photoSlug": "1540202404-a2f29016b523",
+      "count": 6,
+      "countries": [
+        "鍐堟瘮浜?,
+        "鍚夊竷鎻?,
+        "绉戞懇缃?,
+        "姣涢噷姹傛柉",
+        "濉炶垖灏?,
+        "鏂▉澹叞"
+      ],
+      "continents": [
+        "闈炴床"
+      ],
+      "subBuckets": [
+        "闈炴床路娆℃拻鍝堟媺锛堢矖鍒嗭級"
+      ],
+      "sampleUrl": "https://images.unsplash.com/photo-1540202404-a2f29016b523?w=600"
+    },
+    {
+      "photoId": "1516426122078",
+      "photoSlug": "1516426122078-c23e763fe01b",
+      "count": 5,
+      "countries": [
+        "鍒氭灉锛堥噾锛?,
+        "椹揪鍔犳柉鍔?,
+        "绾崇背姣斾簹",
+        "濉炴媺鍒╂槀",
+        "涓潪"
+      ],
+      "continents": [
+        "闈炴床"
+      ],
+      "subBuckets": [
+        "闈炴床路娆℃拻鍝堟媺锛堢矖鍒嗭級"
+      ],
+      "sampleUrl": "https://images.unsplash.com/photo-1516426122078-c23e763fe01b?w=600"
+    },
+    {
+      "photoId": "1523805009345",
+      "photoSlug": "1523805009345-7448847a17a4",
+      "count": 5,
+      "countries": [
+        "澶氬摜",
+        "绉戠壒杩摝",
+        "鑾辩储鎵?,
+        "鍒╂瘮閲屼簹",
+        "涔屽共杈?
+      ],
+      "continents": [
+        "闈炴床"
+      ],
+      "subBuckets": [
+        "闈炴床路娆℃拻鍝堟媺锛堢矖鍒嗭級"
+      ],
+      "sampleUrl": "https://images.unsplash.com/photo-1523805009345-7448847a17a4?w=600"
+    },
+    {
+      "photoId": "1508009603885",
+      "photoSlug": "1508009603885-50cf7c579365",
+      "count": 4,
+      "countries": [
+        "鍒氭灉锛堝竷锛?,
+        "鍗㈡椇杈?,
+        "濉炲唴鍔犲皵",
+        "绱㈤┈閲?
+      ],
+      "continents": [
+        "闈炴床"
+      ],
+      "subBuckets": [
+        "闈炴床路娆℃拻鍝堟媺锛堢矖鍒嗭級"
+      ],
+      "sampleUrl": "https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=600"
+    },
+    {
+      "photoId": "1472214103451",
+      "photoSlug": "1472214103451-9374bd1c798e",
+      "count": 4,
+      "countries": [
+        "鍩冨淇勬瘮浜?,
+        "瀹夊摜鎷?,
+        "璐濆畞",
+        "鍔犵撼"
+      ],
+      "continents": [
+        "闈炴床"
+      ],
+      "subBuckets": [
+        "闈炴床路娆℃拻鍝堟媺锛堢矖鍒嗭級"
+      ],
+      "sampleUrl": "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=600"
+    },
+    {
+      "photoId": "1509316785289",
+      "photoSlug": "1509316785289-025f5b846b35",
+      "count": 4,
+      "countries": [
+        "璧ら亾鍑犲唴浜?,
+        "鍔犺摤",
+        "灏兼棩鍒╀簹",
+        "璧炴瘮浜?
+      ],
+      "continents": [
+        "闈炴床"
+      ],
+      "subBuckets": [
+        "闈炴床路娆℃拻鍝堟媺锛堢矖鍒嗭級"
+      ],
+      "sampleUrl": "https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=600"
+    },
+    {
+      "photoId": "1444703686981",
+      "photoSlug": "1444703686981-a3abbc4d4fe3",
+      "count": 4,
+      "countries": [
+        "甯冨熀绾虫硶绱?,
+        "椹噷",
+        "鍗楄嫃涓?,
+        "灏兼棩灏?
+      ],
+      "continents": [
+        "闈炴床"
+      ],
+      "subBuckets": [
+        "闈炴床路娆℃拻鍝堟媺锛堢矖鍒嗭級"
+      ],
+      "sampleUrl": "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=600"
+    },
+    {
+      "photoId": "1516026672322",
+      "photoSlug": "1516026672322-bc52d61a55d5",
+      "count": 2,
+      "countries": [
+        "鑲凹浜?,
+        "鍧︽灏间簹"
+      ],
+      "continents": [
+        "闈炴床"
+      ],
+      "subBuckets": [
+        "闈炴床路娆℃拻鍝堟媺锛堢矖鍒嗭級"
+      ],
+      "sampleUrl": "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600"
+    }
+  ]
+}

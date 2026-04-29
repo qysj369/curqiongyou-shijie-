@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import Breadcrumbs from '../components/Breadcrumbs'
+import CopyPageLinkButton from '../components/CopyPageLinkButton'
 
 export default function About() {
   const { t } = useTranslation()
   const breadcrumbs = [
-    { label: t('common.home'), to: '/' },
+    { label: t('common.navMap'), to: '/map' },
     { label: t('about.title') },
   ]
 
@@ -13,19 +14,110 @@ export default function About() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="max-w-2xl mx-auto px-4 py-8">
         <Breadcrumbs items={breadcrumbs} />
-        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6">{t('about.title')}</h1>
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">{t('about.title')}</h1>
+          <CopyPageLinkButton />
+        </div>
 
         <section className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 mb-6">
           <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-3">{t('about.introTitle')}</h2>
-          <p className="text-slate-600 dark:text-slate-300 leading-relaxed">{t('about.introBody')}</p>
+          <p className="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+            {t('about.introBody')}
+          </p>
         </section>
 
-        <section className="bg-amber-50 rounded-2xl border border-amber-200 p-6 mb-6">
-          <h2 className="text-xl font-semibold text-amber-800 mb-3">{t('about.guidelinesTitle')}</h2>
-          <p className="text-amber-800 leading-relaxed whitespace-pre-line">{t('about.guidelinesBody')}</p>
+        <section
+          id="light-roam-brief"
+          className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 mb-6"
+          aria-labelledby="light-roam-heading"
+        >
+          <h2 id="light-roam-heading" className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
+            {t('about.lightRoamTitle')}
+          </h2>
+          <ul className="space-y-2.5 text-sm text-slate-700 dark:text-slate-300 leading-relaxed list-none p-0 m-0">
+            <li className="border-l-2 border-sky-400/80 pl-3">{t('about.lightRoamPhilosophy')}</li>
+            <li className="border-l-2 border-sky-400/80 pl-3">{t('about.lightRoamSloganWallet')}</li>
+            <li className="border-l-2 border-sky-400/80 pl-3">{t('about.lightRoamPositioning')}</li>
+            <li className="border-l-2 border-sky-400/80 pl-3">{t('about.lightRoamValues')}</li>
+          </ul>
+          <details className="mt-5 rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2 text-sm text-slate-600 dark:text-slate-400">
+            <summary className="cursor-pointer font-medium text-slate-800 dark:text-slate-200 select-none">
+              {t('about.roadmapDetailsSummary')}
+            </summary>
+            <p className="mt-3 leading-relaxed">{t('home.roadmapLead')}</p>
+            <ul className="mt-2 space-y-2 list-disc pl-5 marker:text-sky-500 text-slate-700 dark:text-slate-300">
+              <li>{t('home.roadmapMap')}</li>
+              <li>{t('home.roadmapItinerary')}</li>
+              <li>{t('home.roadmapHonest')}</li>
+              <li>{t('about.roadmapSwipeNote')}</li>
+            </ul>
+          </details>
+        </section>
+
+        <section
+          id="business-model"
+          className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 mb-6"
+          aria-labelledby="business-model-heading"
+        >
+          <h2 id="business-model-heading" className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-3">
+            {t('about.businessModelTitle')}
+          </h2>
+          <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed mb-4">{t('about.businessModelPhilosophy')}</p>
+          <ul className="space-y-2.5 text-sm text-slate-700 dark:text-slate-300 leading-relaxed list-none p-0 m-0">
+            <li className="border-l-2 border-emerald-500/80 pl-3">{t('about.businessModelMembership')}</li>
+            <li className="border-l-2 border-emerald-500/80 pl-3">{t('about.businessModelAffiliate')}</li>
+            <li className="border-l-2 border-emerald-500/80 pl-3">{t('about.businessModelMerch')}</li>
+          </ul>
+        </section>
+
+        <section
+          className="bg-slate-100 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 mb-6"
+          aria-labelledby="media-disclaimer-heading"
+        >
+          <h2 id="media-disclaimer-heading" className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">
+            {t('about.mediaDisclaimerTitle')}
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{t('about.mediaDisclaimerBody')}</p>
+        </section>
+
+        <section
+          id="mission-pillars"
+          className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 mb-6"
+          aria-labelledby="mission-pillars-heading"
+        >
+          <h2 id="mission-pillars-heading" className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">
+            {t('about.pillarsSectionTitle')}
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-5">{t('about.pillarsIntro')}</p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[
+              ['pillarBudgetTitle', 'pillarBudgetBody'],
+              ['pillarFunTitle', 'pillarFunBody'],
+              ['pillarSafeTitle', 'pillarSafeBody'],
+              ['pillarQuickTitle', 'pillarQuickBody'],
+              ['pillarHealthTitle', 'pillarHealthBody'],
+            ].map(([titleKey, bodyKey]) => (
+              <div
+                key={titleKey}
+                className="rounded-xl border border-slate-200 dark:border-slate-600 p-4 flex flex-col"
+              >
+                <p className="text-slate-800 dark:text-slate-100 font-semibold text-sm">
+                  {t(`home.${titleKey}`)}
+                </p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mt-2 leading-relaxed flex-1">
+                  {t(`home.${bodyKey}`)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="bg-sky-50 rounded-2xl border border-sky-200 p-6 mb-6">
+          <h2 className="text-xl font-semibold text-sky-800 mb-3">{t('about.guidelinesTitle')}</h2>
+          <p className="text-sky-800 leading-relaxed whitespace-pre-line">{t('about.guidelinesBody')}</p>
           <Link
             to="/board"
-            className="inline-block mt-4 px-4 py-2 rounded-lg bg-amber-500 text-white font-medium hover:bg-amber-600 transition text-sm"
+            className="inline-block mt-4 px-4 py-2 rounded-lg bg-sky-600 text-white font-medium hover:bg-sky-700 transition text-sm"
           >
             {t('about.goToBoard')}
           </Link>
@@ -117,8 +209,8 @@ export default function About() {
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 p-5">
-            <h3 className="font-semibold text-amber-800 mb-2">{t('about.playbookFinalTitle')}</h3>
+          <div className="mt-6 rounded-2xl bg-gradient-to-r from-sky-50 to-emerald-50 border border-sky-200 p-5">
+            <h3 className="font-semibold text-sky-800 mb-2">{t('about.playbookFinalTitle')}</h3>
             <p className="text-slate-900 font-bold text-lg">{t('home.sloganPrimaryEn')}</p>
             <p className="text-slate-700 mb-2">{t('home.sloganPrimaryZh')}</p>
             <p className="text-sm text-slate-700 leading-relaxed">{t('about.playbookFinalBlurb')}</p>
@@ -126,9 +218,9 @@ export default function About() {
         </section>
 
         <p className="text-slate-500 text-sm text-center">
-          <Link to="/" className="text-amber-600 hover:underline">{t('common.home')}</Link>
+          <Link to="/map" className="text-sky-700 hover:underline">{t('common.home')}</Link>
           {' · '}
-          <Link to="/board" className="text-amber-600 hover:underline">{t('common.board')}</Link>
+          <Link to="/board" className="text-sky-700 hover:underline">{t('common.board')}</Link>
         </p>
       </div>
     </div>

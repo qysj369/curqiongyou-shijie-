@@ -3,8 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { destinations } from '../data/mockData'
 import CommunityGuidelines from '../components/CommunityGuidelines'
 import Breadcrumbs from '../components/Breadcrumbs'
+import CopyPageLinkButton from '../components/CopyPageLinkButton'
 import { useToast } from '../contexts/ToastContext'
 import { containsProfanity } from '../utils/profanityFilter'
+import { formatDateTime } from '../utils/localeFormat'
+import { getBoardCountryOptionsFromDestinations } from '../utils/destinationFormOptions'
 
 const STORAGE_POSTS = 'budget-travel-board-posts'
 const STORAGE_LIKES = 'budget-travel-board-likes'
@@ -49,7 +52,7 @@ function saveLikes(likes) {
 }
 
 export default function MessageBoard() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { toast } = useToast()
   const [posts, setPosts] = useState(loadPosts)
   const [likes, setLikes] = useState(loadLikes)
@@ -59,15 +62,21 @@ export default function MessageBoard() {
   const [formType, setFormType] = useState('share')
   const [formContent, setFormContent] = useState('')
 
-  const countryList = useMemo(
-    () => [...new Set(destinations.map((d) => d.country).filter(Boolean))].sort(),
-    [],
-  )
+  const countryList = useMemo(() => getBoardCountryOptionsFromDestinations(destinations), [])
 
   useEffect(() => {
     setPosts(loadPosts())
     setLikes(loadLikes())
   }, [])
+
+  /** 下拉选项收紧后，去掉仍指向已移除项（如历史选了南极洲）的筛选与表单值 */
+  useEffect(() => {
+    if (countryFilter && !countryList.includes(countryFilter)) setCountryFilter('')
+  }, [countryList, countryFilter])
+
+  useEffect(() => {
+    if (formCountry && !countryList.includes(formCountry)) setFormCountry('')
+  }, [countryList, formCountry])
 
   const filteredPosts = useMemo(() => {
     let list = [...posts].sort((a, b) => new Date(b.at) - new Date(a.at))
@@ -123,14 +132,17 @@ export default function MessageBoard() {
 
 
   const breadcrumbs = [
-    { label: t('common.home'), to: '/' },
+    { label: t('common.navMap'), to: '/map' },
     { label: t('board.title') },
   ]
 
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <Breadcrumbs items={breadcrumbs} />
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <Breadcrumbs items={breadcrumbs} />
+          <CopyPageLinkButton />
+        </div>
         <h1 className="text-3xl font-bold text-slate-800 mb-2">{t('board.title')}</h1>
         <p className="text-slate-600 mb-6">{t('board.subtitle')}</p>
 
@@ -140,13 +152,14 @@ export default function MessageBoard() {
           <h2 className="text-lg font-semibold text-slate-800 mb-4">{t('board.postNew')}</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">
+              <label htmlFor="board-form-country" className="block text-sm font-medium text-slate-600 mb-1">
                 {t('board.countryOptional')}
               </label>
               <select
+                id="board-form-country"
                 value={formCountry}
                 onChange={(e) => setFormCountry(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
               >
                 <option value="">{t('board.countryNone')}</option>
                 {countryList.map((c) => (
@@ -167,7 +180,7 @@ export default function MessageBoard() {
                       value={opt.value}
                       checked={formType === opt.value}
                       onChange={() => setFormType(opt.value)}
-                      className="text-amber-500 focus:ring-amber-400"
+                      className="text-sky-600 focus:ring-sky-400"
                     />
                     <span className="text-sm text-slate-700">{t(opt.labelKey)}</span>
                   </label>
@@ -175,22 +188,23 @@ export default function MessageBoard() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">
+              <label htmlFor="board-form-content" className="block text-sm font-medium text-slate-600 mb-1">
                 {t('board.content')}
               </label>
               <textarea
+                id="board-form-content"
                 value={formContent}
                 onChange={(e) => setFormContent(e.target.value)}
                 placeholder={t('board.contentPlaceholder')}
                 rows={3}
                 maxLength={500}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 placeholder-slate-400 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 resize-y"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:border-sky-400 resize-y"
               />
               <p className="text-xs text-slate-400 mt-1">{formContent.length}/500</p>
             </div>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-lg bg-amber-500 text-white font-medium hover:bg-amber-600 transition"
+              className="px-5 py-2.5 rounded-lg bg-sky-600 text-white font-medium hover:bg-sky-700 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2"
             >
               {t('board.submit')}
             </button>
@@ -200,6 +214,8 @@ export default function MessageBoard() {
         <div className="flex flex-wrap gap-2 mb-4">
           <span className="text-slate-600 text-sm font-medium">{t('board.filterBy')}</span>
           <select
+            id="board-filter-country"
+            aria-label={t('board.ariaFilterCountry')}
             value={countryFilter}
             onChange={(e) => setCountryFilter(e.target.value)}
             className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-sm"
@@ -210,6 +226,8 @@ export default function MessageBoard() {
             ))}
           </select>
           <select
+            id="board-filter-type"
+            aria-label={t('board.ariaFilterType')}
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
             className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-sm"
@@ -236,10 +254,10 @@ export default function MessageBoard() {
                       {post.country && (
                         <span className="px-2 py-0.5 bg-slate-100 rounded">{post.country}</span>
                       )}
-                      <span className="text-amber-600 font-medium">
+                      <span className="text-sky-700 font-medium">
                         {t(`board.type${post.type === 'share' ? 'Share' : post.type === 'complaint' ? 'Complaint' : 'Other'}`)}
                       </span>
-                      <span>{new Date(post.at).toLocaleString()}</span>
+                      <span>{formatDateTime(post.at, i18n.language)}</span>
                     </div>
                     <p className="text-slate-800 whitespace-pre-wrap">{post.content}</p>
                   </div>
@@ -248,8 +266,8 @@ export default function MessageBoard() {
                     onClick={() => handleLike(post.id)}
                     className={`flex-shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium transition ${
                       likes[post.id]
-                        ? 'bg-rose-100 text-rose-600'
-                        : 'bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-500'
+                        ? 'bg-sky-100 text-sky-700'
+                        : 'bg-slate-100 text-slate-600 hover:bg-sky-50 hover:text-sky-700'
                     }`}
                     title={t('board.like')}
                   >

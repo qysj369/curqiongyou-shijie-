@@ -74,7 +74,7 @@ export default function ArticleMediaSection({
                     key={src + i}
                     type="button"
                     onClick={() => setIndex(i)}
-                    className={`shrink-0 rounded-lg overflow-hidden ring-2 transition ${i === index ? 'ring-amber-400' : 'ring-transparent opacity-70 hover:opacity-100'}`}
+                    className={`shrink-0 rounded-lg overflow-hidden ring-2 transition ${i === index ? 'ring-sky-400' : 'ring-transparent opacity-70 hover:opacity-100'}`}
                     aria-label={t('media.thumbAlt', { n: i + 1 })}
                   >
                     <OptimizedImage src={src} alt="" w={160} h={90} q={70} className="h-14 w-24 object-cover" />

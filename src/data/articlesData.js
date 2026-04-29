@@ -1,4 +1,8 @@
-export const articles = [
+import { augmentArticlesToMinPerDestination, DESTINATION_NAMES } from './budgetRouteGenerator.js'
+import { HOT_DESTINATION_ARTICLE_MIN, HOT_DESTINATION_NAMES } from './hotDestinations.js'
+import { vietnamArticlesBulk } from './articlesVietnamBulk.js'
+
+const articlesCore = [
   {
     id: 'a1',
     title: '曼谷+清迈7日穷游攻略：人均3000玩到爽',
@@ -17,7 +21,7 @@ export const articles = [
       'https://images.unsplash.com/photo-1528181304800-259b08848526?w=1200',
     ],
     videoYoutubeId: '',
-    videoMp4: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+    videoMp4: '',
   },
   {
     id: 'a2',
@@ -33,7 +37,7 @@ export const articles = [
     tags: ['火车', '海岸线', '咖啡'],
     gallery: [
       'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=1200',
-      'https://images.unsplash.com/photo-1584118624014-d89a2c218c60?w=1200',
+      'https://images.unsplash.com/photo-1528127269322-539801943592?w=1200',
     ],
     videoYoutubeId: '',
     videoMp4: '',
@@ -56,7 +60,7 @@ export const articles = [
       'https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?w=1200',
     ],
     videoYoutubeId: '',
-    videoMp4: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+    videoMp4: '',
   },
   {
     id: 'a4',
@@ -73,7 +77,7 @@ export const articles = [
   },
   {
     id: 'a5',
-    title: '美国西海岸15天穷游：洛杉矶-旧金山-一号公路',
+    title: '美国西海岸15天：好莱坞+金门大桥+一号公路（洛杉矶-旧金山段）',
     cover: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=600',
     author: '公路旅行',
     date: '2025-02-01',
@@ -86,7 +90,7 @@ export const articles = [
   },
   {
     id: 'a6',
-    title: '西班牙8日：巴塞罗那+马德里+安达卢西亚',
+    title: '西班牙8日：巴塞罗那圣家堂+马德里+安达卢西亚',
     cover: 'https://images.unsplash.com/photo-1543785734-4b6e564642f8?w=600',
     author: '欧洲穷游',
     date: '2025-01-20',
@@ -152,7 +156,7 @@ export const articles = [
   {
     id: 'a11',
     title: '冰岛环岛7日：极光与冰川',
-    cover: 'https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=600',
+    cover: 'https://images.unsplash.com/photo-1476610182048-b716b8518aae?w=600',
     author: '极光控',
     date: '2025-01-08',
     destination: '冰岛',
@@ -216,7 +220,7 @@ export const articles = [
   },
   {
     id: 'a16',
-    title: '法国10日：巴黎深度+卢瓦尔城堡+圣米歇尔山',
+    title: '法国10日：巴黎·埃菲尔铁塔+卢浮宫+卢瓦尔城堡+圣米歇尔山',
     cover: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600',
     author: '欧陆背包客',
     date: '2025-03-01',
@@ -242,7 +246,7 @@ export const articles = [
   },
   {
     id: 'a18',
-    title: '英国9日：伦敦博物馆+剑桥一日+爱丁堡古城',
+    title: '英国9日：伦敦大英博物馆+塔桥+剑桥一日+爱丁堡古城',
     cover: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600',
     author: '英伦慢行',
     date: '2025-03-08',
@@ -255,8 +259,8 @@ export const articles = [
   },
   {
     id: 'a19',
-    title: '意大利11日：罗马佛罗伦萨威尼斯经典三角',
-    cover: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=600',
+    title: '意大利11日：罗马斗兽场+佛罗伦萨威尼斯经典三角',
+    cover: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600',
     author: '文艺复兴迷',
     date: '2025-03-12',
     destination: '意大利',
@@ -308,7 +312,7 @@ export const articles = [
   {
     id: 'a23',
     title: '土耳其11日：伊斯坦布尔双洲+卡帕热气球+棉花堡',
-    cover: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=600',
+    cover: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=600',
     author: '丝路行者',
     date: '2025-03-22',
     destination: '土耳其',
@@ -360,7 +364,7 @@ export const articles = [
   {
     id: 'a27',
     title: '希腊9日：雅典卫城+圣托里尼蓝白小镇+米克诺斯',
-    cover: 'https://images.unsplash.com/photo-1533105077500-1b7a6ea907da?w=600',
+    cover: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=600',
     author: '爱琴海日落',
     date: '2024-03-01',
     updatedAt: '2026-03-20',
@@ -517,7 +521,7 @@ export const articles = [
   {
     id: 'a39',
     title: '智利10日：圣地亚哥+瓦尔帕莱索彩色港+阿塔卡马星空沙漠',
-    cover: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600',
+    cover: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600',
     author: '安第斯之风',
     date: '2025-05-06',
     destination: '智利',
@@ -569,7 +573,7 @@ export const articles = [
   {
     id: 'a43',
     title: '约旦8日：安曼城堡山+佩特拉古城+瓦迪拉姆火星营地+死海漂浮',
-    cover: 'https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=600',
+    cover: 'https://images.unsplash.com/photo-1512632579908-17e19e3d2b3e?w=600',
     author: '玫瑰红城',
     date: '2025-05-15',
     destination: '约旦',
@@ -582,7 +586,7 @@ export const articles = [
   {
     id: 'a44',
     title: '突尼斯7日：迦太基遗址+蓝白小镇西迪布赛义德+苏塞麦地那',
-    cover: 'https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=600',
+    cover: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600',
     author: '地中海门户',
     date: '2025-05-18',
     destination: '突尼斯',
@@ -738,7 +742,7 @@ export const articles = [
   {
     id: 'a56',
     title: '冰岛10日：黄金圈+南岸瀑布黑沙滩+杰古沙龙冰河湖+斯奈山半岛精华环岛',
-    cover: 'https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=600',
+    cover: 'https://images.unsplash.com/photo-1476610182048-b716b8518aae?w=600',
     author: '极光与瀑布',
     date: '2025-06-20',
     destination: '冰岛',
@@ -751,7 +755,7 @@ export const articles = [
   {
     id: 'a57',
     title: '蒙古8日：乌兰巴托苏赫巴托广场+特勒吉国家公园草原+哈勒和林遗址一日',
-    cover: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600',
+    cover: 'https://images.unsplash.com/photo-1695554534096-71698cd028fc?w=600',
     author: '草原那达慕',
     date: '2025-06-22',
     destination: '蒙古',
@@ -764,7 +768,7 @@ export const articles = [
   {
     id: 'a58',
     title: '不丹7日：廷布大佛+帕罗河谷+虎穴寺徒步（政策与每日最低消费说明）',
-    cover: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600',
+    cover: 'https://images.unsplash.com/photo-1524492479098-5e0a4b2f52e0?w=600',
     author: '雷龙之国',
     date: '2025-06-25',
     destination: '不丹',
@@ -881,7 +885,7 @@ export const articles = [
   {
     id: 'a67',
     title: '阿曼8日：马斯喀特大清真寺+尼兹瓦古堡+瓦希巴沙漠星空+苏尔海龟滩（季）',
-    cover: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600',
+    cover: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600',
     author: '乳香之路',
     date: '2025-07-20',
     destination: '阿曼',
@@ -1141,7 +1145,7 @@ export const articles = [
   {
     id: 'a87',
     title: '越南富国岛5日：免签岛躺平+浮潜一日',
-    cover: 'https://images.unsplash.com/photo-1584118624014-d89a2c218c60?w=600',
+    cover: 'https://images.unsplash.com/photo-1528127269322-539801943592?w=600',
     author: '岛民日记',
     date: '2025-03-18',
     destination: '越南',
@@ -1154,7 +1158,7 @@ export const articles = [
   {
     id: 'a88',
     title: '日本九州福冈+熊本5日：拉面铁道与小城温泉',
-    cover: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600',
+    cover: 'https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?w=600',
     author: '铁道迷',
     date: '2025-03-20',
     destination: '日本',
@@ -1167,7 +1171,7 @@ export const articles = [
   {
     id: 'a89',
     title: '日本冲绳本岛7日：那霸出发包车/公交环岛',
-    cover: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600',
+    cover: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600',
     author: '琉球散步',
     date: '2025-03-22',
     destination: '日本',
@@ -1206,7 +1210,7 @@ export const articles = [
   {
     id: 'a92',
     title: '印度尼西亚日惹+布罗莫火山9日：古迹与火山日出',
-    cover: 'https://images.unsplash.com/photo-1559827260-dc66d43bef33?w=600',
+    cover: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600',
     author: '火山行',
     date: '2025-04-01',
     destination: '印度尼西亚',
@@ -1218,7 +1222,7 @@ export const articles = [
   },
   {
     id: 'a93',
-    title: '美国加州一号公路8日：旧金山出发分段公交/拼车',
+    title: '美国加州一号公路8日：旧金山金门大桥出发分段公交/拼车',
     cover: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=600',
     author: '公路向西',
     date: '2025-04-05',
@@ -1229,4 +1233,19 @@ export const articles = [
     views: 8900,
     tags: ['公路', '海岸', '公交'],
   },
+  ...vietnamArticlesBulk,
 ]
+
+const hotArticleOverrides = Object.fromEntries(
+  HOT_DESTINATION_NAMES.map((name) => [name, HOT_DESTINATION_ARTICLE_MIN]),
+)
+
+/** 每目的地至少 40 篇；热门国家/地区约 100 篇；中国国内线路多保持 180 篇 */
+export const articles = augmentArticlesToMinPerDestination(articlesCore, {
+  minPerDestination: 40,
+  minPerDestinationOverrides: {
+    ...hotArticleOverrides,
+    中国: 180,
+  },
+  destinationNames: DESTINATION_NAMES,
+})

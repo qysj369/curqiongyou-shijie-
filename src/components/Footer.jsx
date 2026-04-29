@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import SocialFollow from './SocialFollow'
+import BrandLogo from './BrandLogo'
 import { parseFriendlyLinks, getIcpFilingText } from '../utils/footerEnv'
 
 export default function Footer() {
@@ -11,13 +12,18 @@ export default function Footer() {
   return (
     <footer className="bg-slate-800 dark:bg-slate-950 text-slate-300 border-t border-slate-700/80 dark:border-slate-800 py-8 mt-auto">
       <div className="max-w-7xl mx-auto px-4">
-        <p className="text-amber-400 dark:text-amber-400/95 font-semibold mb-2 text-center">🌍 {t('common.siteName')}</p>
-        <p className="text-sm text-center text-slate-200 dark:text-slate-100 mb-1">
-          <span className="font-semibold text-amber-400/95">{t('home.sloganPrimaryEn')}</span>
+        <div className="mb-2 flex justify-center">
+          <BrandLogo variant="lockup" lockupOnDark size="sm" className="justify-center" />
+        </div>
+        <p className="mb-1 text-center text-sm font-semibold text-sky-300/95 dark:text-slate-100">
+          {t('home.heroSloganZh')}
         </p>
-        <p className="text-sm text-center text-slate-300 dark:text-slate-400 mb-2">{t('home.sloganPrimaryZh')}</p>
+        <p className="text-sm text-center text-slate-300 dark:text-slate-400 mb-2">{t('home.heroSloganEn')}</p>
         <p className="text-xs text-center text-slate-500 dark:text-slate-500 mb-4 max-w-xl mx-auto leading-relaxed">
           {t('footer.taglineSub')}
+        </p>
+        <p className="text-xs text-center text-slate-400 dark:text-slate-500 mb-4 max-w-md mx-auto">
+          {t('common.globalUxLine')}
         </p>
         <div className="mb-4">
           <SocialFollow />
@@ -25,61 +31,61 @@ export default function Footer() {
         <div className="flex flex-wrap justify-center gap-x-2 gap-y-2 text-sm mb-4">
           <Link
             to="/"
-            className="hover:text-amber-400 dark:hover:text-amber-300 transition px-2 py-2 min-h-11 inline-flex items-center rounded-lg"
+            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
           >
             {t('common.home')}
           </Link>
           <Link
-            to="/destinations"
-            className="hover:text-amber-400 dark:hover:text-amber-300 transition px-2 py-2 min-h-11 inline-flex items-center rounded-lg"
-          >
-            {t('common.destinations')}
-          </Link>
-          <Link
             to="/articles"
-            className="hover:text-amber-400 dark:hover:text-amber-300 transition px-2 py-2 min-h-11 inline-flex items-center rounded-lg"
+            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
           >
             {t('common.articles')}
           </Link>
           <Link
             to="/community"
-            className="hover:text-amber-400 dark:hover:text-amber-300 transition px-2 py-2 min-h-11 inline-flex items-center rounded-lg"
+            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
           >
             {t('common.community')}
           </Link>
           <Link
             to="/membership"
-            className="hover:text-amber-400 dark:hover:text-amber-300 transition px-2 py-2 min-h-11 inline-flex items-center rounded-lg"
+            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
           >
             {t('commerce.membership')}
           </Link>
           <Link
+            to="/about#business-model"
+            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
+          >
+            {t('common.navBusinessModel')}
+          </Link>
+          <Link
             to="/board"
-            className="hover:text-amber-400 dark:hover:text-amber-300 transition px-2 py-2 min-h-11 inline-flex items-center rounded-lg"
+            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
           >
             {t('footer.boardAndGuidelines')}
           </Link>
           <Link
             to="/about"
-            className="hover:text-amber-400 dark:hover:text-amber-300 transition px-2 py-2 min-h-11 inline-flex items-center rounded-lg"
+            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
           >
             {t('footer.about')}
           </Link>
           <Link
             to="/privacy"
-            className="hover:text-amber-400 dark:hover:text-amber-300 transition px-2 py-2 min-h-11 inline-flex items-center rounded-lg"
+            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
           >
             {t('footer.privacy')}
           </Link>
           <Link
             to="/terms"
-            className="hover:text-amber-400 dark:hover:text-amber-300 transition px-2 py-2 min-h-11 inline-flex items-center rounded-lg"
+            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
           >
             {t('footer.terms')}
           </Link>
           <Link
             to="/about#slogan-playbook"
-            className="inline-flex items-center gap-1 px-3 py-2 min-h-11 rounded-full bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 transition text-xs font-medium"
+            className="inline-flex min-h-11 items-center gap-1 rounded-full bg-sky-500/15 px-3 py-2 text-xs font-medium text-sky-300 transition hover:bg-sky-500/25"
           >
             <span aria-hidden>✨</span>
             {t('common.brand')}
@@ -96,7 +102,7 @@ export default function Footer() {
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-slate-300 hover:text-amber-400 dark:hover:text-amber-300 underline-offset-2 hover:underline min-h-11 inline-flex items-center"
+                    className="inline-flex min-h-11 items-center text-slate-300 underline-offset-2 hover:text-sky-300 hover:underline dark:hover:text-sky-200"
                   >
                     {item.label}
                   </a>
@@ -112,7 +118,7 @@ export default function Footer() {
               href="https://beian.miit.gov.cn/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-amber-400/90 underline-offset-2 hover:underline"
+              className="underline-offset-2 hover:text-sky-300/90 hover:underline"
             >
               {t('footer.icpPrefix')}
               {icp}

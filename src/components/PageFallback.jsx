@@ -11,7 +11,7 @@ export default function PageFallback() {
       aria-busy="true"
     >
       <div
-        className="w-11 h-11 border-[3px] border-amber-200 dark:border-slate-600 border-t-amber-600 dark:border-t-amber-500 rounded-full animate-spin mb-4"
+        className="w-11 h-11 border-[3px] border-sky-200 dark:border-slate-600 border-t-sky-600 dark:border-t-sky-500 rounded-full animate-spin mb-4"
         aria-hidden
       />
       <p className="text-slate-600 dark:text-slate-400 text-sm">{t('ui.pageLoading')}</p>

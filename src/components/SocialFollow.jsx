@@ -18,7 +18,7 @@ export default function SocialFollow({ className = '' }) {
 
   return (
     <div className={`text-center ${className}`}>
-      <p className="text-amber-400/90 text-sm font-medium mb-1">{t('social.followUs')}</p>
+      <p className="text-sky-300/90 text-sm font-medium mb-1">{t('social.followUs')}</p>
       <p className="text-slate-400 text-xs mb-2">{t('social.followUsDesc')}</p>
       <div className="flex flex-wrap justify-center gap-2">
         {socialLinkKeys.map((key) => {
@@ -30,7 +30,7 @@ export default function SocialFollow({ className = '' }) {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-700/80 text-slate-200 text-sm hover:bg-amber-500/20 hover:text-amber-300 transition"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-700/80 text-slate-200 text-sm hover:bg-sky-500/20 hover:text-sky-300 transition"
               aria-label={`${t('a11y.openInNewTab')}: ${LABELS[key] || key}`}
             >
               {LABELS[key] || key}

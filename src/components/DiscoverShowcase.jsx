@@ -9,7 +9,6 @@ export default function DiscoverShowcase({ className = '' }) {
 
   const tiles = [
     { to: '/articles', labelKey: 'discover.guides', descKey: 'discover.guidesDesc', emoji: '📚' },
-    { to: '/destinations', labelKey: 'discover.destinations', descKey: 'discover.destinationsDesc', emoji: '🌏' },
     { to: '/community/qa', labelKey: 'discover.qa', descKey: 'discover.qaDesc', emoji: '❓' },
     { to: '/community/buddies', labelKey: 'discover.buddies', descKey: 'discover.buddiesDesc', emoji: '👥' },
   ]
@@ -23,7 +22,7 @@ export default function DiscoverShowcase({ className = '' }) {
           <Link
             key={to}
             to={to}
-            className="flex flex-col items-start text-left p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-600 hover:shadow-md transition"
+            className="flex flex-col items-start text-left p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-sky-300 dark:hover:border-sky-600 motion-safe:hover:shadow-md motion-safe:transition"
           >
             <span className="text-2xl mb-2" aria-hidden>
               {emoji}

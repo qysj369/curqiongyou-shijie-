@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import Breadcrumbs from '../components/Breadcrumbs'
+import CopyPageLinkButton from '../components/CopyPageLinkButton'
 
 const UPDATED = '2026-04-10'
 
@@ -14,8 +15,11 @@ export default function LegalTerms() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <Breadcrumbs items={crumbs} />
-        <article className="mt-6 space-y-6 text-slate-700 dark:text-slate-300 leading-relaxed text-[15px] md:text-base">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <Breadcrumbs items={crumbs} />
+          <CopyPageLinkButton />
+        </div>
+        <article className="space-y-6 text-slate-700 dark:text-slate-300 leading-relaxed text-[15px] md:text-base">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">{t('legal.termsTitle')}</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">{t('legal.lastUpdated', { date: UPDATED })}</p>
           <p>{t('legal.termsLead')}</p>
@@ -53,7 +57,7 @@ export default function LegalTerms() {
         <p className="mt-10">
           <Link
             to="/"
-            className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 underline underline-offset-2 min-h-11 inline-flex items-center"
+            className="text-sky-700 dark:text-sky-300 hover:text-sky-800 dark:hover:text-sky-200 underline underline-offset-2 min-h-11 inline-flex items-center"
           >
             {t('legal.backHome')}
           </Link>

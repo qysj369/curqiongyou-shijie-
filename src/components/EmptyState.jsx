@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 
 const actionBtnClass =
-  'inline-flex min-h-11 min-w-[7rem] items-center justify-center px-5 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500'
+  'inline-flex min-h-11 min-w-[7rem] items-center justify-center px-5 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500'
 
 /**
  * 列表/区块无数据时的友好空状态

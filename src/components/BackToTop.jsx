@@ -21,7 +21,7 @@ export default function BackToTop() {
     <button
       type="button"
       onClick={scrollToTop}
-      className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-amber-500 text-white shadow-lg hover:bg-amber-600 transition focus:outline-none focus:ring-2 focus:ring-amber-400"
+      className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-sky-600 text-white shadow-lg hover:bg-sky-700 transition focus:outline-none focus:ring-2 focus:ring-sky-400"
       title={t('a11y.backToTop')}
       aria-label={t('a11y.backToTop')}
     >

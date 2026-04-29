@@ -17,10 +17,25 @@
   body {
     @apply bg-slate-50 text-slate-800 antialiased text-base;
     @apply dark:bg-slate-950 dark:text-slate-100;
+    font-feature-settings: 'tnum' 1, 'ss01' 1;
+    text-rendering: optimizeLegibility;
   }
   /* 键盘焦点可见，便于无障碍 */
   *:focus-visible {
-    @apply outline-2 outline-offset-2 outline-amber-500;
+    @apply outline-2 outline-offset-2 outline-sky-500;
+  }
+}
+
+@layer components {
+  .app-surface-card {
+    @apply rounded-2xl border border-slate-200/90 bg-white shadow-[0_2px_10px_rgba(2,6,23,0.06)];
+    @apply dark:border-slate-700 dark:bg-slate-900 dark:shadow-[0_2px_12px_rgba(0,0,0,0.25)];
+  }
+
+  .app-input {
+    @apply rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800;
+    @apply dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100;
+    @apply focus:outline-none focus:ring-2 focus:ring-sky-400;
   }
 }
 
@@ -40,6 +55,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   .animate-spin {
     animation-duration: 1.5s;
   }

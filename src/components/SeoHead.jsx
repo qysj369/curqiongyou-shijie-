@@ -44,8 +44,38 @@ function removeOgImages() {
   removeMeta('name', 'twitter:image')
 }
 
+function removeSeoHreflangLinks() {
+  document.head.querySelectorAll('link[data-roamwise-hreflang]').forEach((el) => el.remove())
+}
+
+function upsertHreflang(hreflang, href) {
+  const el = document.createElement('link')
+  el.setAttribute('rel', 'alternate')
+  el.setAttribute('hreflang', hreflang)
+  el.setAttribute('href', href)
+  el.setAttribute('data-roamwise-hreflang', '1')
+  document.head.appendChild(el)
+}
+
+function removeOgLocaleAlternates() {
+  document.head
+    .querySelectorAll('meta[property="og:locale:alternate"]')
+    .forEach((el) => el.remove())
+}
+
+function appendOgLocaleAlternate(locale) {
+  const el = document.createElement('meta')
+  el.setAttribute('property', 'og:locale:alternate')
+  el.setAttribute('content', locale)
+  document.head.appendChild(el)
+}
+
 /** 各列表/静态路由独立 description，避免全站重复 meta description */
 const ROUTE_DESC_KEYS = [
+  [/^\/map\/?$/, 'seo.descHome'],
+  [/^\/routes\/?$/, 'seo.descArticles'],
+  [/^\/budget\/?$/, 'seo.descBudgetCalculator'],
+  [/^\/me\/?$/, 'seo.descFavorites'],
   [/^\/community\/qa\/?$/, 'seo.descCommunityQA'],
   [/^\/community\/buddies/, 'seo.descCommunityBuddies'],
   [/^\/community\/?$/, 'seo.descCommunity'],
@@ -54,6 +84,7 @@ const ROUTE_DESC_KEYS = [
   [/^\/favorites/, 'seo.descFavorites'],
   [/^\/board/, 'seo.descBoard'],
   [/^\/membership/, 'seo.descMembership'],
+  [/^\/budget-calculator\/?$/, 'seo.descBudgetCalculator'],
   [/^\/about/, 'seo.descAbout'],
   [/^\/privacy\/?$/, 'seo.descPrivacy'],
   [/^\/terms\/?$/, 'seo.descTerms'],
@@ -64,7 +95,7 @@ function resolveRouteDescription(pathname, t) {
   for (const [re, key] of ROUTE_DESC_KEYS) {
     if (re.test(pathname)) return t(key)
   }
-  if (/^\/articles\/[^/]+\/?$/.test(pathname)) return t('seo.descArticleDetail')
+  if (/^\/(?:articles|routes)\/[^/]+\/?$/.test(pathname)) return t('seo.descArticleDetail')
   if (/^\/destinations\/[^/]+\/?$/.test(pathname)) return t('seo.descDestinationDetail')
   if (/^\/community\/qa\/[^/]+\/?$/.test(pathname)) return t('seo.descCommunityQADetail')
   return t('seo.descFallback')
@@ -72,6 +103,10 @@ function resolveRouteDescription(pathname, t) {
 
 /** 仅列表/静态页；详情页由 `useSeoOverride` 提供标题。顺序：先匹配更具体的路径。 */
 const ROUTE_TITLE_KEYS = [
+  [/^\/map\/?$/, 'common.navMap'],
+  [/^\/routes\/?$/, 'common.navRoutes'],
+  [/^\/budget\/?$/, 'common.navBudget'],
+  [/^\/me\/?$/, 'common.navMe'],
   [/^\/community\/qa\/?$/, 'community.qa'],
   [/^\/community\/buddies/, 'community.buddies'],
   [/^\/community\/?$/, 'community.title'],
@@ -80,6 +115,7 @@ const ROUTE_TITLE_KEYS = [
   [/^\/favorites/, 'common.favorites'],
   [/^\/board/, 'common.board'],
   [/^\/membership/, 'commerce.membership'],
+  [/^\/budget-calculator\/?$/, 'common.navBudgetCalculator'],
   [/^\/about/, 'footer.about'],
   [/^\/privacy\/?$/, 'legal.privacyTitle'],
   [/^\/terms\/?$/, 'legal.termsTitle'],
@@ -94,7 +130,7 @@ function resolveRouteTitleKey(pathname) {
 }
 
 function fallbackDetailListTitle(pathname, t) {
-  if (/^\/articles\/[^/]+\/?$/.test(pathname)) {
+  if (/^\/(?:articles|routes)\/[^/]+\/?$/.test(pathname)) {
     return t('seo.pageTitleTemplate', {
       page: t('common.articles'),
       site: t('common.siteName'),
@@ -145,7 +181,7 @@ export default function SeoHead() {
     ? toAbsoluteMediaUrl(override.image) || getDefaultOgImageUrl()
     : getDefaultOgImageUrl()
 
-  const ogType = /^\/articles\/[^/]+\/?$/.test(pathname) ? 'article' : 'website'
+  const ogType = /^\/(?:articles|routes)\/[^/]+\/?$/.test(pathname) ? 'article' : 'website'
 
   useEffect(() => {
     document.title = documentTitle
@@ -170,7 +206,16 @@ export default function SeoHead() {
     upsertMeta('name', 'twitter:card', 'summary_large_image')
     upsertMeta('name', 'twitter:title', documentTitle)
     upsertMeta('name', 'twitter:description', metaDescription)
-    upsertMeta('property', 'og:locale', i18n.language === 'zh-CN' ? 'zh_CN' : 'en_US')
+    const ogLocale = i18n.language === 'zh-CN' ? 'zh_CN' : 'en_US'
+    upsertMeta('property', 'og:locale', ogLocale)
+    removeOgLocaleAlternates()
+    removeSeoHreflangLinks()
+    if (canonicalHref) {
+      upsertHreflang('x-default', canonicalHref)
+      upsertHreflang('en', canonicalHref)
+      upsertHreflang('zh-CN', canonicalHref)
+      appendOgLocaleAlternate(ogLocale === 'zh_CN' ? 'en_US' : 'zh_CN')
+    }
   }, [documentTitle, metaDescription, canonicalHref, ogImageUrl, ogType, t, i18n.language])
 
   useEffect(() => {
@@ -182,6 +227,7 @@ export default function SeoHead() {
       name: t('common.siteName'),
       alternateName: t('common.brandTagline'),
       description: t('seo.description'),
+      inLanguage: ['en-US', 'zh-CN'],
     }
     const siteUrl = absolutePageUrl('/')
     if (siteUrl) base.url = siteUrl

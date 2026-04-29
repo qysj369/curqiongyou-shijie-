@@ -25,14 +25,14 @@ function ErrorFallback({ onRetry }) {
   const { t } = useTranslation()
   return (
     <div className="min-h-[50vh] flex flex-col items-center justify-center px-4 py-12 bg-slate-50 dark:bg-slate-950">
-      <p className="text-amber-600 dark:text-amber-400 font-semibold mb-2">{t('errorBoundary.title')}</p>
+      <p className="text-sky-700 dark:text-sky-300 font-semibold mb-2">{t('errorBoundary.title')}</p>
       <p className="text-slate-600 dark:text-slate-400 text-sm text-center mb-6 max-w-sm">
         {t('errorBoundary.body')}
       </p>
       <div className="flex flex-wrap gap-3 justify-center">
         <Link
           to="/"
-          className="inline-flex min-h-11 items-center px-5 py-2.5 rounded-xl bg-amber-500 text-white font-medium hover:bg-amber-600"
+          className="inline-flex min-h-11 items-center px-5 py-2.5 rounded-xl bg-sky-600 text-white font-medium hover:bg-sky-700"
           aria-label={t('errorBoundary.home')}
         >
           {t('errorBoundary.home')}

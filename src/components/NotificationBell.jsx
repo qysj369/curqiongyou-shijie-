@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { listInbox, unreadCount, markRead, markAllRead } from '../data/notificationsStore'
+import { formatDateTime } from '../utils/localeFormat'
 
 export default function NotificationBell() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [open, setOpen] = useState(false)
   const [items, setItems] = useState([])
   const [count, setCount] = useState(0)
@@ -44,7 +45,7 @@ export default function NotificationBell() {
           🔔
         </span>
         {count > 0 ? (
-          <span className="absolute top-1 right-1 min-w-[1.125rem] h-4 px-1 rounded-full bg-amber-500 text-white text-[10px] font-bold leading-4 text-center">
+          <span className="absolute top-1 right-1 min-w-[1.125rem] h-4 px-1 rounded-full bg-sky-600 text-white text-[10px] font-bold leading-4 text-center">
             {count > 9 ? '9+' : count}
           </span>
         ) : null}
@@ -60,7 +61,7 @@ export default function NotificationBell() {
                   markAllRead()
                   refresh()
                 }}
-                className="text-xs text-amber-600 dark:text-amber-400 hover:underline min-h-8 px-1"
+                className="text-xs text-sky-700 dark:text-sky-300 hover:underline min-h-8 px-1"
                 aria-label={t('a11y.markAllNotificationsRead')}
               >
                 {t('notifications.markAllRead')}
@@ -84,7 +85,7 @@ export default function NotificationBell() {
                     <span className="font-medium text-slate-800 dark:text-slate-100 block">{n.title}</span>
                     {n.body ? <span className="text-slate-600 dark:text-slate-400 text-xs mt-0.5 block leading-snug">{n.body}</span> : null}
                     <span className="text-slate-400 text-[10px] mt-1 block">
-                      {n.at ? new Date(n.at).toLocaleString() : ''}
+                      {n.at ? formatDateTime(n.at, i18n.language) : ''}
                     </span>
                   </button>
                 </li>

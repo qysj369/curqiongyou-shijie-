@@ -13,23 +13,55 @@ import CommentSection from '../components/CommentSection'
 import UserGuideForm from '../components/UserGuideForm'
 import BudgetGuidePanel from '../components/BudgetGuidePanel'
 import ArticleMediaSection from '../components/ArticleMediaSection'
+import { resolveDestinationRouteVideo } from '../data/destinationRouteVideo'
 import EmptyState from '../components/EmptyState'
 import { useSeoOverride } from '../contexts/SeoOverrideContext'
 import { excerptForMeta } from '../utils/seoExcerpt'
 import { getLastUpdatedDay, isPossiblyOutdated } from '../utils/articleTimeliness'
+import { formatDate, formatInteger } from '../utils/localeFormat'
+import { formatGuideBudgetLine } from '../utils/budgetDisplay'
+import { useUsdApproxDisplay } from '../contexts/UsdApproxPreferenceContext'
 
 export default function ArticleDetail() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { id } = useParams()
   const { setOverride, clear } = useSeoOverride()
   const articleRef = useRef(null)
   const [userGuidesRefresh, setUserGuidesRefresh] = useState(0)
   const [detail, setDetail] = useState(null)
+  const { showUsdApprox } = useUsdApproxDisplay()
 
   const isUserGuide = id && id.startsWith('ug-')
   const userGuide = isUserGuide ? getUserGuideById(id) : null
   const article = isUserGuide ? null : articles.find(a => a.id === id)
   const dest = article ? destinations.find(d => d.name === article.destination) : (userGuide ? destinations.find(d => d.name === userGuide.destinationName) : null)
+
+  const routeVideo = useMemo(
+    () => (article ? resolveDestinationRouteVideo(article) : { videoYoutubeId: '', videoMp4: '' }),
+    [article],
+  )
+
+  const routeExecutionCards = useMemo(() => {
+    if (!article) return []
+    const daily = article.days > 0 ? Math.max(1, Math.round(article.budget / article.days)) : article.budget
+    return [
+      {
+        id: 'budget',
+        title: '预算控制 · Budget control',
+        body: `总预算 ¥${formatInteger(article.budget, i18n.language)}，按 ${formatInteger(article.days || 1, i18n.language)} 天拆分，建议日均控制在 ¥${formatInteger(daily, i18n.language)} 左右并预留 10%-15% 机动金。`,
+      },
+      {
+        id: 'route',
+        title: '动线效率 · Route flow',
+        body: '优先按“同片区聚合 + 少换住处”执行，跨城尽量提前锁交通。行程出现延误时先保留核心景点，再裁剪可替代点。',
+      },
+      {
+        id: 'risk',
+        title: '避坑提醒 · Risk checks',
+        body: '门票、营业时间、签证材料与季节风险在出发前 48 小时再复核一次；涉及夜间交通时，优先官方渠道和正规车辆。',
+      },
+    ]
+  }, [article, i18n.language])
 
   useEffect(() => {
     if (isUserGuide || !article?.id) {
@@ -51,12 +83,21 @@ export default function ArticleDetail() {
   }, [isUserGuide, article?.id])
   const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
   const shareTitle = (article || userGuide)?.title ?? ''
-  const shareText = article ? `${article.title} · ${article.destination} ¥${article.budget}` : (userGuide ? `${userGuide.title} · ${userGuide.destinationName} ¥${userGuide.budget}` : '')
-
+  const shareText = article
+    ? `${article.title} · ${article.destination} ¥${formatInteger(article.budget, i18n.language)}`
+    : (userGuide
+        ? `${userGuide.title} · ${userGuide.destinationName} ¥${formatInteger(userGuide.budget, i18n.language)}`
+        : '')
   useEffect(() => {
     if (article) {
       const raw = detail?.content || ''
-      const desc = excerptForMeta(raw, { stripMarkdown: true }) || t('seo.description')
+      const lead = t('seo.articleDetailMetaLead', {
+        destination: article.destination,
+        budget: formatInteger(article.budget, i18n.language),
+        days: formatInteger(article.days || 1, i18n.language),
+      })
+      const excerpt = excerptForMeta(raw, { stripMarkdown: true })
+      const desc = `${lead}${excerpt ? ` · ${excerpt}` : ''}`.slice(0, 160) || t('seo.description')
       setOverride({
         title: t('seo.pageTitleTemplate', { page: article.title, site: t('common.siteName') }),
         description: desc,
@@ -75,7 +116,7 @@ export default function ArticleDetail() {
     }
     clear()
     return () => clear()
-  }, [article, userGuide, detail, t, setOverride, clear])
+  }, [article, userGuide, detail, t, i18n.language, setOverride, clear])
 
   const related = useMemo(() => {
     if (!article) return []
@@ -98,14 +139,14 @@ export default function ArticleDetail() {
 
   const breadcrumbs = article
     ? [
-        { label: t('common.home'), to: '/' },
-        { label: t('common.articles'), to: '/articles' },
+        { label: t('common.navMap'), to: '/map' },
+        { label: t('common.navRoutes'), to: '/routes' },
         { label: article.title },
       ]
     : userGuide
       ? [
-          { label: t('common.home'), to: '/' },
-          { label: t('common.articles'), to: '/articles' },
+          { label: t('common.navMap'), to: '/map' },
+          { label: t('common.navRoutes'), to: '/routes' },
           { label: userGuide.title },
         ]
       : []
@@ -113,7 +154,7 @@ export default function ArticleDetail() {
   const jsonLd = useMemo(() => {
     if ((!article && !userGuide) || typeof window === 'undefined') return null
     const headline = article?.title || userGuide?.title
-    const desc = (detail?.content || userGuide?.content || '').slice(0, 200)
+    const desc = excerptForMeta(detail?.content || userGuide?.content || '', { stripMarkdown: true }).slice(0, 200)
     const image = article?.cover || userGuideDefaultCover
     const date = article?.date || userGuide?.createdAt?.slice(0, 10)
     const authorName = article?.author || userGuide?.author
@@ -124,10 +165,20 @@ export default function ArticleDetail() {
       description: desc,
       image,
       datePublished: date,
+      dateModified: date,
+      inLanguage: i18n.language === 'zh-CN' ? 'zh-CN' : 'en-US',
       author: { '@type': 'Person', name: authorName },
+      publisher: {
+        '@type': 'Organization',
+        name: t('common.siteName'),
+      },
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': window.location.href,
+      },
       url: window.location.href,
     }
-  }, [article, userGuide, detail])
+  }, [article, userGuide, detail, i18n.language, t])
 
   if (isUserGuide && !userGuide)
     return (
@@ -136,7 +187,7 @@ export default function ArticleDetail() {
           <EmptyState
             emoji="🔍"
             title={t('articleDetail.notFound')}
-            actionTo="/articles"
+            actionTo="/routes"
             actionLabel={t('articleDetail.backToList')}
           />
         </div>
@@ -149,11 +200,15 @@ export default function ArticleDetail() {
         <div className="max-w-3xl mx-auto px-4 py-8">
           <Breadcrumbs items={breadcrumbs} className="print:hidden" />
           <Link
-            to="/articles"
-            className="text-amber-600 dark:text-amber-400 hover:underline mb-4 min-h-11 inline-flex items-center print:hidden"
+            to="/routes"
+            className="text-sky-700 dark:text-sky-300 hover:underline mb-4 min-h-11 inline-flex items-center print:hidden"
           >
             {t('articleDetail.backToList')}
           </Link>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 print:hidden">
+            {t('common.fxDisclaimer')}{' '}
+            <span className="text-slate-400 dark:text-slate-500">({t('common.usdToggleLead')})</span>
+          </p>
           <div className="mb-4 print:hidden">
             <ShareBar articleRef={articleRef} shareUrl={shareUrl} shareTitle={shareTitle} shareText={shareText} />
           </div>
@@ -163,15 +218,15 @@ export default function ArticleDetail() {
           >
             <OptimizedImage src={userGuideDefaultCover} alt="" w={1200} h={675} q={75} className="w-full aspect-video object-cover" />
             <div className="p-6 md:p-8">
-              <span className="inline-block px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-xs font-medium mb-2">
+              <span className="mb-2 inline-block rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">
                 {t('userGuide.userBadge')}
               </span>
               {userGuide.status === 'pending' && (
                 <div
-                  className="mb-4 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 px-4 py-3 text-sm"
+                  className="mb-4 rounded-xl border border-sky-300 dark:border-sky-700 bg-sky-50 dark:bg-sky-950/40 px-4 py-3 text-sm"
                   role="status"
                 >
-                  <p className="font-semibold text-amber-900 dark:text-amber-200 flex flex-wrap items-center gap-2">
+                  <p className="flex flex-wrap items-center gap-2 font-semibold text-sky-900 dark:text-sky-200">
                     <span aria-hidden>⏳</span>
                     {t('governance.reviewPending')}
                   </p>
@@ -186,7 +241,13 @@ export default function ArticleDetail() {
                 {userGuide.budget > 0 && (
                   <>
                     <span>·</span>
-                    <span className="text-amber-600 dark:text-amber-400 font-semibold">¥{userGuide.budget}</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                      {formatGuideBudgetLine(userGuide.budget, {
+                        showUsdApprox,
+                        t,
+                        lng: i18n.language,
+                      })}
+                    </span>
                   </>
                 )}
                 <span>·</span>
@@ -194,13 +255,13 @@ export default function ArticleDetail() {
                 {dest && (
                   <>
                     <span>·</span>
-                    <Link to={`/destinations/${dest.id}`} className="text-teal-600 dark:text-teal-400 hover:underline">
+                    <Link to={`/routes?destination=${encodeURIComponent(dest.name)}`} className="text-sky-700 dark:text-sky-300 hover:underline">
                       {dest.name}
                     </Link>
                   </>
                 )}
                 <span>·</span>
-                <span>{userGuide.createdAt.slice(0, 10)}</span>
+                <span>{formatDate(userGuide.createdAt, i18n.language)}</span>
               </div>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
                 {t('governance.lastUpdated', {
@@ -209,16 +270,38 @@ export default function ArticleDetail() {
               </p>
               {isPossiblyOutdated({ date: userGuide.createdAt.slice(0, 10) }) && (
                 <div
-                  className="mt-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/90 dark:bg-amber-950/35 px-4 py-3"
+                  className="mt-3 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/90 dark:bg-sky-950/35 px-4 py-3"
                   role="status"
                 >
-                  <p className="font-semibold text-amber-800 dark:text-amber-300 text-sm">{t('governance.possiblyOutdated')}</p>
+                  <p className="text-sm font-semibold text-sky-800 dark:text-sky-300">{t('governance.possiblyOutdated')}</p>
                   <p className="text-slate-600 dark:text-slate-400 text-xs mt-1 leading-relaxed">{t('governance.outdatedHint')}</p>
                 </div>
               )}
               <div className="mt-4 print:hidden">
                 <BudgetGuidePanel destinationName={userGuide.destinationName} />
               </div>
+            <div className="mt-4 print:hidden rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/30 p-4">
+              <p className="text-sm font-semibold text-sky-800 dark:text-sky-300">路线疑问快速处理 · Route Q&A</p>
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                先按预算执行，再按社区最新反馈修正细节。 · Validate route details with recent traveler feedback.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {dest ? (
+                  <Link
+                    to={`/community/qa?destination=${encodeURIComponent(dest.name)}`}
+                    className="inline-flex min-h-10 items-center rounded-lg bg-sky-600 px-3 py-2 text-xs font-medium text-white hover:bg-sky-700 transition"
+                  >
+                    去社区提问 · Ask in Q&A
+                  </Link>
+                ) : null}
+                <Link
+                  to="/community/qa"
+                  className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition"
+                >
+                  浏览问答 · Browse Q&A
+                </Link>
+              </div>
+            </div>
               <div className="mt-6 max-w-none whitespace-pre-wrap text-slate-700 dark:text-slate-300 leading-relaxed">
                 {userGuide.content}
               </div>
@@ -236,7 +319,7 @@ export default function ArticleDetail() {
           <EmptyState
             emoji="🔍"
             title={t('articleDetail.notFound')}
-            actionTo="/articles"
+            actionTo="/routes"
             actionLabel={t('articleDetail.backToList')}
           />
         </div>
@@ -249,11 +332,15 @@ export default function ArticleDetail() {
       <div className="max-w-3xl mx-auto px-4 py-8">
         <Breadcrumbs items={breadcrumbs} className="print:hidden" />
         <Link
-          to="/articles"
-          className="text-amber-600 dark:text-amber-400 hover:underline mb-4 min-h-11 inline-flex items-center print:hidden"
+          to="/routes"
+          className="text-sky-700 dark:text-sky-300 hover:underline mb-4 min-h-11 inline-flex items-center print:hidden"
         >
           {t('articleDetail.backToList')}
         </Link>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 print:hidden">
+          {t('common.fxDisclaimer')}{' '}
+          <span className="text-slate-400 dark:text-slate-500">({t('common.usdToggleLead')})</span>
+        </p>
 
         <div className="mb-4 print:hidden">
           <ShareBar
@@ -280,13 +367,19 @@ export default function ArticleDetail() {
             <div className="flex flex-wrap gap-2 mt-3 text-slate-500 dark:text-slate-400 text-sm">
               <span>{t('articleDetail.days', { count: article.days })}</span>
               <span>·</span>
-              <span className="text-amber-600 dark:text-amber-400 font-semibold">¥{article.budget}</span>
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                {formatGuideBudgetLine(article.budget, {
+                  showUsdApprox,
+                  t,
+                  lng: i18n.language,
+                })}
+              </span>
               <span>·</span>
               <span>{article.author}</span>
               {dest && (
                 <>
                   <span>·</span>
-                  <Link to={`/destinations/${dest.id}`} className="text-teal-600 dark:text-teal-400 hover:underline">
+                  <Link to={`/routes?destination=${encodeURIComponent(dest.name)}`} className="text-sky-700 dark:text-sky-300 hover:underline">
                     {dest.name}
                   </Link>
                 </>
@@ -295,12 +388,20 @@ export default function ArticleDetail() {
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
               {t('governance.lastUpdated', { date: getLastUpdatedDay(article) || '—' })}
             </p>
+            <div
+              className="mt-4 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/90 dark:bg-sky-950/35 px-4 py-3"
+              role="note"
+            >
+              <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                {t('articleDetail.landmarkAccuracyNote')}
+              </p>
+            </div>
             {isPossiblyOutdated(article) && (
               <div
-                className="mt-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/90 dark:bg-amber-950/35 px-4 py-3"
+                className="mt-3 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/90 dark:bg-sky-950/35 px-4 py-3"
                 role="status"
               >
-                <p className="font-semibold text-amber-800 dark:text-amber-300 text-sm">{t('governance.possiblyOutdated')}</p>
+                <p className="text-sm font-semibold text-sky-800 dark:text-sky-300">{t('governance.possiblyOutdated')}</p>
                 <p className="text-slate-600 dark:text-slate-400 text-xs mt-1 leading-relaxed">{t('governance.outdatedHint')}</p>
               </div>
             )}
@@ -308,14 +409,49 @@ export default function ArticleDetail() {
               className="mt-6"
               title={article.title}
               gallery={article.gallery}
-              videoYoutubeId={article.videoYoutubeId}
-              videoMp4={article.videoMp4}
+              videoYoutubeId={routeVideo.videoYoutubeId}
+              videoMp4={routeVideo.videoMp4}
             />
             <div className="mt-4 print:hidden">
               <BudgetGuidePanel destinationName={article.destination} destinationId={dest?.id} />
             </div>
+            <div className="mt-4 print:hidden flex flex-wrap gap-2">
+              <a href="#article-section-plan" className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition">执行卡片 · Plan</a>
+              <a href="#article-section-content" className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition">正文路书 · Guide body</a>
+              <a href="#article-section-community" className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition">问答互助 · Q&A</a>
+            </div>
+            <section id="article-section-plan" className="mt-4 grid gap-3 md:grid-cols-3">
+              {routeExecutionCards.map((card) => (
+                <article key={card.id} className="rounded-xl border border-sky-100 dark:border-sky-900/50 bg-sky-50/70 dark:bg-sky-950/25 p-3">
+                  <h3 className="text-sm font-semibold text-sky-800 dark:text-sky-300">{card.title}</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-700 dark:text-slate-300">{card.body}</p>
+                </article>
+              ))}
+            </section>
+            <div className="mt-4 print:hidden rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/30 p-4">
+              <p className="text-sm font-semibold text-sky-800 dark:text-sky-300">路线疑问快速处理 · Route Q&A</p>
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                对签证、交通或预算有疑问时，先在社区问答确认最新经验再出发。
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {dest ? (
+                  <Link
+                    to={`/community/qa?destination=${encodeURIComponent(dest.name)}`}
+                    className="inline-flex min-h-10 items-center rounded-lg bg-sky-600 px-3 py-2 text-xs font-medium text-white hover:bg-sky-700 transition"
+                  >
+                    去社区提问 · Ask in Q&A
+                  </Link>
+                ) : null}
+                <Link
+                  to="/community/qa"
+                  className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition"
+                >
+                  浏览问答 · Browse Q&A
+                </Link>
+              </div>
+            </div>
 
-            <div className="mt-6 max-w-none">
+            <div id="article-section-content" className="mt-6 max-w-none">
               {detail?.content ? (
                 <div className="whitespace-pre-wrap text-slate-700 dark:text-slate-300 leading-relaxed [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-slate-800 [&_h2]:dark:text-slate-100 [&_h2]:mt-6 [&_h2]:mb-2 [&_table]:w-full [&_td]:py-2 [&_th]:text-left">
                   {detail.content.trim().split('\n').map((line, i) => {
@@ -354,7 +490,7 @@ export default function ArticleDetail() {
                   className="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/80 px-4 py-5 flex items-start gap-3 text-slate-600 dark:text-slate-300"
                 >
                   <span
-                    className="inline-block h-5 w-5 shrink-0 border-2 border-amber-500 border-t-transparent rounded-full animate-spin motion-reduce:animate-none"
+                    className="inline-block h-5 w-5 shrink-0 rounded-full border-2 border-sky-500 border-t-transparent animate-spin motion-reduce:animate-none"
                     aria-hidden
                   />
                   <p className="text-sm leading-relaxed">{t('articleDetail.loading')}</p>
@@ -371,14 +507,19 @@ export default function ArticleDetail() {
               {related.map((a) => (
                 <Link
                   key={a.id}
-                  to={`/articles/${a.id}`}
-                  className="block bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition border border-slate-100 dark:border-slate-700"
+                  to={`/routes/${a.id}`}
+                  className="block bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden motion-safe:hover:shadow-md motion-safe:transition border border-slate-100 dark:border-slate-700"
                 >
                   <OptimizedImage src={a.cover} alt="" w={800} h={450} q={75} loading="lazy" className="w-full aspect-video object-cover" />
                   <div className="p-3">
                     <h3 className="font-semibold text-slate-800 dark:text-slate-100 line-clamp-2">{a.title}</h3>
                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                      {a.destination} · ¥{a.budget}
+                      {a.destination} ·{' '}
+                      {formatGuideBudgetLine(a.budget, {
+                        showUsdApprox,
+                        t,
+                        lng: i18n.language,
+                      })}
                     </p>
                   </div>
                 </Link>
@@ -388,18 +529,25 @@ export default function ArticleDetail() {
         )}
 
         <section className="mt-10 print:hidden">
+          <div id="article-section-community" />
           <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">{t('userGuide.relatedExperiences')}</h2>
           {relatedUserGuides.length > 0 ? (
             <ul className="space-y-4 mb-6">
               {relatedUserGuides.map((g) => (
                 <li key={g.id}>
                   <Link
-                    to={`/articles/${g.id}`}
-                    className="block bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm hover:shadow-md transition border border-slate-100 dark:border-slate-700"
+                    to={`/routes/${g.id}`}
+                    className="block bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm motion-safe:hover:shadow-md motion-safe:transition border border-slate-100 dark:border-slate-700"
                   >
                     <h3 className="font-semibold text-slate-800 dark:text-slate-100">{g.title}</h3>
                     <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-                      {g.destinationName} · ¥{g.budget} · {g.author} · {g.createdAt.slice(0, 10)}
+                      {g.destinationName} ·{' '}
+                      {formatGuideBudgetLine(g.budget, {
+                        showUsdApprox,
+                        t,
+                        lng: i18n.language,
+                      })}{' '}
+                      · {g.author} · {formatDate(g.createdAt, i18n.language)}
                     </p>
                     <p className="text-slate-600 dark:text-slate-400 text-sm mt-2 line-clamp-2">{g.content}</p>
                   </Link>

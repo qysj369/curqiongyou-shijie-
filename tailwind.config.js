@@ -26,9 +26,20 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['"Noto Sans SC"', 'system-ui', 'sans-serif'],
+        sans: [
+          'Inter',
+          '"Noto Sans SC"',
+          '"SF Pro Text"',
+          '"Segoe UI"',
+          'system-ui',
+          'sans-serif',
+        ],
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addVariant }) {
+      addVariant('motion-safe', '@media (prefers-reduced-motion: no-preference)')
+    },
+  ],
 }

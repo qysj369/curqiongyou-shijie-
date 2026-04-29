@@ -37,9 +37,12 @@ jobs:
         env:
           # 绑定自定义域名时，前端资源应从根路径加载
           BASE: /
-          # canonical / og:url：须与访客实际访问的根地址一致。已绑 helloroamly.com 时改为 https://helloroamly.com（勿尾斜杠）。
+          # canonical / og:url：须与访客实际访问的根地址一致（勿尾斜杠）。
           # 仍用 github.io 时填 https://<用户>.github.io/<仓库名>（勿尾斜杠）。
-          VITE_SITE_URL: https://qysj369.github.io/curqiongyou-shijie-
+          VITE_SITE_URL: https://hellelovely.com
+
+      - name: Add CNAME for custom domain
+        run: echo "hellelovely.com" > dist/CNAME
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

@@ -13,7 +13,7 @@ export default function Breadcrumbs({ items, className = '' }) {
             {item.to != null ? (
               <Link
                 to={item.to}
-                className="text-amber-600 dark:text-amber-400 hover:underline min-h-8 inline-flex items-center"
+                className="text-sky-700 dark:text-sky-300 hover:underline min-h-8 inline-flex items-center"
               >
                 {item.label}
               </Link>

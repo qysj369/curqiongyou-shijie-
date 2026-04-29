@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+  <!-- Geometric R: navy stem + bowl, orange leg (no degenerate arcs) -->
+  <path
+    d="M9 7v18"
+    stroke="#0c4a6e"
+    stroke-width="2.75"
+    stroke-linecap="round"
+  />
+  <path
+    d="M9 7h6.5q5.5 0 5.5 5.2v0.6q0 5.2-5.5 5.2H9"
+    stroke="#0c4a6e"
+    stroke-width="2.75"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M15.8 17.8 22 25"
+    stroke="#ea580c"
+    stroke-width="2.75"
+    stroke-linecap="round"
+  />
+</svg>

@@ -14,7 +14,7 @@ export default function GuideRecommendBar({ percent = 0 }) {
       </div>
       <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden" role="progressbar" aria-valuenow={p} aria-valuemin={0} aria-valuemax={100}>
         <div
-          className="h-full rounded-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400"
+          className="h-full rounded-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-sky-400"
           style={{ width: `${p}%` }}
         />
       </div>

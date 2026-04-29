@@ -3573,8 +3573,38 @@ export const articleDetails = {
   a93: Object.assign(articles.find(a => a.id === 'a93'), { content: a93Content }),
 }
 
+function buildFallbackArticleContent(article) {
+  const { title, destination, budget, days, tags } = article
+  const tagLine = Array.isArray(tags) && tags.length ? tags.join('、') : '穷游、路线'
+  return `
+## 行程概览
+- **标题**：${title}
+- **目的地**：${destination}
+- **参考总预算**：约 ${budget} 元/人（站内估算，行前请按实时汇率与物价复核）
+- **天数**：${days} 天
+- **标签**：${tagLine}
+
+## 路线骨架
+本篇为「${destination}」方向的**穷游路线骨架**：可按签证、季节与机票价位，把城市与自然段重新排序。建议先做三件事：①圈定 1～2 个核心片区；②用公共交通与拼车衔接，少换住宿；③大交通尽量提前蹲促销。
+
+## 预算怎么控
+- **住宿**：青旅床位、民宿单间、经济型连锁混住，把每晚均价压在心理价位内。
+- **吃饭**：本地市集、连锁快餐、超市简餐兜底，偶尔一两顿特色餐厅即可。
+- **门票与活动**：提前官网比价，能买联票或城市卡再下手；免费步行街区与公园优先排进每日动线。
+
+## 行前清单
+签证与入境材料、保险、现金与银行卡、离线地图。若你对该国海关或安全政策不熟，请以权威领事信息与航司通知为准。
+
+## 说明
+完整逐日图文与最新贴士欢迎社区补充；你也可以收藏后按自己的节奏微调天数与预算。
+`.trim()
+}
+
 export function getArticleDetail(id) {
-  return articleDetails[id] ?? null
+  if (articleDetails[id]) return articleDetails[id]
+  const meta = articles.find((a) => a.id === id)
+  if (!meta) return null
+  return Object.assign({}, meta, { content: buildFallbackArticleContent(meta) })
 }
 
 /** @deprecated 使用 getArticleDetail(id) 或 articleDetails[id] */
