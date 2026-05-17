@@ -11,7 +11,7 @@ const LOCKUP_H = {
   md: 'h-8 sm:h-9',
 }
 
-/** 仅「Roamwise」一字时使用分色字标（Roam 橙 / wise 深蓝） */
+/** 中国版：「Roamwise」不再拆成两段英文展示，统一为整词字标。 */
 function isRoamwiseWordmark(s) {
   if (s == null || typeof s !== 'string') return false
   const t = s.replace(/\u200b/g, '').trim()
@@ -21,9 +21,10 @@ function isRoamwiseWordmark(s) {
 function RoamwiseSplitWordmark({ compact = false }) {
   const text = compact ? 'text-base' : 'text-xl'
   return (
-    <span className={`font-bold ${text} tracking-tight truncate`}>
-      <span className="text-sky-700 dark:text-sky-300">Roam</span>
-      <span className="text-emerald-600 dark:text-emerald-300">wise</span>
+    <span
+      className={`font-bold ${text} tracking-tight truncate bg-gradient-to-r from-sky-700 to-emerald-600 bg-clip-text text-transparent dark:from-sky-300 dark:to-emerald-300`}
+    >
+      Roamwise
     </span>
   )
 }

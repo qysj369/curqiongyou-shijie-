@@ -278,8 +278,11 @@ async function streamMockText(res, text) {
 app.post('/api/ai/chat', async (req, res) => {
   try {
     const incoming = Array.isArray(req.body?.messages) ? req.body.messages : []
+    const customSys = typeof req.body?.systemPrompt === 'string' ? req.body.systemPrompt.trim() : ''
+    const systemContent =
+      customSys.length > 0 ? customSys.slice(0, 12000) : SYSTEM_PROMPT
     const messages = [
-      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'system', content: systemContent },
       ...incoming
         .filter((m) => m && typeof m.content === 'string' && (m.role === 'user' || m.role === 'assistant'))
         .map((m) => ({ role: m.role, content: m.content })),

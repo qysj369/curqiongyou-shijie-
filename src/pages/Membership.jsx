@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import Breadcrumbs from '../components/Breadcrumbs'
 import CopyPageLinkButton from '../components/CopyPageLinkButton'
-import AdSlot from '../components/AdSlot'
 import DiscoverShowcase from '../components/DiscoverShowcase'
 
 const BENEFITS = [
@@ -63,10 +62,6 @@ export default function Membership() {
             </Link>
           )}
           <p className="text-slate-500 text-sm mt-3">{t('commerce.membershipNote')}</p>
-        </div>
-
-        <div className="mb-8 print:hidden">
-          <AdSlot slotId="membership-side" />
         </div>
 
         <DiscoverShowcase className="mb-8" />

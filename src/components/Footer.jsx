@@ -9,100 +9,69 @@ export default function Footer() {
   const icp = getIcpFilingText()
   const friendly = parseFriendlyLinks()
 
+  const linkClass =
+    'inline-flex min-h-10 items-center rounded-lg px-2 py-1.5 text-sm text-slate-300 transition hover:text-sky-300 dark:hover:text-sky-200'
+
   return (
-    <footer className="bg-slate-800 dark:bg-slate-950 text-slate-300 border-t border-slate-700/80 dark:border-slate-800 py-8 mt-auto">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="mb-2 flex justify-center">
+    <footer className="mt-auto border-t border-slate-700/80 bg-slate-800 py-6 text-slate-300 dark:border-slate-800 dark:bg-slate-950">
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="mb-3 flex justify-center">
           <BrandLogo variant="lockup" lockupOnDark size="sm" className="justify-center" />
         </div>
-        <p className="mb-1 text-center text-sm font-semibold text-sky-300/95 dark:text-slate-100">
-          {t('home.heroSloganZh')}
+        <p className="mx-auto mb-2 max-w-lg text-center text-xs leading-relaxed text-slate-400 dark:text-slate-500">
+          {t('footer.missionShort')}
         </p>
-        <p className="text-sm text-center text-slate-300 dark:text-slate-400 mb-2">{t('home.heroSloganEn')}</p>
-        <p className="text-xs text-center text-slate-500 dark:text-slate-500 mb-4 max-w-xl mx-auto leading-relaxed">
-          {t('footer.taglineSub')}
+        <p className="mx-auto mb-4 max-w-md text-center text-[11px] leading-relaxed text-slate-500 dark:text-slate-500">
+          {t('footer.compactHint')}
         </p>
-        <p className="text-xs text-center text-slate-400 dark:text-slate-500 mb-4 max-w-md mx-auto">
-          {t('common.globalUxLine')}
-        </p>
-        <div className="mb-4">
+        <div className="mb-4 flex justify-center">
           <SocialFollow />
         </div>
-        <div className="flex flex-wrap justify-center gap-x-2 gap-y-2 text-sm mb-4">
-          <Link
-            to="/"
-            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
-          >
-            {t('common.home')}
+
+        <nav
+          className="mb-4 flex flex-wrap justify-center gap-x-1 gap-y-1 text-center"
+          aria-label={t('footer.secondaryNavAria')}
+        >
+          <Link to="/community" className={linkClass}>
+            {t('common.navCommunity')}
           </Link>
-          <Link
-            to="/articles"
-            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
-          >
-            {t('common.articles')}
-          </Link>
-          <Link
-            to="/community"
-            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
-          >
-            {t('common.community')}
-          </Link>
-          <Link
-            to="/membership"
-            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
-          >
-            {t('commerce.membership')}
-          </Link>
-          <Link
-            to="/about#business-model"
-            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
-          >
-            {t('common.navBusinessModel')}
-          </Link>
-          <Link
-            to="/board"
-            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
-          >
-            {t('footer.boardAndGuidelines')}
-          </Link>
-          <Link
-            to="/about"
-            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
-          >
+          <span className="text-slate-600 dark:text-slate-600" aria-hidden>
+            ·
+          </span>
+          <Link to="/about" className={linkClass}>
             {t('footer.about')}
           </Link>
-          <Link
-            to="/privacy"
-            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
-          >
+          <span className="text-slate-600 dark:text-slate-600" aria-hidden>
+            ·
+          </span>
+          <Link to="/china-readiness" className={linkClass}>
+            {t('footer.chinaReadiness')}
+          </Link>
+          <span className="text-slate-600 dark:text-slate-600" aria-hidden>
+            ·
+          </span>
+          <Link to="/privacy" className={linkClass}>
             {t('footer.privacy')}
           </Link>
-          <Link
-            to="/terms"
-            className="inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:text-sky-300 dark:hover:text-sky-200"
-          >
+          <span className="text-slate-600 dark:text-slate-600" aria-hidden>
+            ·
+          </span>
+          <Link to="/terms" className={linkClass}>
             {t('footer.terms')}
           </Link>
-          <Link
-            to="/about#slogan-playbook"
-            className="inline-flex min-h-11 items-center gap-1 rounded-full bg-sky-500/15 px-3 py-2 text-xs font-medium text-sky-300 transition hover:bg-sky-500/25"
-          >
-            <span aria-hidden>✨</span>
-            {t('common.brand')}
-          </Link>
-        </div>
+        </nav>
 
-        {friendly.length > 0 && (
+        {friendly.length > 0 ? (
           <div className="mb-4 text-center">
-            <p className="text-xs text-slate-500 dark:text-slate-500 mb-2">{t('footer.friendlyLinks')}</p>
-            <ul className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
+            <p className="mb-1.5 text-[11px] text-slate-500 dark:text-slate-500">{t('footer.friendlyLinks')}</p>
+            <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm">
               {friendly.map((item) => (
                 <li key={item.url}>
                   <a
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex min-h-11 items-center text-slate-300 underline-offset-2 hover:text-sky-300 hover:underline dark:hover:text-sky-200"
+                    className="text-slate-300 underline-offset-2 hover:text-sky-300 hover:underline dark:hover:text-sky-200"
                   >
                     {item.label}
                   </a>
@@ -110,10 +79,10 @@ export default function Footer() {
               ))}
             </ul>
           </div>
-        )}
+        ) : null}
 
-        {icp && (
-          <p className="text-xs text-center text-slate-500 dark:text-slate-500 mb-2">
+        {icp ? (
+          <p className="mb-2 text-center text-[11px] text-slate-500 dark:text-slate-500">
             <a
               href="https://beian.miit.gov.cn/"
               target="_blank"
@@ -124,10 +93,9 @@ export default function Footer() {
               {icp}
             </a>
           </p>
-        )}
+        ) : null}
 
-        <p className="text-xs text-center text-slate-500 dark:text-slate-500 mb-1">{t('footer.copyright')}</p>
-        <p className="text-xs text-center text-slate-500 dark:text-slate-500">{t('footer.missionShort')}</p>
+        <p className="text-center text-[11px] text-slate-500 dark:text-slate-500">{t('footer.copyright')}</p>
       </div>
     </footer>
   )

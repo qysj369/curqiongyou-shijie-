@@ -63,19 +63,20 @@ function removeOgLocaleAlternates() {
     .forEach((el) => el.remove())
 }
 
-function appendOgLocaleAlternate(locale) {
-  const el = document.createElement('meta')
-  el.setAttribute('property', 'og:locale:alternate')
-  el.setAttribute('content', locale)
-  document.head.appendChild(el)
-}
-
 /** 各列表/静态路由独立 description，避免全站重复 meta description */
 const ROUTE_DESC_KEYS = [
+  [/^\/plan\/?$/, 'seo.descPlanHub'],
+  [/^\/globe\/?$/, 'seo.descPlanHub'],
   [/^\/map\/?$/, 'seo.descHome'],
+  [/^\/trip-ai\/?$/, 'seo.descTripAi'],
+  [/^\/map-hub\/?$/, 'seo.descMapHub'],
+  [/^\/advisor\/?$/, 'seo.descAdvisor'],
+  [/^\/ai\/?$/, 'seo.descAiTravelmate'],
+  [/^\/library\/?$/, 'seo.descLibrary'],
+  [/^\/steward\/?$/, 'seo.descSteward'],
   [/^\/routes\/?$/, 'seo.descArticles'],
   [/^\/budget\/?$/, 'seo.descBudgetCalculator'],
-  [/^\/me\/?$/, 'seo.descFavorites'],
+  [/^\/me\/?$/, 'seo.descMe'],
   [/^\/community\/qa\/?$/, 'seo.descCommunityQA'],
   [/^\/community\/buddies/, 'seo.descCommunityBuddies'],
   [/^\/community\/?$/, 'seo.descCommunity'],
@@ -85,6 +86,7 @@ const ROUTE_DESC_KEYS = [
   [/^\/board/, 'seo.descBoard'],
   [/^\/membership/, 'seo.descMembership'],
   [/^\/budget-calculator\/?$/, 'seo.descBudgetCalculator'],
+  [/^\/china-readiness\/?$/, 'seo.descChinaReadiness'],
   [/^\/about/, 'seo.descAbout'],
   [/^\/privacy\/?$/, 'seo.descPrivacy'],
   [/^\/terms\/?$/, 'seo.descTerms'],
@@ -103,7 +105,15 @@ function resolveRouteDescription(pathname, t) {
 
 /** 仅列表/静态页；详情页由 `useSeoOverride` 提供标题。顺序：先匹配更具体的路径。 */
 const ROUTE_TITLE_KEYS = [
+  [/^\/plan\/?$/, 'common.navPlanHub'],
+  [/^\/globe\/?$/, 'common.navPlanHub'],
   [/^\/map\/?$/, 'common.navMap'],
+  [/^\/trip-ai\/?$/, 'common.navTripAi'],
+  [/^\/map-hub\/?$/, 'common.navMapHub'],
+  [/^\/advisor\/?$/, 'common.navAdvisor'],
+  [/^\/ai\/?$/, 'common.navAiTravelmate'],
+  [/^\/library\/?$/, 'common.navLibrary'],
+  [/^\/steward\/?$/, 'common.navSteward'],
   [/^\/routes\/?$/, 'common.navRoutes'],
   [/^\/budget\/?$/, 'common.navBudget'],
   [/^\/me\/?$/, 'common.navMe'],
@@ -116,6 +126,7 @@ const ROUTE_TITLE_KEYS = [
   [/^\/board/, 'common.board'],
   [/^\/membership/, 'commerce.membership'],
   [/^\/budget-calculator\/?$/, 'common.navBudgetCalculator'],
+  [/^\/china-readiness\/?$/, 'chinaReadiness.title'],
   [/^\/about/, 'footer.about'],
   [/^\/privacy\/?$/, 'legal.privacyTitle'],
   [/^\/terms\/?$/, 'legal.termsTitle'],
@@ -152,7 +163,7 @@ function fallbackDetailListTitle(pathname, t) {
 }
 
 export default function SeoHead() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { pathname } = useLocation()
   const { override } = useSeoOverride()
 
@@ -171,7 +182,7 @@ export default function SeoHead() {
       page: t('notFound.pageTitle'),
       site: t('common.siteName'),
     })
-  }, [pathname, t, i18n.language])
+  }, [pathname, t])
 
   const documentTitle = override?.title || defaultTitle
   const metaDescription =
@@ -206,17 +217,14 @@ export default function SeoHead() {
     upsertMeta('name', 'twitter:card', 'summary_large_image')
     upsertMeta('name', 'twitter:title', documentTitle)
     upsertMeta('name', 'twitter:description', metaDescription)
-    const ogLocale = i18n.language === 'zh-CN' ? 'zh_CN' : 'en_US'
-    upsertMeta('property', 'og:locale', ogLocale)
+    upsertMeta('property', 'og:locale', 'zh_CN')
     removeOgLocaleAlternates()
     removeSeoHreflangLinks()
     if (canonicalHref) {
       upsertHreflang('x-default', canonicalHref)
-      upsertHreflang('en', canonicalHref)
       upsertHreflang('zh-CN', canonicalHref)
-      appendOgLocaleAlternate(ogLocale === 'zh_CN' ? 'en_US' : 'zh_CN')
     }
-  }, [documentTitle, metaDescription, canonicalHref, ogImageUrl, ogType, t, i18n.language])
+  }, [documentTitle, metaDescription, canonicalHref, ogImageUrl, ogType, t])
 
   useEffect(() => {
     const el = document.getElementById('seo-ld-website')
@@ -227,12 +235,23 @@ export default function SeoHead() {
       name: t('common.siteName'),
       alternateName: t('common.brandTagline'),
       description: t('seo.description'),
-      inLanguage: ['en-US', 'zh-CN'],
+      inLanguage: ['zh-CN'],
     }
     const siteUrl = absolutePageUrl('/')
     if (siteUrl) base.url = siteUrl
+    const routesSearchUrl = absolutePageUrl('/routes')
+    if (routesSearchUrl) {
+      base.potentialAction = {
+        '@type': 'SearchAction',
+        target: {
+          '@type': 'EntryPoint',
+          urlTemplate: `${routesSearchUrl}?keyword={search_term_string}`,
+        },
+        'query-input': 'required name=search_term_string',
+      }
+    }
     el.textContent = JSON.stringify(base)
-  }, [t, i18n.language])
+  }, [t])
 
   return null
 }

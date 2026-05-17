@@ -1,7 +1,7 @@
 {
   "name": "Roamwise · 轻游世界",
-  "short_name": "Roamwise",
-  "description": "年轻独立、低花费、体验优先的全球穷游参考；真实路线与轻量导航，地图与 AI 路书迭代中。 Youth-led budget travel—real routes, light UX; map & AI itineraries in progress.",
+  "short_name": "轻游世界",
+  "description": "青年穷游参考：真实路线、轻量导航；地图与智能行程持续迭代。",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#f59e0b",

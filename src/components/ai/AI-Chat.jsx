@@ -57,14 +57,16 @@ function buildPlanDraft(messages) {
   }
 }
 
-async function fetchTravelmateReply(history, onChunk) {
+async function fetchTravelmateReply(history, onChunk, systemPrompt) {
+  const payload = {
+    messages: history.map((m) => ({ role: m.role, content: m.text })),
+  }
+  const sys = typeof systemPrompt === 'string' && systemPrompt.trim() ? systemPrompt.trim() : TRAVELMATE_SYSTEM_PROMPT
+  payload.systemPrompt = sys
   const resp = await fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      systemPrompt: TRAVELMATE_SYSTEM_PROMPT,
-      messages: history.map((m) => ({ role: m.role, content: m.text })),
-    }),
+    body: JSON.stringify(payload),
   })
   if (!resp.ok) throw new Error(`API ${resp.status}`)
   if (resp.body && typeof resp.body.getReader === 'function') {
@@ -95,12 +97,34 @@ async function fetchTravelmateReply(history, onChunk) {
   return (await resp.text()).trim()
 }
 
-export default function AIChat({ withDraft = false, autoPrompt = '', autoPromptNonce = 0 }) {
+/**
+ * 全站复用的旅行对话 UI（流式回复、语音输入、可选右侧计划草稿）。
+ *
+ * @param {object} props
+ * @param {boolean} [props.withDraft] 是否显示右侧「旅行计划草稿」栏
+ * @param {string} [props.autoPrompt] 非空时自动填入并发送（与 autoPromptNonce 配合避免重复）
+ * @param {number} [props.autoPromptNonce]
+ * @param {string} [props.seedAssistant] 首条助手气泡文案；不传则用默认穷游开场白
+ * @param {string} [props.inputPlaceholder] 输入框 placeholder
+ * @param {boolean} [props.fullPage] 用于 /advisor 等独占页：加高对话区、略放宽最大宽度
+ * @param {string} [props.systemPrompt] 覆盖默认小元人设（如顾问页偏交通/动线）；不传则用 TRAVELMATE_SYSTEM_PROMPT
+ */
+export default function AIChat({
+  withDraft = false,
+  autoPrompt = '',
+  autoPromptNonce = 0,
+  seedAssistant,
+  inputPlaceholder,
+  fullPage = false,
+  systemPrompt,
+}) {
   const [messages, setMessages] = useState([
     {
       id: uid(),
       role: 'assistant',
-      text: `嗨，我是${TRAVELMATE_NAME}。告诉我你的预算、天数和出发地，我给你做一版省钱又好玩的穷游方案。`,
+      text:
+        seedAssistant ||
+        `嗨，我是${TRAVELMATE_NAME}。告诉我你的预算、天数和出发地，我给你做一版省钱又好玩的穷游方案。`,
     },
   ])
   const [input, setInput] = useState('')
@@ -154,13 +178,17 @@ export default function AIChat({ withDraft = false, autoPrompt = '', autoPromptN
         prev.map((m) => (m.id === pendingId ? { ...m, text: '', pending: false, streaming: true } : m)),
       )
       let lastSnapshot = ''
-      const reply = await fetchTravelmateReply(next, (partial) => {
-        lastSnapshot = partial
-        setMessages((prev) =>
-          prev.map((m) => (m.id === pendingId ? { ...m, text: partial, pending: false, streaming: true } : m)),
-        )
-        scrollToBottom()
-      })
+      const reply = await fetchTravelmateReply(
+        next,
+        (partial) => {
+          lastSnapshot = partial
+          setMessages((prev) =>
+            prev.map((m) => (m.id === pendingId ? { ...m, text: partial, pending: false, streaming: true } : m)),
+          )
+          scrollToBottom()
+        },
+        systemPrompt,
+      )
       const safeReply =
         (reply || lastSnapshot || '').trim() ||
         '我刚刚没拿到有效回复，你可以再发一次，我会继续帮你规划。'
@@ -179,7 +207,7 @@ export default function AIChat({ withDraft = false, autoPrompt = '', autoPromptN
       setThinking(false)
       scrollToBottom()
     }
-  }, [thinking, messages, scrollToBottom, streamAssistantText])
+  }, [thinking, messages, scrollToBottom, streamAssistantText, systemPrompt])
 
   const handleSend = useCallback(async () => {
     await performSend(input)
@@ -228,10 +256,17 @@ export default function AIChat({ withDraft = false, autoPrompt = '', autoPromptN
     setRecording(true)
   }, [recording])
 
+  const outerMax = withDraft ? 'max-w-7xl' : fullPage ? 'max-w-6xl' : 'max-w-5xl'
+  const chatColHeight = fullPage
+    ? 'h-[clamp(22rem,calc(100dvh-12.5rem),56rem)]'
+    : 'h-[calc(100vh-10rem)]'
+
   return (
-    <div className={`mx-auto w-full ${withDraft ? 'max-w-7xl' : 'max-w-5xl'}`}>
+    <div className={`mx-auto w-full ${outerMax}`}>
       <div className={`grid gap-4 ${withDraft ? 'lg:grid-cols-[minmax(0,2fr)_minmax(20rem,1fr)]' : 'grid-cols-1'}`}>
-        <div className="flex h-[calc(100vh-10rem)] flex-col rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div
+          className={`flex ${chatColHeight} flex-col rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900`}
+        >
           <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto p-4">
         {messages.map((m) => (
           <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -275,7 +310,7 @@ export default function AIChat({ withDraft = false, autoPrompt = '', autoPromptN
                   }
                 }}
                 rows={2}
-                placeholder="例如：预算 3000，7 天，从广州出发，想去东南亚。"
+                placeholder={inputPlaceholder || '例如：预算 3000，7 天，从广州出发，想去东南亚。'}
                 className="min-h-[44px] flex-1 resize-y rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
               />
               <button
@@ -303,7 +338,9 @@ export default function AIChat({ withDraft = false, autoPrompt = '', autoPromptN
         </div>
 
         {withDraft ? (
-          <aside className="h-[calc(100vh-10rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+          <aside
+            className={`${chatColHeight} overflow-y-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900`}
+          >
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">旅行计划草稿</h3>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">根据当前对话实时生成，可继续让小元细化。</p>
 

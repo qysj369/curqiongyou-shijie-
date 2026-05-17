@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,17 +32,57 @@ jobs:
       - name: Install
         run: npm install
 
+      - name: Unit tests
+        run: npm run test
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E (six modules + URL bridges)
+        run: npm run test:e2e
+        env:
+          CI: true
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install
+        run: npm install
+
+      - name: Check VITE_SITE_URL (repository variable)
+        run: |
+          if [ -z "${{ vars.VITE_SITE_URL }}" ]; then
+            echo "::error::请在仓库 Settings → Secrets and variables → Actions → Variables 中新增 VITE_SITE_URL（生产站点根 URL，https 开头、无尾斜杠）。"
+            exit 1
+          fi
+
       - name: Build
         run: npm run build
         env:
-          # 绑定自定义域名时，前端资源应从根路径加载
-          BASE: /
-          # canonical / og:url：须与访客实际访问的根地址一致（勿尾斜杠）。
-          # 仍用 github.io 时填 https://<用户>.github.io/<仓库名>（勿尾斜杠）。
-          VITE_SITE_URL: https://hellelovely.com
+          # 未设置 PAGES_BASE 时由 vite 回落为 `/`；子路径部署在 Variables 中设为 `/仓库名/`
+          BASE: ${{ vars.PAGES_BASE }}
+          VITE_SITE_URL: ${{ vars.VITE_SITE_URL }}
 
-      - name: Add CNAME for custom domain
-        run: echo "hellelovely.com" > dist/CNAME
+      - name: Install Playwright Chromium (preview E2E)
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E against dist (vite preview)
+        run: npx playwright test --config=playwright.preview.config.js
+        env:
+          CI: true
+
+      - name: Write CNAME (optional custom domain)
+        if: ${{ vars.PAGES_CNAME != '' }}
+        run: echo "${{ vars.PAGES_CNAME }}" > dist/CNAME
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

@@ -15,10 +15,26 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-slate-50 text-slate-800 antialiased text-base;
+    @apply text-slate-800 antialiased text-base;
     @apply dark:bg-slate-950 dark:text-slate-100;
     font-feature-settings: 'tnum' 1, 'ss01' 1;
     text-rendering: optimizeLegibility;
+  }
+  /** 产品文档：浅蓝 → 米白 → 浅灰过渡；深色模式保持纯色底 */
+  @media (prefers-color-scheme: light) {
+    body {
+      background: linear-gradient(
+        180deg,
+        theme(colors.sky.50) 0%,
+        theme(colors.stone.50) 38%,
+        theme(colors.slate.50) 100%
+      );
+    }
+  }
+  @media (prefers-color-scheme: dark) {
+    body {
+      @apply bg-slate-950;
+    }
   }
   /* 键盘焦点可见，便于无障碍 */
   *:focus-visible {
@@ -27,6 +43,26 @@
 }
 
 @layer components {
+  /** 穷游主站页面衬底：高德式大块白/浅灰分区，与 body 渐变叠加时仍显干净 */
+  .rw-main-surface {
+    @apply bg-slate-50/90 dark:bg-slate-950;
+  }
+
+  .rw-surface-page {
+    @apply bg-slate-50 dark:bg-slate-950;
+  }
+
+  /* 首页区块标题：左色条 + 标题，便于各段视觉对齐 */
+  .home-section-heading {
+    @apply flex items-start gap-3 sm:gap-4;
+  }
+  .home-section-heading__rail {
+    @apply mt-1 h-[1.35em] w-1 shrink-0 rounded-full bg-gradient-to-b from-sky-500 to-cyan-500 shadow-[0_0_12px_rgba(14,165,233,0.45)];
+  }
+  .home-section-heading__text {
+    @apply text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-50;
+  }
+
   .app-surface-card {
     @apply rounded-2xl border border-slate-200/90 bg-white shadow-[0_2px_10px_rgba(2,6,23,0.06)];
     @apply dark:border-slate-700 dark:bg-slate-900 dark:shadow-[0_2px_12px_rgba(0,0,0,0.25)];
@@ -61,11 +97,58 @@
   .animate-spin {
     animation-duration: 1.5s;
   }
+  .rw-plan-blobs,
+  .rw-plan-blobs-slow {
+    animation: none !important;
+  }
+  .rw-plan-route {
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
+  }
 }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* /plan 启程页：轻量动效（替代原 3D 地球入口） */
+@keyframes rw-plan-aurora {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-3%, 2%) scale(1.05);
+  }
+}
+@keyframes rw-plan-aurora-slow {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(4%, -2%);
+  }
+}
+@keyframes rw-plan-dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rw-plan-blobs {
+    animation: rw-plan-aurora 18s ease-in-out infinite alternate;
+  }
+  .rw-plan-blobs-slow {
+    animation: rw-plan-aurora-slow 22s ease-in-out infinite alternate;
+  }
+  .rw-plan-route {
+    stroke-dasharray: 520;
+    stroke-dashoffset: 520;
+    animation: rw-plan-dash 2.6s ease-out forwards;
+  }
 }
 
 /* 打印时只保留正文 */

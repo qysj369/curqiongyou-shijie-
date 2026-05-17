@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { sendMessage } from '../services/aiChat'
 import ChatMessageContent from './ChatMessageContent'
@@ -84,6 +84,22 @@ function toTemplateSnippet(countryHit, onlyMissingFields = false) {
 export default function AIChatWidget() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const stackAboveBottomNav = pathname !== '/plan' && pathname !== '/globe'
+  const [narrowScreen, setNarrowScreen] = useState(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false
+    return window.matchMedia('(max-width: 767px)').matches
+  })
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return
+    const mq = window.matchMedia('(max-width: 767px)')
+    const fn = () => setNarrowScreen(mq.matches)
+    fn()
+    mq.addEventListener('change', fn)
+    return () => mq.removeEventListener('change', fn)
+  }, [])
+  const mapHomeImmersiveChrome =
+    narrowScreen && stackAboveBottomNav && (pathname === '/' || pathname === '/map')
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState(() => [
     { role: 'assistant', text: t('aiChat.welcome') },
@@ -245,19 +261,32 @@ export default function AIChatWidget() {
     persistDownloadOnlyMissingPref(downloadOnlyMissing)
   }, [downloadOnlyMissing])
 
+  const fabBottomClass = stackAboveBottomNav
+    ? mapHomeImmersiveChrome
+      ? 'bottom-[calc(9rem+env(safe-area-inset-bottom))]'
+      : 'bottom-[calc(5rem+env(safe-area-inset-bottom))]'
+    : 'bottom-6'
+  const panelBottomClass = stackAboveBottomNav
+    ? mapHomeImmersiveChrome
+      ? 'bottom-[calc(13.5rem+env(safe-area-inset-bottom))]'
+      : 'bottom-[calc(9.5rem+env(safe-area-inset-bottom))]'
+    : 'bottom-24'
+
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-[100] w-14 h-14 rounded-full bg-sky-600 text-white shadow-lg motion-safe:hover:bg-sky-700 motion-safe:transition flex items-center justify-center"
+        className={`fixed ${fabBottomClass} right-6 z-[100] flex h-14 w-14 items-center justify-center rounded-full bg-sky-600 text-white shadow-lg motion-safe:transition motion-safe:hover:bg-sky-700`}
         aria-label={t('aiChat.toggle')}
       >
         <span className="text-2xl" aria-hidden>💬</span>
       </button>
 
       {open && (
-        <div className="fixed bottom-24 right-6 z-[100] w-[360px] max-w-[calc(100vw-3rem)] rounded-2xl bg-white dark:bg-slate-900 shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col max-h-[480px]">
+        <div
+          className={`fixed ${panelBottomClass} right-6 z-[100] flex max-h-[480px] w-[360px] max-w-[calc(100vw-3rem)] flex-col rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900`}
+        >
           <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
             <span className="font-semibold text-slate-800 dark:text-slate-100">{t('aiChat.title')}</span>
             <button
@@ -463,7 +492,7 @@ export default function AIChatWidget() {
                 type="button"
                 onClick={() => {
                   setShowLimitModal(false)
-                  navigate('/membership')
+                  navigate('/about')
                 }}
                 className="px-4 py-2 rounded-lg bg-sky-600 text-white font-medium hover:bg-sky-700 transition"
               >

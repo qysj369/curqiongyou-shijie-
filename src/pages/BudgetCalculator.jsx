@@ -207,10 +207,10 @@ export default function BudgetCalculator() {
       <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-            匹配路线推荐 · Recommended routes
+            {t('budgetCalculator.matchRoutesTitle')}
           </h2>
           <Link to={routesQuery} className="text-sm font-medium text-sky-700 hover:text-sky-800 dark:text-sky-300 dark:hover:text-sky-200">
-            查看更多匹配路线 →
+            {t('budgetCalculator.matchRoutesMore')}
           </Link>
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-3">

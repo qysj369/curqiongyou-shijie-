@@ -12,6 +12,7 @@ import JsonLd from '../components/JsonLd'
 import CommentSection from '../components/CommentSection'
 import UserGuideForm from '../components/UserGuideForm'
 import BudgetGuidePanel from '../components/BudgetGuidePanel'
+import GuideAmapPanel from '../components/GuideAmapPanel'
 import ArticleMediaSection from '../components/ArticleMediaSection'
 import { resolveDestinationRouteVideo } from '../data/destinationRouteVideo'
 import EmptyState from '../components/EmptyState'
@@ -47,21 +48,25 @@ export default function ArticleDetail() {
     return [
       {
         id: 'budget',
-        title: '预算控制 · Budget control',
-        body: `总预算 ¥${formatInteger(article.budget, i18n.language)}，按 ${formatInteger(article.days || 1, i18n.language)} 天拆分，建议日均控制在 ¥${formatInteger(daily, i18n.language)} 左右并预留 10%-15% 机动金。`,
+        title: t('articleDetail.execBudgetTitle'),
+        body: t('articleDetail.execBudgetBody', {
+          total: formatInteger(article.budget, i18n.language),
+          days: formatInteger(article.days || 1, i18n.language),
+          daily: formatInteger(daily, i18n.language),
+        }),
       },
       {
         id: 'route',
-        title: '动线效率 · Route flow',
-        body: '优先按“同片区聚合 + 少换住处”执行，跨城尽量提前锁交通。行程出现延误时先保留核心景点，再裁剪可替代点。',
+        title: t('articleDetail.execRouteTitle'),
+        body: t('articleDetail.execRouteBody'),
       },
       {
         id: 'risk',
-        title: '避坑提醒 · Risk checks',
-        body: '门票、营业时间、签证材料与季节风险在出发前 48 小时再复核一次；涉及夜间交通时，优先官方渠道和正规车辆。',
+        title: t('articleDetail.execRiskTitle'),
+        body: t('articleDetail.execRiskBody'),
       },
     ]
-  }, [article, i18n.language])
+  }, [article, i18n.language, t])
 
   useEffect(() => {
     if (isUserGuide || !article?.id) {
@@ -166,7 +171,7 @@ export default function ArticleDetail() {
       image,
       datePublished: date,
       dateModified: date,
-      inLanguage: i18n.language === 'zh-CN' ? 'zh-CN' : 'en-US',
+      inLanguage: 'zh-CN',
       author: { '@type': 'Person', name: authorName },
       publisher: {
         '@type': 'Organization',
@@ -280,28 +285,26 @@ export default function ArticleDetail() {
               <div className="mt-4 print:hidden">
                 <BudgetGuidePanel destinationName={userGuide.destinationName} />
               </div>
-            <div className="mt-4 print:hidden rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/30 p-4">
-              <p className="text-sm font-semibold text-sky-800 dark:text-sky-300">路线疑问快速处理 · Route Q&A</p>
-              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
-                先按预算执行，再按社区最新反馈修正细节。 · Validate route details with recent traveler feedback.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {dest ? (
+              <div className="mt-4 print:hidden rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/30 p-4">
+                <p className="text-sm font-semibold text-sky-800 dark:text-sky-300">{t('articleDetail.qaBlockTitle')}</p>
+                <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{t('articleDetail.qaBlockLeadUser')}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {dest ? (
+                    <Link
+                      to={`/community/qa?destination=${encodeURIComponent(dest.name)}`}
+                      className="inline-flex min-h-10 items-center rounded-lg bg-sky-600 px-3 py-2 text-xs font-medium text-white hover:bg-sky-700 transition"
+                    >
+                      {t('articleDetail.qaAsk')}
+                    </Link>
+                  ) : null}
                   <Link
-                    to={`/community/qa?destination=${encodeURIComponent(dest.name)}`}
-                    className="inline-flex min-h-10 items-center rounded-lg bg-sky-600 px-3 py-2 text-xs font-medium text-white hover:bg-sky-700 transition"
+                    to="/community/qa"
+                    className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition"
                   >
-                    去社区提问 · Ask in Q&A
+                    {t('articleDetail.qaBrowse')}
                   </Link>
-                ) : null}
-                <Link
-                  to="/community/qa"
-                  className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition"
-                >
-                  浏览问答 · Browse Q&A
-                </Link>
+                </div>
               </div>
-            </div>
               <div className="mt-6 max-w-none whitespace-pre-wrap text-slate-700 dark:text-slate-300 leading-relaxed">
                 {userGuide.content}
               </div>
@@ -388,6 +391,47 @@ export default function ArticleDetail() {
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
               {t('governance.lastUpdated', { date: getLastUpdatedDay(article) || '—' })}
             </p>
+            <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3 dark:border-emerald-900/40 dark:bg-emerald-950/25">
+              <p className="text-xs font-semibold text-emerald-900 dark:text-emerald-200">{t('articleDetail.keyFactsTitle')}</p>
+              <dl className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4 text-sm text-slate-800 dark:text-slate-100">
+                <div>
+                  <dt className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('articleDetail.keyFactDestLabel')}</dt>
+                  <dd className="mt-0.5 font-medium">
+                    {dest ? (
+                      <Link to={`/routes?destination=${encodeURIComponent(dest.name)}`} className="text-sky-700 dark:text-sky-300 hover:underline">
+                        {dest.name}
+                      </Link>
+                    ) : (
+                      <span>{article.destination}</span>
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('articleDetail.keyFactDaysLabel')}</dt>
+                  <dd className="mt-0.5 font-medium">{formatInteger(article.days, i18n.language)}</dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('articleDetail.keyFactBudgetLabel')}</dt>
+                  <dd className="mt-0.5 font-semibold text-emerald-700 dark:text-emerald-400">
+                    {formatGuideBudgetLine(article.budget, {
+                      showUsdApprox,
+                      t,
+                      lng: i18n.language,
+                    })}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('articleDetail.keyFactDailyLabel')}</dt>
+                  <dd className="mt-0.5 font-medium">
+                    {article.days > 0
+                      ? t('articles.routeCardPerDay', {
+                          cny: formatInteger(Math.max(1, Math.round(article.budget / article.days)), i18n.language),
+                        })
+                      : '—'}
+                  </dd>
+                </div>
+              </dl>
+            </div>
             <div
               className="mt-4 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/90 dark:bg-sky-950/35 px-4 py-3"
               role="note"
@@ -416,10 +460,20 @@ export default function ArticleDetail() {
               <BudgetGuidePanel destinationName={article.destination} destinationId={dest?.id} />
             </div>
             <div className="mt-4 print:hidden flex flex-wrap gap-2">
-              <a href="#article-section-plan" className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition">执行卡片 · Plan</a>
-              <a href="#article-section-content" className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition">正文路书 · Guide body</a>
-              <a href="#article-section-community" className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition">问答互助 · Q&A</a>
+              <a href="#article-section-map" className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition">
+                {t('articleDetail.quickNavMap')}
+              </a>
+              <a href="#article-section-plan" className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition">
+                {t('articleDetail.quickNavPlan')}
+              </a>
+              <a href="#article-section-content" className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition">
+                {t('articleDetail.quickNavBody')}
+              </a>
+              <a href="#article-section-community" className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition">
+                {t('articleDetail.quickNavQa')}
+              </a>
             </div>
+            <GuideAmapPanel articleId={article.id} />
             <section id="article-section-plan" className="mt-4 grid gap-3 md:grid-cols-3">
               {routeExecutionCards.map((card) => (
                 <article key={card.id} className="rounded-xl border border-sky-100 dark:border-sky-900/50 bg-sky-50/70 dark:bg-sky-950/25 p-3">
@@ -429,24 +483,22 @@ export default function ArticleDetail() {
               ))}
             </section>
             <div className="mt-4 print:hidden rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/30 p-4">
-              <p className="text-sm font-semibold text-sky-800 dark:text-sky-300">路线疑问快速处理 · Route Q&A</p>
-              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
-                对签证、交通或预算有疑问时，先在社区问答确认最新经验再出发。
-              </p>
+              <p className="text-sm font-semibold text-sky-800 dark:text-sky-300">{t('articleDetail.qaBlockTitle')}</p>
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{t('articleDetail.qaBlockLeadArticle')}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {dest ? (
                   <Link
                     to={`/community/qa?destination=${encodeURIComponent(dest.name)}`}
                     className="inline-flex min-h-10 items-center rounded-lg bg-sky-600 px-3 py-2 text-xs font-medium text-white hover:bg-sky-700 transition"
                   >
-                    去社区提问 · Ask in Q&A
+                    {t('articleDetail.qaAsk')}
                   </Link>
                 ) : null}
                 <Link
                   to="/community/qa"
                   className="inline-flex min-h-10 items-center rounded-lg border border-sky-300 px-3 py-2 text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-slate-800 transition"
                 >
-                  浏览问答 · Browse Q&A
+                  {t('articleDetail.qaBrowse')}
                 </Link>
               </div>
             </div>

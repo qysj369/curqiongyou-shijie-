@@ -2,10 +2,8 @@
 const CNY_PER_USD = 7.2
 
 export function localeTagFromI18n(lng) {
-  if (lng === 'zh-CN' || (typeof lng === 'string' && lng.toLowerCase().startsWith('zh'))) {
-    return 'zh-CN'
-  }
-  return 'en-US'
+  void lng
+  return 'zh-CN'
 }
 
 export function formatInteger(value, lng) {

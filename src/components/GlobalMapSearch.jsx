@@ -1,11 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { articles } from '../data/mockData'
+import { useToast } from '../contexts/ToastContext'
+import MoreMenuDrawer from './MoreMenuDrawer'
+import NotificationBell from './NotificationBell'
 import { places } from '../data/placeModel'
 import { PLACE_GEO_BY_ID } from '../data/placeGeo.generated'
-import { MAP_POI_OVERRIDES, getCountryTemplate } from '../data/mapPoiOverrides'
+import { getCountryTemplate } from '../data/mapPoiOverrides'
+import { hasAmapKey } from '../lib/loadAmapApi'
+import { reverseGeocodeCity } from '../lib/reverseGeocodeCity.js'
+import { buildBudgetGuidePois, normalized } from '../lib/budgetGuidePois.js'
 
 const SOURCE_ID = 'roamwise-destination-points'
 const LAYER_ID = 'roamwise-destination-circles'
@@ -32,48 +38,6 @@ const RASTER_STYLE = {
   layers: [{ id: 'basemap-raster', type: 'raster', source: 'basemap' }],
 }
 
-function normalized(text) {
-  return String(text || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-}
-
-function buildDestinationKeywords(dest, relatedArticleTags) {
-  return normalized(
-    [
-      dest.name,
-      dest.country,
-      dest.region,
-      dest.continent,
-      dest.description,
-      ...(dest.tags || []),
-      ...(relatedArticleTags || []),
-    ].join(' '),
-  )
-}
-
-function classifyPointCategory(dest, relatedArticleTags) {
-  const text = normalized(
-    [
-      ...(dest.tags || []),
-      ...(relatedArticleTags || []),
-      dest.description || '',
-      dest.name || '',
-      dest.country || '',
-    ].join(' '),
-  )
-  if (/(free|免费|观景|view|sunset|日落|徒步|街区|古城|海滩|公园|hike)/.test(text)) return 'blue'
-  if (/(cheap|budget|便宜|夜市|美食|food|咖啡|青旅|hostel|省钱|物价友好)/.test(text)) return 'green'
-  return 'orange'
-}
-
-function buildPoiName(dest, category) {
-  if (category === 'blue') return `${dest.name} Free View Spot`
-  if (category === 'green') return `${dest.name} Budget Food/Stay`
-  return `${dest.name} Budget Hostel Deal`
-}
-
 function escapeHtml(input) {
   const text = String(input ?? '')
   return text
@@ -82,41 +46,6 @@ function escapeHtml(input) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
-}
-
-function getDefaultPoiCopy(t, category) {
-  return {
-    placeNameEn:
-      category === 'blue'
-        ? 'Free View Spot'
-        : category === 'green'
-          ? 'Budget Food/Stay'
-          : 'Budget Hostel Deal',
-    savingTips:
-      category === 'blue'
-        ? t('home.mapCardSavingBlue')
-        : category === 'green'
-          ? t('home.mapCardSavingGreen')
-          : t('home.mapCardSavingYellow'),
-    highlights:
-      category === 'blue'
-        ? t('home.mapCardHighlightsBlue')
-        : category === 'green'
-          ? t('home.mapCardHighlightsGreen')
-          : t('home.mapCardHighlightsYellow'),
-    transport:
-      category === 'blue'
-        ? t('home.mapCardTransportBlue')
-        : category === 'green'
-          ? t('home.mapCardTransportGreen')
-          : t('home.mapCardTransportYellow'),
-    pitfall:
-      category === 'blue'
-        ? t('home.mapCardPitfallBlue')
-        : category === 'green'
-          ? t('home.mapCardPitfallGreen')
-          : t('home.mapCardPitfallYellow'),
-  }
 }
 
 function buildCountryFourBlocks(t, destinationName, category, allPoints) {
@@ -143,11 +72,20 @@ function buildCountryFourBlocks(t, destinationName, category, allPoints) {
 }
 
 /**
- * @param {{ compact?: boolean }} [props]
+ * @param {{ compact?: boolean, immersive?: boolean, embedInHome?: boolean }} [props]
  * `compact`：用于首页嵌入，降低地图高度，减少瓦片未加载时的「大块空白」观感。
+ * `immersive`：移动端全屏地图 + 浮层（对齐高德首屏信息架构）。
+ * `embedInHome`：嵌入首页时隐藏组件内重复标题（由首页区块 `h2` 承担）。
  */
-export default function GlobalMapSearch({ compact = false } = {}) {
-  const { t } = useTranslation()
+export default function GlobalMapSearch({ compact = false, immersive = false, embedInHome = false } = {}) {
+  const { t, i18n } = useTranslation()
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+  const { toast } = useToast()
+  const [moreOpen, setMoreOpen] = useState(false)
+  const mapSearchHeading = hasAmapKey()
+    ? t('home.globalMapSearchTitleWhenAmap')
+    : t('home.globalMapSearchTitle')
   const [query, setQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [routeFrom, setRouteFrom] = useState('')
@@ -175,64 +113,79 @@ export default function GlobalMapSearch({ compact = false } = {}) {
     window.localStorage.setItem(MOBILE_LITE_OPEN_KEY, mobileLiteOpen ? '1' : '0')
   }, [mobileLiteOpen])
 
-  const destinationToTags = useMemo(() => {
-    const m = new Map()
-    for (const a of articles) {
-      const key = a.destination
-      if (!key) continue
-      const prev = m.get(key) || []
-      m.set(key, [...prev, ...(a.tags || [])])
-    }
-    return m
-  }, [])
+  useEffect(() => {
+    setMoreOpen(false)
+  }, [pathname])
 
-  const allPoints = useMemo(() => {
-    return places.flatMap((d) => {
-      const geo = PLACE_GEO_BY_ID[d.id]
-      if (!geo) return []
-      const relatedTags = destinationToTags.get(d.name) || []
-      const baseKeywords = buildDestinationKeywords(d, relatedTags)
-      const primaryCategory = classifyPointCategory(d, relatedTags)
-      const line = Array.isArray(geo.line) && geo.line.length >= 3
-        ? geo.line
-        : [
-            [geo.lng - 0.18, geo.lat + 0.06],
-            [geo.lng, geo.lat],
-            [geo.lng + 0.18, geo.lat - 0.06],
-          ]
-      const categories = ['blue', 'green', 'orange']
-      return categories.map((category, idx) => {
-        const [lng, lat] = line[idx] || [geo.lng, geo.lat]
-        const defaultCopy = getDefaultPoiCopy(t, category)
-        const destinationOverride = MAP_POI_OVERRIDES?.[d.name] || {}
-        // Legacy compatibility: some configs still use "yellow" while runtime category is "orange".
-        const override = destinationOverride[category] || (category === 'orange' ? destinationOverride.yellow : {}) || {}
-        const poiName = override.placeNameEn || buildPoiName(d, category)
-        const categoryKeywords =
-          category === 'blue'
-            ? 'free view sunset spot scenic walk 免费 观景 日落'
-            : category === 'green'
-              ? 'cheap stay budget food hostel night market 便宜 省钱 美食 青旅 夜市'
-              : 'cheap hotel hostel deal couchsurfing low price 低价 住宿 青旅 特价 酒店 沙发客'
-        return {
-          id: `${d.id}-${category}`,
-          destinationId: d.id,
-          destinationName: d.name,
-          name: poiName,
-          country: d.country,
-          lng,
-          lat,
-          category,
-          primaryCategory,
-          savingTips: override.savingTips || defaultCopy.savingTips,
-          highlights: override.highlights || defaultCopy.highlights,
-          transport: override.transport || defaultCopy.transport,
-          pitfall: override.pitfall || defaultCopy.pitfall,
-          keywords: normalized(`${baseKeywords} ${poiName} ${categoryKeywords}`),
-        }
-      })
-    })
-  }, [destinationToTags, t])
+  useEffect(() => {
+    if (!immersive || !moreOpen) return
+    const onKey = (e) => {
+      if (e.key === 'Escape') setMoreOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [immersive, moreOpen])
+
+  const onLocate = useCallback(() => {
+    const map = mapRef.current
+    if (!map) return
+    if (!navigator.geolocation) {
+      toast(t('mapHome.locateUnsupported'))
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lng = pos.coords.longitude
+        const lat = pos.coords.latitude
+        map.flyTo({
+          center: [lng, lat],
+          zoom: Math.max(map.getZoom(), 3.2),
+          essential: true,
+        })
+        if (!immersive) return
+        void (async () => {
+          const { city } = await reverseGeocodeCity(lng, lat)
+          const label = city?.trim() || t('mapHome.locateFallbackCity')
+          toast(t('mapHome.locateTripNavigating', { city: label }))
+          navigate(
+            `/trip-ai?destination=${encodeURIComponent(label)}&autogenerate=1&notes=${encodeURIComponent(t('mapHome.notesLocateGenerated'))}`,
+          )
+        })()
+      },
+      () => {
+        toast(t('mapHome.locateDenied'))
+      },
+      { enableHighAccuracy: true, maximumAge: 30_000, timeout: 12_000 },
+    )
+  }, [immersive, navigate, t, toast])
+
+  const onScanStub = useCallback(() => {
+    toast(t('mapHome.scanComingSoon'))
+  }, [t, toast])
+
+  const onVoiceStub = useCallback(() => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) {
+      toast(t('mapHome.voiceUnsupported'))
+      return
+    }
+    try {
+      const r = new SR()
+      r.lang = 'zh-CN'
+      r.onresult = (ev) => {
+        const text = ev.results?.[0]?.[0]?.transcript
+        if (text) setQuery((q) => (q ? `${q} ${text}` : text))
+      }
+      r.onerror = () => {
+        toast(t('mapHome.voiceError'))
+      }
+      r.start()
+    } catch {
+      toast(t('mapHome.voiceUnsupported'))
+    }
+  }, [i18n.language, t, toast])
+
+  const allPoints = useMemo(() => buildBudgetGuidePois(t, { countryPlaceId: null }), [t])
 
   const routeDestinations = useMemo(
     () =>
@@ -317,6 +270,16 @@ export default function GlobalMapSearch({ compact = false } = {}) {
     })
   }
 
+  const filterChipItems = useMemo(
+    () => [
+      { key: 'all', label: t('home.mapFilterAll'), chip: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200' },
+      { key: 'blue', label: t('home.mapFilterBlue'), chip: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300' },
+      { key: 'green', label: t('home.mapFilterGreen'), chip: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' },
+      { key: 'orange', label: t('home.mapFilterYellow'), chip: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' },
+    ],
+    [t],
+  )
+
   const geoJson = useMemo(
     () => ({
       type: 'FeatureCollection',
@@ -350,7 +313,9 @@ export default function GlobalMapSearch({ compact = false } = {}) {
       minZoom: 1,
       maxZoom: 8,
     })
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
+    if (!immersive) {
+      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
+    }
     map.on('load', () => {
       map.addSource(SOURCE_ID, {
         type: 'geojson',
@@ -430,6 +395,7 @@ export default function GlobalMapSearch({ compact = false } = {}) {
         const safeRealPitfall = escapeHtml(four.realPitfall)
         const safeTrustSafe = escapeHtml(t('home.mapCardTrustSafe'))
         const safeTrustNoTrap = escapeHtml(t('home.mapCardTrustNoTrap'))
+        const safeNextStep = escapeHtml(t('home.mapPopupNextStep'))
         const destinationQuery = encodeURIComponent(destinationName)
         const routesHref =
           category === 'green'
@@ -453,6 +419,7 @@ export default function GlobalMapSearch({ compact = false } = {}) {
                 <a href="${destinationHref}" style="display:inline-block;padding:4px 8px;border-radius:8px;background:#e0f2fe;color:#0369a1;text-decoration:none;font-weight:600">${t('home.mapActionDestination')}</a>
                 <a href="${routesHref}" style="display:inline-block;padding:4px 8px;border-radius:8px;background:#dcfce7;color:#047857;text-decoration:none;font-weight:600">${t('home.mapActionRoutes')}</a>
               </div>
+              <p style="margin-top:8px;font-size:11px;color:#64748b;line-height:1.35">${safeNextStep}</p>
             </div>`,
           )
           .addTo(map)
@@ -489,7 +456,7 @@ export default function GlobalMapSearch({ compact = false } = {}) {
       map.remove()
       mapRef.current = null
     }
-  }, [geoJson, t])
+  }, [geoJson, immersive, t])
 
   useEffect(() => {
     const map = mapRef.current
@@ -503,23 +470,191 @@ export default function GlobalMapSearch({ compact = false } = {}) {
     map.fitBounds(bounds, { padding: 36, maxZoom: 5.5, duration: 650 })
   }, [geoJson, filteredPoints, allPoints.length])
 
+  if (immersive) {
+    return (
+      <>
+        <div className="fixed inset-0 z-0 bg-slate-200 dark:bg-slate-950">
+          <div ref={mapContainerRef} className="absolute inset-0 h-full w-full" />
+        </div>
+
+        <div className="pointer-events-none fixed inset-0 z-20">
+          <div className="pointer-events-auto px-3 pt-[max(0.5rem,env(safe-area-inset-top))]">
+            <div className="flex items-start gap-2">
+              <div className="mt-0.5 flex shrink-0 flex-col gap-2">
+                <Link
+                  to="/me"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-lg shadow-lg ring-1 ring-slate-200/80 dark:bg-slate-800/95 dark:ring-slate-700"
+                  aria-label={t('common.navMe')}
+                >
+                  <span aria-hidden>👤</span>
+                </Link>
+                <div className="pointer-events-auto flex justify-center rounded-full bg-white/95 p-0.5 shadow-lg ring-1 ring-slate-200/80 dark:bg-slate-800/95 dark:ring-slate-700">
+                  <NotificationBell />
+                </div>
+              </div>
+              <div className="min-w-0 flex-1">
+                <label htmlFor="global-map-search-immersive-top" className="sr-only">
+                  {t('home.globalMapSearchPlaceholder')}
+                </label>
+                <div className="flex items-center gap-1 rounded-full bg-white/95 px-3 py-2.5 shadow-lg ring-1 ring-slate-200/80 dark:bg-slate-800/95 dark:ring-slate-700">
+                  <span className="text-slate-400" aria-hidden>⌄</span>
+                  <input
+                    id="global-map-search-immersive-top"
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder={t('mapHome.searchPlaceholderFloating')}
+                    className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none dark:text-slate-100"
+                  />
+                  {query ? (
+                    <button
+                      type="button"
+                      className="rounded-full px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700"
+                      onClick={() => setQuery('')}
+                      aria-label={t('mapHome.clearSearch')}
+                    >
+                      ✕
+                    </button>
+                  ) : null}
+                </div>
+                <div className="scrollbar-hide mt-2 flex gap-1.5 overflow-x-auto pb-1">
+                  {filterChipItems.map((item) => (
+                    <button
+                      key={item.key}
+                      type="button"
+                      onClick={() => setCategoryFilter(item.key)}
+                      className={`pointer-events-auto shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition ring-1 ${
+                        categoryFilter === item.key
+                          ? 'bg-slate-900 text-white ring-slate-900 dark:bg-white dark:text-slate-900 dark:ring-white'
+                          : `${item.chip} ring-transparent`
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex shrink-0 flex-col gap-2 pt-0.5">
+                <button
+                  type="button"
+                  onClick={() => setMoreOpen(true)}
+                  className="flex min-h-11 min-w-11 flex-col items-center justify-center rounded-xl bg-white/95 px-1 py-1 text-[10px] font-semibold leading-tight text-slate-800 shadow-lg ring-1 ring-slate-200/80 dark:bg-slate-800/95 dark:text-slate-100 dark:ring-slate-700"
+                  aria-label={t('a11y.openMoreMenu')}
+                >
+                  <span className="text-base leading-none" aria-hidden>＋</span>
+                  <span>{t('common.moreMenuTitle')}</span>
+                </button>
+                <Link
+                  to="/map-hub"
+                  className="flex min-h-11 min-w-11 flex-col items-center justify-center rounded-xl bg-white/95 px-1 py-1 text-[10px] font-semibold leading-tight text-slate-800 shadow-lg ring-1 ring-slate-200/80 dark:bg-slate-800/95 dark:text-slate-100 dark:ring-slate-700"
+                >
+                  <span className="text-base leading-none" aria-hidden>◫</span>
+                  <span>{t('common.navMapHub')}</span>
+                </Link>
+                <Link
+                  to="/about"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-800 text-sm font-bold text-white shadow-lg ring-2 ring-white/20 dark:bg-slate-700 dark:ring-slate-900/40"
+                  aria-label={t('mapHome.promoAria')}
+                >
+                  <span aria-hidden>于</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="pointer-events-auto fixed bottom-[calc(8.75rem+env(safe-area-inset-bottom))] left-3 z-20 flex items-center gap-1.5 rounded-2xl bg-white/95 px-3 py-2 text-xs font-medium text-slate-700 shadow-lg ring-1 ring-slate-200/80 dark:bg-slate-800/95 dark:text-slate-200 dark:ring-slate-700">
+            <span aria-hidden>☁️</span>
+            <span>{t('mapHome.weatherDemo')}</span>
+          </div>
+
+          <div className="pointer-events-auto fixed bottom-[calc(8.75rem+env(safe-area-inset-bottom))] right-3 z-20 flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={onLocate}
+              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/95 text-lg shadow-lg ring-1 ring-slate-200/80 dark:bg-slate-800/95 dark:ring-slate-700"
+              aria-label={t('mapHome.locate')}
+              title={t('mapHome.locate')}
+            >
+              <span aria-hidden>⊙</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/trip-ai')}
+              className="flex h-12 w-12 flex-col items-center justify-center rounded-2xl bg-white/95 px-1 py-1 text-[10px] font-semibold leading-tight text-sky-700 shadow-lg ring-1 ring-sky-200/90 dark:bg-slate-800/95 dark:text-sky-300 dark:ring-sky-800"
+              aria-label={t('mapHome.routePlanShort')}
+            >
+              <span className="text-lg leading-none text-sky-600 dark:text-sky-400" aria-hidden>➤</span>
+              <span>{t('mapHome.routePlanShort')}</span>
+            </button>
+          </div>
+
+          <div className="pointer-events-auto fixed bottom-[calc(4.25rem+env(safe-area-inset-bottom))] left-0 right-0 z-30 px-3 pb-1">
+            <div className="mx-auto max-w-7xl rounded-2xl bg-white/98 px-3 py-2.5 shadow-[0_-8px_30px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/90 dark:bg-slate-900/98 dark:ring-slate-700">
+              <label htmlFor="global-map-search-immersive-panel" className="sr-only">
+                {t('home.globalMapSearchPlaceholder')}
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400" aria-hidden>🔍</span>
+                <input
+                  id="global-map-search-immersive-panel"
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={t('mapHome.searchPlaceholderPanel')}
+                  className="min-w-0 flex-1 bg-transparent text-base text-slate-900 placeholder:text-slate-400 focus:outline-none dark:text-slate-100"
+                />
+                <button
+                  type="button"
+                  onClick={onScanStub}
+                  className="rounded-xl p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                  aria-label={t('mapHome.scan')}
+                >
+                  <span className="text-lg" aria-hidden>▢</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onVoiceStub}
+                  className="rounded-xl p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                  aria-label={t('mapHome.voice')}
+                >
+                  <span className="text-lg" aria-hidden>🎙</span>
+                </button>
+              </div>
+              <p className="mt-1 truncate text-center text-[11px] text-slate-500 dark:text-slate-400">
+                {t('home.globalMapSearchCount', { count: filteredPoints.length })}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <MoreMenuDrawer open={moreOpen} onClose={() => setMoreOpen(false)} />
+      </>
+    )
+  }
+
   return (
     <section className={compact ? 'max-w-7xl mx-auto px-2 sm:px-4 pt-0 sm:pt-1' : 'max-w-7xl mx-auto px-2 sm:px-4 pt-3 sm:pt-6'}>
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        {!(compact && embedInHome) ? (
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           {compact ? (
             <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
-              {t('home.globalMapSearchTitle')}
+              {mapSearchHeading}
             </h3>
           ) : (
             <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
-              {t('home.globalMapSearchTitle')}
+              {mapSearchHeading}
             </h2>
           )}
           <span className="text-sm sm:text-xs text-slate-500 dark:text-slate-400">
             {t('home.globalMapSearchCount', { count: filteredPoints.length })}
           </span>
         </div>
+        ) : (
+        <p className="sr-only">
+          {mapSearchHeading} · {t('home.globalMapSearchCount', { count: filteredPoints.length })}
+        </p>
+        )}
         <label htmlFor="global-map-search" className="sr-only">
           {t('home.globalMapSearchPlaceholder')}
         </label>
@@ -532,12 +667,7 @@ export default function GlobalMapSearch({ compact = false } = {}) {
           className="w-full mb-3 rounded-xl border border-slate-200 px-3 py-3 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
         />
         <div className="mb-3 flex flex-wrap gap-2">
-          {[
-            { key: 'all', label: t('home.mapFilterAll'), chip: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200' },
-            { key: 'blue', label: t('home.mapFilterBlue'), chip: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300' },
-            { key: 'green', label: t('home.mapFilterGreen'), chip: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' },
-            { key: 'orange', label: t('home.mapFilterYellow'), chip: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' },
-          ].map((item) => (
+          {filterChipItems.map((item) => (
             <button
               key={item.key}
               type="button"

@@ -22,8 +22,10 @@ export default async function handler(req, res) {
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {})
     const incoming = Array.isArray(body.messages) ? body.messages : []
+    const customSys = typeof body.systemPrompt === 'string' ? body.systemPrompt.trim() : ''
+    const systemContent = customSys.length > 0 ? customSys.slice(0, 12000) : SYSTEM_PROMPT
     const messages = [
-      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'system', content: systemContent },
       ...incoming
         .filter((m) => m && typeof m.content === 'string' && (m.role === 'user' || m.role === 'assistant'))
         .map((m) => ({ role: m.role, content: m.content })),

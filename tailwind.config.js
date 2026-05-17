@@ -8,6 +8,12 @@ export default {
   theme: {
     extend: {
       colors: {
+        /** 品牌文档：浅蓝 / 米白感 / 浅绿点缀 — 与 sky / stone / emerald 配合使用 */
+        brand: {
+          skySoft: '#e8f4fc',
+          cream: '#faf9f6',
+          mint: '#ecfdf5',
+        },
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',

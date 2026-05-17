@@ -28,7 +28,7 @@ function saveNote(articleId, note) {
 }
 
 export default function CommentSection({ articleId, discussionUrl }) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { toast } = useToast()
   const [notes, setNotes] = useState([])
   const [input, setInput] = useState('')
@@ -64,7 +64,7 @@ export default function CommentSection({ articleId, discussionUrl }) {
     mount.innerHTML = ''
     const theme = getPreferredGiscusTheme()
     const mapping = import.meta.env.VITE_GISCUS_MAPPING || 'pathname'
-    const lang = i18n.language?.startsWith('zh') ? 'zh-CN' : 'en'
+    const lang = 'zh-CN'
 
     const script = document.createElement('script')
     script.src = 'https://giscus.app/client.js'
@@ -103,7 +103,7 @@ export default function CommentSection({ articleId, discussionUrl }) {
       mq.removeEventListener('change', onScheme)
       mount.innerHTML = ''
     }
-  }, [hasGiscus, articleId, i18n.language])
+  }, [hasGiscus, articleId])
 
   return (
     <section className="mt-10 print:hidden border-t border-slate-200 dark:border-slate-700 pt-8">

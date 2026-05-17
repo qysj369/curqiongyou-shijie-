@@ -9,6 +9,10 @@ dist/
 .env.local
 .env.*.local
 
+# Playwright
+playwright-report/
+test-results/
+
 # Editor / OS
 .DS_Store
 *.log

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -13,51 +13,81 @@ import { getUserGuidesAsCards } from '../data/userGuidesStore'
 import FavoriteButton from '../components/FavoriteButton'
 import OptimizedImage from '../components/OptimizedImage'
 import EmptyState from '../components/EmptyState'
-import CopyPageLinkButton from '../components/CopyPageLinkButton'
-import AdSlot from '../components/AdSlot'
 import { matchesGuideCard, matchesDestinationCard } from '../utils/searchMatch'
 import { approxUsdFromCny, formatDate, formatInteger } from '../utils/localeFormat'
 import { useUsdApproxDisplay } from '../contexts/UsdApproxPreferenceContext'
-import { optimizeUnsplashUrl } from '../utils/optimizeUnsplashUrl'
+import { useMinimalUi } from '../contexts/MinimalUiContext'
 import {
   assignArticleGridCoversInOrder,
   assignGridCoversInOrder,
   sortDestinationsUniqueHeroFirst,
 } from '../utils/homePlaceCover.js'
-import { useMediaQuery } from '../hooks/useMediaQuery'
-import { isAiChatEnabled } from '../services/aiChat'
+import { useMapHomeImmersive } from '../hooks/useMapHomeImmersive'
 import { PLACE_GEO_BY_ID } from '../data/placeGeo.generated'
 import { useToast } from '../contexts/ToastContext'
-import GlobalMapSearch from '../components/GlobalMapSearch'
+import PageFallback from '../components/PageFallback'
+import { readAutoLocateEnabled, AUTO_LOCATE_PREF_CHANGED } from '../lib/homeAutoLocatePreference.js'
 
-/**
- * 首页主视觉：首张图 Matheus Ferrero 户外多元年轻人（public/hero-home.jpg 随站加载）
- */
-const HOME_HERO_PHOTO_PAGE = 'https://unsplash.com/@matheusferrero?utm_source=roamwise&utm_medium=referral'
-const HOME_HERO_UNSPLASH_BASE = 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac'
-/** 本地 hero 缺失或 404 时回退（同一张 Unsplash） */
-const HOME_HERO_IMG_FALLBACK = optimizeUnsplashUrl(HOME_HERO_UNSPLASH_BASE, {
-  w: 1920,
-  q: 84,
-  fit: 'max',
-  auto: 'format',
-})
-const HERO_RESP_WIDTHS = [640, 960, 1280, 1920]
+const GlobalMapSearch = lazy(() => import('../components/GlobalMapSearch.jsx'))
 
-function buildLocalHeroSrcSet(prefix) {
-  return HERO_RESP_WIDTHS.map((w) => `${prefix}hero-home-${w}w.jpg ${w}w`).join(', ')
+function HomeMapEmbed() {
+  const { t } = useTranslation()
+  const wrapRef = useRef(null)
+  const [mountMap, setMountMap] = useState(false)
+
+  useEffect(() => {
+    if (mountMap) return
+    const el = wrapRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setMountMap(true)
+      return
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setMountMap(true)
+          io.disconnect()
+        }
+      },
+      { root: null, rootMargin: '200px 0px', threshold: 0.01 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [mountMap])
+
+  const skeleton = (
+    <div
+      className="min-h-[min(52vh,22rem)] md:min-h-[24rem] w-full rounded-2xl border border-slate-200 bg-slate-100/90 dark:border-slate-700 dark:bg-slate-800/60 motion-safe:animate-pulse"
+      role="status"
+      aria-busy="true"
+      aria-label={t('home.mapEmbedLoading')}
+    />
+  )
+
+  return (
+    <div ref={wrapRef} className="mx-auto max-w-7xl px-2 sm:px-6">
+      {mountMap ? (
+        <Suspense fallback={skeleton}>
+          <GlobalMapSearch compact embedInHome />
+        </Suspense>
+      ) : (
+        skeleton
+      )}
+    </div>
+  )
 }
 
-function buildRemoteHeroSrcSet() {
-  return HERO_RESP_WIDTHS.map((w) =>
-    `${optimizeUnsplashUrl(HOME_HERO_UNSPLASH_BASE, { w, q: 84, fit: 'max', auto: 'format' })} ${w}w`,
-  ).join(', ')
-}
+/** 首页仅保留四条穷游主路径；进阶地图与规划入口见右上角「更多」 */
+const HOME_CORE_NAV = [
+  { to: '/map', labelKey: 'common.navMap', emoji: '🗺️', circle: 'bg-sky-500 shadow-sky-500/30' },
+  { to: '/routes', labelKey: 'common.navRoutes', emoji: '📖', circle: 'bg-amber-500 shadow-amber-500/25' },
+  { to: '/budget', labelKey: 'common.navBudget', emoji: '🧮', circle: 'bg-emerald-500 shadow-emerald-500/25' },
+  { to: '/trip-ai', labelKey: 'common.navTripAi', emoji: '✈️', circle: 'bg-violet-500 shadow-violet-500/25' },
+]
 
 const BUDGET_MAX = { any: null, '2000': 2000, '5000': 5000, '10000': 10000 }
 const DAYS_VALUE = { any: null, '3': 3, '7': 7, '15': 15 }
 const AUTO_LOCATE_ONCE_KEY = 'roamwise-auto-locate-once-v1'
-const AUTO_LOCATE_ENABLED_KEY = 'roamwise-auto-locate-enabled-v1'
 
 function haversineKm(lat1, lng1, lat2, lng2) {
   const toRad = (v) => (v * Math.PI) / 180
@@ -69,52 +99,57 @@ function haversineKm(lat1, lng1, lat2, lng2) {
   return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
+/** 列表区块标题：穷游网式粗黑小标题，少装饰 */
+function HomeSectionTitle({ children, id, tabIndex = undefined }) {
+  return (
+    <h2
+      id={id}
+      tabIndex={tabIndex}
+      className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-xl"
+    >
+      {children}
+    </h2>
+  )
+}
+
 export default function Home() {
+  const mapHomeImmersive = useMapHomeImmersive()
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { toast } = useToast()
+  const { minimal } = useMinimalUi()
   const [search, setSearch] = useState('')
   const [budgetMax, setBudgetMax] = useState('any')
   const [daysFilter, setDaysFilter] = useState('any')
-  const [heroVariant, setHeroVariant] = useState('local')
-  const [mobileSubBandOpen, setMobileSubBandOpen] = useState(false)
-  const [roadbookBudget, setRoadbookBudget] = useState('5000')
-  const [roadbookDays, setRoadbookDays] = useState('7')
-  const [roadbookRegion, setRoadbookRegion] = useState('')
-  const [roadbookNotes, setRoadbookNotes] = useState('')
-  const [isLocating, setIsLocating] = useState(false)
-  const [autoLocateEnabled, setAutoLocateEnabled] = useState(() => {
-    if (typeof window === 'undefined') return true
-    const v = window.localStorage.getItem(AUTO_LOCATE_ENABLED_KEY)
-    if (v == null) return true
-    return v !== '0'
-  })
-  const isDesktopLayout = useMediaQuery('(min-width: 768px)')
-  const subBandDetailsOpen = isDesktopLayout || mobileSubBandOpen
-  const mediaPrefix = useMemo(() => {
-    const base = import.meta.env.BASE || '/'
-    return base.endsWith('/') ? base : `${base}/`
+  const [subBandOpen, setSubBandOpen] = useState(false)
+  const [autoLocateEnabled, setAutoLocateEnabled] = useState(() => readAutoLocateEnabled())
+
+  useEffect(() => {
+    const sync = () => setAutoLocateEnabled(readAutoLocateEnabled())
+    window.addEventListener(AUTO_LOCATE_PREF_CHANGED, sync)
+    return () => window.removeEventListener(AUTO_LOCATE_PREF_CHANGED, sync)
   }, [])
-  const localHeroDefaultSrc = `${mediaPrefix}hero-home-1920w.jpg`
+
+  /** 首屏主路径预取，降低首次点击白屏概率（与 Vite base 一致） */
+  useEffect(() => {
+    const base = import.meta.env.BASE_URL || '/'
+    const prefix = base === '/' ? '' : base.replace(/\/$/, '')
+    const paths = ['/map', '/routes', '/budget', '/trip-ai']
+    const links = paths.map((p) => {
+      const el = document.createElement('link')
+      el.rel = 'prefetch'
+      el.href = `${prefix}${p}`
+      el.setAttribute('data-roamwise-home-prefetch', '1')
+      document.head.appendChild(el)
+      return el
+    })
+    return () => links.forEach((el) => el.remove())
+  }, [])
+
   const { showUsdApprox } = useUsdApproxDisplay()
 
   const ugcList = useMemo(() => getUserGuidesAsCards(), [])
-
-  useEffect(() => {
-    const href = `${mediaPrefix}hero-home-1280w.jpg`
-    if (document.head.querySelector(`link[data-roamwise-hero-preload="1"]`)) return
-    const link = document.createElement('link')
-    link.rel = 'preload'
-    link.as = 'image'
-    link.href = href
-    link.setAttribute('fetchpriority', 'high')
-    link.setAttribute('data-roamwise-hero-preload', '1')
-    document.head.appendChild(link)
-    return () => {
-      link.remove()
-    }
-  }, [mediaPrefix])
 
   const matchesBudget = (budget) => {
     const max = BUDGET_MAX[budgetMax]
@@ -139,8 +174,9 @@ export default function Home() {
     [search, budgetMax, daysFilter],
   )
 
-  const filteredPopularDestinations = popularPlaces.filter((dest) =>
-    matchesDestinationCard(dest, search),
+  const filteredPopularDestinations = useMemo(
+    () => popularPlaces.filter((dest) => matchesDestinationCard(dest, search)),
+    [search],
   )
 
   const popularDestinationCards = useMemo(() => {
@@ -222,19 +258,11 @@ export default function Home() {
     [],
   )
 
-  const goRandomDestination = useCallback(() => {
-    if (!places.length) return
-    const i = Math.floor(Math.random() * places.length)
-    const d = places[i]
-    if (d?.name) navigate(`/routes?destination=${encodeURIComponent(String(d.name))}`)
-  }, [navigate, places])
-
   const locateAndJump = useCallback((fromAuto = false) => {
     if (!navigator?.geolocation) {
       if (!fromAuto) toast(t('home.locateUnsupported'))
       return
     }
-    setIsLocating(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords
@@ -255,29 +283,17 @@ export default function Home() {
         } else {
           if (!fromAuto) toast(t('home.locateFailed'))
         }
-        setIsLocating(false)
       },
       (err) => {
         const denied = err?.code === 1
         if (!fromAuto) toast(denied ? t('home.locateDenied') : t('home.locateFailed'))
-        setIsLocating(false)
       },
       { enableHighAccuracy: false, timeout: 12000, maximumAge: 5 * 60 * 1000 },
     )
   }, [navigate, t, toast, places])
 
-  const toggleAutoLocate = useCallback(() => {
-    setAutoLocateEnabled((prev) => {
-      const next = !prev
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(AUTO_LOCATE_ENABLED_KEY, next ? '1' : '0')
-      }
-      toast(next ? t('home.autoLocateEnabled') : t('home.autoLocateDisabled'))
-      return next
-    })
-  }, [t, toast])
-
   useEffect(() => {
+    if (mapHomeImmersive) return
     if (typeof window === 'undefined') return
     if (!navigator?.geolocation) return
     const q = searchParams.get('autolocate')
@@ -293,247 +309,99 @@ export default function Home() {
       locateAndJump(true)
     }, 700)
     return () => window.clearTimeout(timer)
-  }, [locateAndJump, searchParams, autoLocateEnabled])
+  }, [mapHomeImmersive, locateAndJump, searchParams, autoLocateEnabled])
 
-  const dispatchRoadbookPrompt = useCallback(() => {
-    const budgetPhrase =
-      roadbookBudget === 'any'
-        ? t('home.oneClickBudgetAnyPhrase')
-        : t('home.oneClickBudgetCappedPhrase', {
-            amount: formatInteger(Number(roadbookBudget), i18n.language),
-          })
-    const daysPhrase =
-      roadbookDays === 'any'
-        ? t('home.oneClickDaysAnyPhrase')
-        : t('home.oneClickDaysFixedPhrase', {
-            days: formatInteger(Number(roadbookDays), i18n.language),
-          })
-    const regionPhrase = roadbookRegion.trim() || t('home.roadbookRegionUnspecified')
-    const notesPhrase = roadbookNotes.trim() || t('home.roadbookNotesUnspecified')
-    const message = t('home.roadbookAiPrompt', {
-      budget: budgetPhrase,
-      days: daysPhrase,
-      region: regionPhrase,
-      notes: notesPhrase,
-    })
-    window.dispatchEvent(new CustomEvent('roamwise:ai-itinerary', { detail: { message } }))
-  }, [roadbookBudget, roadbookDays, roadbookRegion, roadbookNotes, t, i18n.language])
+  if (mapHomeImmersive) {
+    return (
+      <Suspense fallback={<PageFallback />}>
+        <GlobalMapSearch immersive />
+      </Suspense>
+    )
+  }
 
   return (
-    <div>
+    <div className="rw-surface-page home-page">
       <section
-        className="relative flex min-h-[min(76vh,34rem)] md:min-h-[36rem] flex-col text-white overflow-hidden"
-        aria-label={t('home.heroRegionAria')}
+        className="border-b border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-950"
+        aria-label={t('home.qyStyleSurfaceAria')}
       >
-        <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
-          <img
-            src={heroVariant === 'local' ? localHeroDefaultSrc : HOME_HERO_IMG_FALLBACK}
-            srcSet={heroVariant === 'local' ? buildLocalHeroSrcSet(mediaPrefix) : buildRemoteHeroSrcSet()}
-            sizes="100vw"
-            alt=""
-            width={1920}
-            height={1080}
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-            className="absolute inset-0 h-full w-full object-cover object-[72%_center] sm:object-[76%_center] md:object-[78%_center]"
-            onError={() => setHeroVariant((v) => (v === 'local' ? 'remote' : v))}
-          />
-          {/* 顶部条带：标语区可读性（与用户标注的「最上沿区域」对齐） */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[min(38%,11rem)] sm:h-[min(36%,12rem)] bg-gradient-to-b from-slate-950/60 via-slate-900/25 to-transparent" />
-          {/* 左侧留白区：压暗渐变便于白字；右侧保留画面主体 */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-[min(92%,28rem)] sm:w-[min(88%,34rem)] md:w-[min(52%,36rem)] bg-gradient-to-r from-slate-950/55 via-slate-900/30 to-transparent" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[28%] max-h-[10rem] bg-gradient-to-t from-slate-950/40 via-transparent to-transparent" />
-        </div>
-        <div className="relative z-10 flex flex-1 flex-col items-stretch justify-start px-5 sm:px-8 md:px-12 lg:px-16 pt-4 pb-10 sm:pt-5 sm:pb-12 md:pt-6 md:pb-14">
-          <p className="sr-only">{t('home.heroImageAlt')}</p>
-          <div className="max-w-[min(100%,26rem)] sm:max-w-2xl text-left">
-            <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.12em] text-sky-200/95">
-              {t('home.heroEyebrowNew')}
-            </p>
-            <h1 className="mt-2 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-wide text-white leading-tight drop-shadow-md [text-shadow:0_2px_20px_rgba(0,0,0,0.7)]">
+        <div className="mx-auto max-w-2xl px-4 pb-6 pt-5 sm:px-6 md:max-w-7xl md:pb-8">
+          <div className="mx-auto max-w-xl text-center md:mx-0 md:text-left">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-2xl">
               {t('home.heroTitleNew')}
             </h1>
-            <p className="mt-2 text-sm sm:text-base md:text-lg font-medium text-white/92 leading-snug drop-shadow-md [text-shadow:0_1px_14px_rgba(0,0,0,0.6)]">
-              {t('home.heroLeadNew')}
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2.5">
-              <Link
-                to="/map"
-                className="inline-flex min-h-11 items-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700"
-              >
-                {t('home.heroCtaPrimary')}
-              </Link>
-              <Link
-                to="/routes"
-                className="inline-flex min-h-11 items-center rounded-xl border border-white/60 bg-white/15 px-4 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur-sm transition hover:bg-white/25"
-              >
-                {t('home.heroCtaSecondary')}
-              </Link>
-              <Link
-                to="/budget"
-                className="inline-flex min-h-11 items-center rounded-xl border border-emerald-300/80 bg-emerald-200/15 px-4 py-2 text-sm font-semibold text-emerald-100 shadow-sm backdrop-blur-sm transition hover:bg-emerald-200/25"
-              >
-                {t('home.heroCtaBudget')}
-              </Link>
-            </div>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{t('home.heroLeadNew')}</p>
           </div>
-        </div>
-      </section>
 
-      <section
-        id="home-map-explore"
-        className="scroll-mt-24 border-b border-slate-200 bg-slate-50 py-6 sm:py-8 dark:border-slate-800 dark:bg-slate-950"
-        aria-label={t('home.mapExploreAria')}
-      >
-        <div className="max-w-7xl mx-auto px-4 mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div className="text-center sm:text-left">
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">{t('home.mapExploreTitle')}</h2>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400 max-w-2xl mx-auto sm:mx-0">{t('home.mapExploreLead')}</p>
-          </div>
-          <div className="flex flex-wrap justify-center sm:justify-end gap-2 shrink-0">
-            <a
-              href="#home-map-explore"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700"
-            >
-              {t('home.mapExploreJump')}
-            </a>
-            {isAiChatEnabled() ? (
-              <button
-                type="button"
-                onClick={() => window.dispatchEvent(new CustomEvent('roamwise:ai-open'))}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-              >
-                {t('home.openAiAssistant')}
-              </button>
-            ) : null}
-          </div>
-        </div>
-        <GlobalMapSearch compact />
-      </section>
-
-      {/* 热门与快捷入口移出主视觉区，避免叠在人脸与画面上 */}
-      <section
-        className="border-b border-slate-200/90 bg-slate-50/95 dark:border-slate-800 dark:bg-slate-950/95"
-        aria-label={t('home.heroSubBandAria')}
-      >
-        <div className="max-w-4xl mx-auto px-4 py-3 md:py-4 text-center">
-          <div className="flex flex-wrap items-center justify-between gap-2 print:hidden mb-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={goRandomDestination}
-                aria-label={t('home.randomDestinationAria')}
-                className="min-h-10 rounded-xl border-2 border-sky-400/90 bg-white/95 px-4 py-2 text-left shadow-sm transition hover:bg-sky-50/95 hover:border-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:bg-slate-900/95 dark:hover:bg-slate-800 dark:border-sky-500/80 dark:focus-visible:ring-offset-slate-950"
-              >
-                <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
-                  {t('home.randomDestinationZh')}
-                </span>
-                <span className="block text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-                  {t('home.randomDestinationEn')}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => locateAndJump(false)}
-                disabled={isLocating}
-                className="min-h-10 rounded-xl border border-emerald-300/90 bg-emerald-50/90 px-3 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100/90 disabled:cursor-not-allowed disabled:opacity-70 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
-              >
-                {isLocating ? t('home.locating') : t('home.locateCta')}
-              </button>
-              <button
-                type="button"
-                onClick={toggleAutoLocate}
-                className="min-h-10 rounded-xl border border-slate-300/90 bg-white/90 px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200"
-              >
-                {autoLocateEnabled ? t('home.autoLocateOn') : t('home.autoLocateOff')}
-              </button>
-            </div>
-            <CopyPageLinkButton className="!min-h-9 !px-2.5 !py-1.5 !text-xs rounded-lg shadow-sm shrink-0" />
-          </div>
           <form
             id="home-search-form"
             role="search"
-            aria-label={t('home.searchFormAria')}
-            className="bg-white dark:bg-slate-900/95 dark:border dark:border-slate-700 rounded-2xl p-2.5 sm:p-3 shadow-lg border border-slate-200/80 dark:border-slate-700 flex flex-col md:flex-row gap-2 sm:gap-2.5 mb-3 text-left"
+            aria-label={t('a11y.homeSearchForm')}
+            className="mx-auto mt-5 max-w-xl md:mx-0"
             onSubmit={(e) => {
               e.preventDefault()
               const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
               const behavior = reduceMotion ? 'auto' : 'smooth'
-              if (search.trim()) {
+              const q = search.trim()
+              if (q) {
                 document.getElementById('home-search-results')?.scrollIntoView({ behavior, block: 'start' })
+                queueMicrotask(() => {
+                  document.getElementById('home-search-results-title')?.focus({ preventScroll: true })
+                })
               } else {
-                document.getElementById('home-featured')?.scrollIntoView({ behavior, block: 'start' })
+                const nextId = minimal ? 'home-map-explore' : 'home-featured'
+                document.getElementById(nextId)?.scrollIntoView({ behavior, block: 'start' })
+                queueMicrotask(() => {
+                  const focusId = minimal ? 'home-map-explore-title' : 'home-featured-title'
+                  document.getElementById(focusId)?.focus({ preventScroll: true })
+                })
               }
             }}
           >
-            <div className="flex-1 min-w-0">
+            <div className="relative">
+              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-base opacity-60" aria-hidden>
+                🔍
+              </span>
               <label htmlFor="home-search-q" className="sr-only">
-                {t('home.searchQueryLabel')}
+                {t('a11y.homeSearchQueryLabel')}
               </label>
               <input
                 id="home-search-q"
                 type="search"
-                placeholder={t('home.searchPlaceholder')}
+                placeholder={t('home.homeSearchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 autoComplete="off"
-                className="w-full px-3 py-2.5 min-h-10 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-800 dark:bg-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+                enterKeyHint="search"
+                className="w-full min-h-[3rem] rounded-full border border-slate-200 bg-slate-50/80 py-2.5 pl-11 pr-[5.5rem] text-[15px] text-slate-900 shadow-inner focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/40 dark:border-slate-600 dark:bg-slate-900/60 dark:text-slate-100 dark:focus:border-sky-500"
               />
-            </div>
-            <div className="md:min-w-[10.5rem]">
-              <label htmlFor="home-budget-filter" className="sr-only">
-                {t('home.budgetFilterLabel')}
-              </label>
-              <select
-                id="home-budget-filter"
-                value={budgetMax}
-                onChange={(e) => setBudgetMax(e.target.value)}
-                className="w-full px-3 py-2.5 min-h-10 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:bg-slate-800 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+              <button
+                type="submit"
+                aria-label={t('a11y.homeSearchSubmit')}
+                className="absolute right-1.5 top-1/2 flex min-h-9 -translate-y-1/2 items-center rounded-full bg-sky-600 px-4 text-sm font-semibold text-white transition hover:bg-sky-700"
               >
-                <option value="any">{t('home.budgetAny')}</option>
-                <option value="2000">{t('home.budget0_2000')}</option>
-                <option value="5000">{t('home.budget2000_5000')}</option>
-                <option value="10000">{t('home.budget5000_10000')}</option>
-              </select>
+                {t('home.searchBarButton')}
+              </button>
             </div>
-            <div className="md:min-w-[10.5rem]">
-              <label htmlFor="home-days-filter" className="sr-only">
-                {t('home.daysFilterLabel')}
-              </label>
-              <select
-                id="home-days-filter"
-                value={daysFilter}
-                onChange={(e) => setDaysFilter(e.target.value)}
-                className="w-full px-3 py-2.5 min-h-10 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:bg-slate-800 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-              >
-                <option value="any">{t('home.daysAny')}</option>
-                <option value="3">{t('home.days3')}</option>
-                <option value="7">{t('home.days7')}</option>
-                <option value="15">{t('home.days15')}</option>
-              </select>
-            </div>
-            <button
-              type="submit"
-              className="px-6 py-2.5 min-h-10 bg-sky-600 hover:bg-sky-700 rounded-xl font-semibold text-white text-sm transition shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900"
+
+            {!minimal && (
+            <details
+              className="collapse-panel mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 dark:border-slate-600 dark:bg-slate-900/40"
+              aria-label={t('a11y.homeDetailsFilters')}
             >
-              {t('home.searchButton')}
-            </button>
-          </form>
-          {isAiChatEnabled() ? (
-            <div className="mb-3 rounded-2xl border border-slate-200/90 bg-white/90 dark:border-slate-700 dark:bg-slate-900/80 px-3 py-3 shadow-sm text-left">
-              <p className="text-xs font-semibold text-slate-800 dark:text-slate-100">{t('home.roadbookTitle')}</p>
-              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 mb-3 leading-relaxed">{t('home.roadbookLead')}</p>
-              <div className="flex flex-col sm:flex-row gap-2 sm:items-center mb-2">
-                <div className="flex-1 min-w-0 sm:max-w-[11rem]">
-                  <label htmlFor="roadbook-budget" className="sr-only">
-                    {t('home.roadbookBudgetLabel')}
+              <summary className="cursor-pointer list-none py-2.5 text-center text-xs font-semibold text-slate-600 marker:text-slate-400 dark:text-slate-300 [&::-webkit-details-marker]:hidden">
+                {t('home.searchFiltersSummary')}
+              </summary>
+              <div className="flex flex-col gap-3 border-t border-slate-200/80 px-3 pb-3 pt-2 dark:border-slate-700 sm:flex-row sm:items-center">
+                <div className="min-w-0 flex-1">
+                  <label htmlFor="home-budget-filter" className="sr-only">
+                    {t('home.budgetFilterLabel')}
                   </label>
                   <select
-                    id="roadbook-budget"
-                    value={roadbookBudget}
-                    onChange={(e) => setRoadbookBudget(e.target.value)}
-                    className="w-full px-3 py-2 min-h-10 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-700 dark:bg-slate-800 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+                    id="home-budget-filter"
+                    value={budgetMax}
+                    onChange={(e) => setBudgetMax(e.target.value)}
+                    className="app-input w-full min-h-10 text-sm"
                   >
                     <option value="any">{t('home.budgetAny')}</option>
                     <option value="2000">{t('home.budget0_2000')}</option>
@@ -541,15 +409,15 @@ export default function Home() {
                     <option value="10000">{t('home.budget5000_10000')}</option>
                   </select>
                 </div>
-                <div className="flex-1 min-w-0 sm:max-w-[11rem]">
-                  <label htmlFor="roadbook-days" className="sr-only">
-                    {t('home.roadbookDaysLabel')}
+                <div className="min-w-0 flex-1">
+                  <label htmlFor="home-days-filter" className="sr-only">
+                    {t('home.daysFilterLabel')}
                   </label>
                   <select
-                    id="roadbook-days"
-                    value={roadbookDays}
-                    onChange={(e) => setRoadbookDays(e.target.value)}
-                    className="w-full px-3 py-2 min-h-10 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-700 dark:bg-slate-800 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+                    id="home-days-filter"
+                    value={daysFilter}
+                    onChange={(e) => setDaysFilter(e.target.value)}
+                    className="app-input w-full min-h-10 text-sm"
                   >
                     <option value="any">{t('home.daysAny')}</option>
                     <option value="3">{t('home.days3')}</option>
@@ -558,144 +426,123 @@ export default function Home() {
                   </select>
                 </div>
               </div>
-              <div className="mb-2">
-                <label htmlFor="roadbook-region" className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
-                  {t('home.roadbookRegionLabel')}
-                </label>
-                <input
-                  id="roadbook-region"
-                  type="text"
-                  value={roadbookRegion}
-                  onChange={(e) => setRoadbookRegion(e.target.value)}
-                  placeholder={t('home.roadbookRegionPlaceholder')}
-                  maxLength={80}
-                  className="w-full px-3 py-2 min-h-10 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-800 dark:bg-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-                />
-              </div>
-              <div className="mb-2">
-                <label htmlFor="roadbook-notes" className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
-                  {t('home.roadbookNotesLabel')}
-                </label>
-                <textarea
-                  id="roadbook-notes"
-                  value={roadbookNotes}
-                  onChange={(e) => setRoadbookNotes(e.target.value)}
-                  placeholder={t('home.roadbookNotesPlaceholder')}
-                  rows={3}
-                  maxLength={400}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-800 dark:bg-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 resize-y min-h-[4.5rem]"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={dispatchRoadbookPrompt}
-                className="mb-2 w-full min-h-11 px-4 py-2.5 rounded-xl bg-sky-700 hover:bg-sky-800 dark:bg-sky-600 dark:hover:bg-sky-500 text-white text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900"
-              >
-                {t('home.roadbookCta')}
-              </button>
-              <p className="text-[11px] text-slate-500 dark:text-slate-500 leading-relaxed">{t('home.roadbookHint')}</p>
-            </div>
-          ) : (
-            <p className="mb-3 text-center text-[11px] text-slate-500 dark:text-slate-500">{t('home.roadbookDisabled')}</p>
-          )}
-          <details
-            className="collapse-panel group mb-3 rounded-xl border border-slate-200/90 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-900/30 text-left md:border-0 md:bg-transparent"
-            open={subBandDetailsOpen}
-            onToggle={(e) => {
-              if (isDesktopLayout) return
-              setMobileSubBandOpen(e.currentTarget.open)
-            }}
+            </details>
+            )}
+          </form>
+
+          <nav
+            className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-x-4 gap-y-5 sm:max-w-xl sm:grid-cols-4 sm:gap-x-6"
+            aria-label={t('a11y.homeCoreShortcuts')}
           >
-            <summary className="md:hidden cursor-pointer list-none rounded-xl px-3 py-2.5 text-center text-sm font-medium text-slate-700 dark:text-slate-200">
+            {HOME_CORE_NAV.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="group flex flex-col items-center gap-2 rounded-xl pb-1 pt-0.5 text-center outline-none transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:hover:bg-slate-900/80 dark:focus-visible:ring-offset-slate-950"
+              >
+                <span
+                  className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-2xl text-white shadow-md ring-2 ring-white/30 transition group-active:scale-[0.97] dark:ring-slate-900/40 ${item.circle}`}
+                  aria-hidden
+                >
+                  {item.emoji}
+                </span>
+                <span className="max-w-[5.5rem] text-[11px] font-semibold leading-snug text-slate-800 dark:text-slate-100 sm:max-w-none sm:text-xs">
+                  {t(item.labelKey)}
+                </span>
+              </Link>
+            ))}
+          </nav>
+
+          {!minimal && (
+          <p className="mx-auto mt-4 max-w-xl text-center text-xs text-slate-600 dark:text-slate-400 md:mx-0 md:text-left">
+            <Link
+              to="/trip-ai"
+              className="font-medium text-sky-700 underline-offset-2 hover:underline dark:text-sky-300"
+              aria-label={`${t('home.tripAiTeaser')} ${t('a11y.homeTripAiLink')}`}
+            >
+              {t('home.tripAiTeaser')}
+            </Link>
+          </p>
+          )}
+
+          {!minimal && (
+          <details
+            className="collapse-panel mx-auto mt-5 max-w-xl rounded-2xl border border-slate-100 bg-slate-50/80 dark:border-slate-700 dark:bg-slate-900/30 md:mx-0"
+            aria-label={t('a11y.homeDetailsSnapshot')}
+            open={subBandOpen}
+            onToggle={(e) => setSubBandOpen(e.currentTarget.open)}
+          >
+            <summary className="cursor-pointer list-none px-3 py-2.5 text-center text-xs font-medium text-slate-600 dark:text-slate-300 [&::-webkit-details-marker]:hidden">
               {t('home.subBandSummary')}
             </summary>
-            <div className="space-y-3 px-1 pb-3 pt-0 md:space-y-3 md:px-0 md:pb-0">
-              {/* 站点统计（首页极简：理念与五柱见关于页） */}
-              <div className="rounded-xl border border-slate-200/90 bg-white/70 dark:border-slate-700 dark:bg-slate-900/50 px-3 py-2.5 text-center shadow-sm">
-                <div
-                  className="flex flex-wrap justify-center gap-1.5 text-[11px] leading-tight"
-                  role="group"
-                  aria-label={t('home.heroStatsAria')}
-                >
-                  <span className="rounded-full bg-slate-100 dark:bg-slate-800/90 px-2 py-0.5 border border-slate-200/90 dark:border-slate-600 text-slate-700 dark:text-slate-200">
-                    {t('home.heroStatDestinations', { count: siteSnapshot.destinationCount })}
-                  </span>
-                  <span className="rounded-full bg-slate-100 dark:bg-slate-800/90 px-2 py-0.5 border border-slate-200/90 dark:border-slate-600 text-slate-700 dark:text-slate-200">
-                    {t('home.heroStatGuides', { count: siteSnapshot.guideCount })}
-                  </span>
-                  <span className="rounded-full bg-slate-100 dark:bg-slate-800/90 px-2 py-0.5 border border-slate-200/90 dark:border-slate-600 text-slate-700 dark:text-slate-200">
-                    {t('home.heroStatRegions', { count: siteSnapshot.continentCount })}
-                  </span>
-                </div>
+            <div className="space-y-3 border-t border-slate-200/80 px-3 pb-3 pt-3 dark:border-slate-700">
+              <div
+                className="flex flex-wrap justify-center gap-1.5 text-[11px] leading-tight"
+                role="group"
+                aria-label={t('home.heroStatsAria')}
+              >
+                <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                  {t('home.heroStatDestinations', { count: siteSnapshot.destinationCount })}
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                  {t('home.heroStatGuides', { count: siteSnapshot.guideCount })}
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                  {t('home.heroStatRegions', { count: siteSnapshot.continentCount })}
+                </span>
               </div>
-              <nav className="max-w-2xl mx-auto text-center" aria-label={t('home.hotSearchAria')}>
-                <p className="text-xs font-medium text-slate-700 dark:text-slate-200 mb-2">{t('home.hotSearchTitle')}</p>
+              <nav className="text-center" aria-label={t('home.hotSearchAria')}>
+                <p className="mb-2 text-xs font-medium text-slate-600 dark:text-slate-300">{t('home.hotSearchTitle')}</p>
                 <div className="flex flex-wrap justify-center gap-1.5">
                   {hotPickDestinations.map((d) => (
                     <Link
                       key={d.id}
                       to={`/routes?destination=${encodeURIComponent(d.name)}`}
-                      className="px-2.5 py-1 min-h-8 rounded-full bg-white dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium border border-slate-200/90 dark:border-slate-600 transition [touch-action:manipulation] shadow-sm"
+                      aria-label={t('a11y.homeHotPickFilter', { name: d.name })}
+                      className="min-h-8 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-800 transition hover:border-sky-300 hover:bg-sky-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
                     >
                       {d.name}
                     </Link>
                   ))}
                 </div>
               </nav>
-              <nav
-                className="pt-4 border-t border-slate-200/80 dark:border-slate-700/80 text-center"
-                aria-label={t('home.quickNavAria')}
-              >
-                <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">{t('home.quickNavLead')}</p>
-                <div className="flex flex-wrap justify-center gap-1.5">
-                  <Link
-                    to="/map"
-                    className="px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium border border-slate-200/90 dark:border-slate-600 transition min-h-9 inline-flex items-center shadow-sm"
-                  >
-                    {t('common.navMap')}
-                  </Link>
-                  <Link
-                    to="/routes"
-                    className="px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium border border-slate-200/90 dark:border-slate-600 transition min-h-9 inline-flex items-center shadow-sm"
-                  >
-                    {t('common.navHotCountries')}
-                  </Link>
-                  <Link
-                    to="/budget"
-                    className="px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium border border-slate-200/90 dark:border-slate-600 transition min-h-9 inline-flex items-center shadow-sm"
-                  >
-                    {t('common.navSavingTips')}
-                  </Link>
-                  <Link
-                    to="/about"
-                    className="px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium border border-slate-200/90 dark:border-slate-600 transition min-h-9 inline-flex items-center shadow-sm"
-                  >
-                    {t('common.navAbout')}
-                  </Link>
-                </div>
-              </nav>
             </div>
           </details>
-          <p className="mt-4 text-[11px] text-slate-500 dark:text-slate-500">
-            <span>{t('home.heroPhotoCreditPrefix')} </span>
-            <a
-              href={HOME_HERO_PHOTO_PAGE}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-sky-800 dark:text-sky-300 underline underline-offset-2 hover:opacity-90"
-            >
-              {t('home.heroPhotoCredit')}
-            </a>
+          )}
+        </div>
+      </section>
+
+      <section
+        id="home-map-explore"
+        className="scroll-mt-24 border-b border-slate-200/80 bg-slate-50 py-6 dark:border-slate-800 dark:bg-slate-950 sm:py-8"
+        aria-labelledby="home-map-explore-title"
+        aria-describedby="home-map-explore-lead"
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <h2 id="home-map-explore-title" tabIndex={-1} className="text-base font-bold text-slate-900 dark:text-slate-50 sm:text-lg">
+            {t('home.mapExploreTitle')}
+          </h2>
+          <p id="home-map-explore-lead" className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400 sm:text-sm">
+            {t('home.mapExploreLead')}
           </p>
+        </div>
+        <div className="mx-auto max-w-7xl px-2 sm:px-6">
+          <HomeMapEmbed />
         </div>
       </section>
 
       {searchTrimmed ? (
-        <section id="home-search-results" className="max-w-7xl mx-auto px-4 pt-6 pb-2 scroll-mt-24">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-1">{t('home.searchResultsTitle')}</h2>
-          {mergedSearchResults.length > 0 ? (
-            <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">{t('home.searchResultsCount', { count: mergedSearchResults.length })}</p>
-          ) : null}
+        <section id="home-search-results" className="mx-auto max-w-7xl scroll-mt-24 px-4 pb-4 pt-10 sm:px-6" aria-labelledby="home-search-results-title">
+          <div className="mb-6">
+            <HomeSectionTitle id="home-search-results-title" tabIndex={-1}>
+              {t('home.searchResultsTitle')}
+            </HomeSectionTitle>
+            {mergedSearchResults.length > 0 ? (
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400" aria-live="polite">
+                {t('home.searchResultsCount', { count: mergedSearchResults.length })}
+              </p>
+            ) : null}
+          </div>
           {mergedSearchResults.length === 0 ? (
             <EmptyState
               emoji="🔍"
@@ -710,12 +557,12 @@ export default function Home() {
                 <div key={article.id} className="relative">
                   <Link
                     to={`/routes/${article.id}`}
-                    className="group block bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-md motion-safe:hover:shadow-lg motion-safe:transition border border-slate-100 dark:border-slate-700"
+                    className="group block rounded-xl overflow-hidden shadow-md motion-safe:hover:shadow-lg motion-safe:transition border border-slate-100 dark:border-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 bg-white dark:bg-slate-900"
                   >
                     <div className="h-48 overflow-hidden relative">
                       <OptimizedImage
                         src={cover}
-                        alt=""
+                        alt={t('home.searchResultCoverAlt', { title: article.title })}
                         loading="lazy"
                         w={900}
                         h={384}
@@ -769,15 +616,26 @@ export default function Home() {
         </section>
       ) : null}
 
-      <section id="home-featured" className="max-w-7xl mx-auto px-4 py-12 scroll-mt-24">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2 md:mb-6">
-          🔥 {t('home.featuredRoutes')}
-        </h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+      {!minimal && (
+      <>
+      <section id="home-featured" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-14 sm:px-6 sm:py-16">
+        <div className="mb-10 flex flex-col gap-5 sm:mb-12 md:flex-row md:items-end md:justify-between">
+          <HomeSectionTitle id="home-featured-title" tabIndex={-1}>
+            {t('home.featuredRoutes')}
+          </HomeSectionTitle>
+          <Link
+            to="/routes"
+            aria-label={t('a11y.homeViewAllGuides')}
+            className="shrink-0 self-start text-sm font-semibold text-sky-700 underline decoration-sky-300/80 decoration-2 underline-offset-4 hover:text-sky-900 dark:text-sky-300 dark:decoration-sky-600/80 dark:hover:text-sky-200 md:self-auto"
+          >
+            {t('home.viewAll')}
+          </Link>
+        </div>
+        <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
           {t('common.fxDisclaimer')}{' '}
           <span className="text-slate-400 dark:text-slate-500">({t('common.usdToggleLead')})</span>
         </p>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 md:hidden">{t('ui.swipeHint')}</p>
+        <p className="mb-6 text-xs text-slate-500 dark:text-slate-400 md:hidden">{t('ui.swipeHint')}</p>
         {filteredFeaturedRoutes.length === 0 ? (
           <EmptyState
             emoji="🔥"
@@ -792,7 +650,7 @@ export default function Home() {
               <Link
                 key={route.id}
                 to={`/routes/${route.id}`}
-                className="flex-shrink-0 w-[min(18rem,calc(100vw-2.5rem))] snap-start group"
+                className="flex-shrink-0 w-[min(18rem,calc(100vw-2.5rem))] snap-start group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 rounded-2xl"
               >
                 <div className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-md motion-safe:hover:shadow-xl motion-safe:transition-all motion-safe:duration-300 border border-slate-100 dark:border-slate-700">
                   <div className="h-40 bg-slate-200 dark:bg-slate-800 relative overflow-hidden">
@@ -830,12 +688,13 @@ export default function Home() {
         )}
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 py-12">
-        <div className="flex justify-between items-center mb-6 gap-3">
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">🌏 {t('home.popularDestinations')}</h2>
+      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16">
+        <div className="mb-10 flex flex-col gap-5 sm:mb-12 md:flex-row md:items-end md:justify-between">
+          <HomeSectionTitle>{t('home.popularDestinations')}</HomeSectionTitle>
           <Link
             to="/routes"
-            className="text-sky-700 dark:text-sky-300 hover:text-sky-800 dark:hover:text-sky-200 font-medium min-h-11 inline-flex items-center shrink-0"
+            aria-label={t('a11y.homeViewAllGuides')}
+            className="shrink-0 self-start text-sm font-semibold text-sky-700 underline decoration-sky-300/80 decoration-2 underline-offset-4 hover:text-sky-900 dark:text-sky-300 dark:decoration-sky-600/80 dark:hover:text-sky-200 md:self-auto"
           >
             {t('home.viewAll')}
           </Link>
@@ -911,16 +770,13 @@ export default function Home() {
         )}
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <AdSlot slotId="home-mid" className="min-h-[80px]" />
-      </div>
-
-      <section className="max-w-7xl mx-auto px-4 py-12">
-        <div className="flex justify-between items-center mb-6 gap-3">
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">📝 {t('home.latestArticles')}</h2>
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12">
+        <div className="mb-10 flex flex-col gap-5 sm:mb-12 md:flex-row md:items-end md:justify-between">
+          <HomeSectionTitle>{t('home.latestArticles')}</HomeSectionTitle>
           <Link
             to="/routes"
-            className="text-sky-700 dark:text-sky-300 hover:text-sky-800 dark:hover:text-sky-200 font-medium min-h-11 inline-flex items-center shrink-0"
+            aria-label={t('a11y.homeViewAllGuides')}
+            className="shrink-0 self-start text-sm font-semibold text-sky-700 underline decoration-sky-300/80 decoration-2 underline-offset-4 hover:text-sky-900 dark:text-sky-300 dark:decoration-sky-600/80 dark:hover:text-sky-200 md:self-auto"
           >
             {t('home.viewAll')}
           </Link>
@@ -939,7 +795,7 @@ export default function Home() {
               <div key={article.id} className="relative">
                 <Link
                   to={`/routes/${article.id}`}
-                  className="group block bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-md motion-safe:hover:shadow-lg motion-safe:transition border border-slate-100 dark:border-slate-700"
+                  className="group block rounded-xl overflow-hidden shadow-md motion-safe:hover:shadow-lg motion-safe:transition border border-slate-100 dark:border-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 bg-white dark:bg-slate-900"
                 >
                   <div className="h-48 overflow-hidden">
                     <OptimizedImage
@@ -986,15 +842,18 @@ export default function Home() {
       </section>
 
       {recentUserGuides.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 py-12 bg-slate-100/50 dark:bg-slate-900/40 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
-          <div className="flex justify-between items-center mb-6 gap-3">
+        <section className="mx-auto max-w-7xl rounded-3xl border border-slate-200/90 bg-gradient-to-br from-slate-50/90 via-white to-sky-50/40 px-4 py-14 shadow-inner dark:border-slate-700 dark:from-slate-900/80 dark:via-slate-950 dark:to-slate-900/60 sm:px-8 sm:py-16">
+          <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">✨ {t('userGuide.recentUserGuides')}</h2>
-              <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">{t('userGuide.recentUserGuidesSub')}</p>
+              <HomeSectionTitle>{t('userGuide.recentUserGuides')}</HomeSectionTitle>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                {t('userGuide.recentUserGuidesSub')}
+              </p>
             </div>
             <Link
               to="/routes"
-              className="text-sky-700 dark:text-sky-300 hover:text-sky-800 dark:hover:text-sky-200 font-medium whitespace-nowrap min-h-11 inline-flex items-center shrink-0"
+              aria-label={t('a11y.homeViewAllUserGuides')}
+              className="shrink-0 self-start text-sm font-semibold text-sky-700 underline decoration-sky-300/80 decoration-2 underline-offset-4 hover:text-sky-900 dark:text-sky-300 dark:decoration-sky-600/80 dark:hover:text-sky-200 md:self-auto"
             >
               {t('userGuide.viewAllGuides')}
             </Link>
@@ -1004,7 +863,7 @@ export default function Home() {
               <div key={item.id} className="relative">
                 <Link
                   to={`/routes/${item.id}`}
-                  className="group block bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-md motion-safe:hover:shadow-lg motion-safe:transition border border-slate-100 dark:border-slate-700"
+                  className="group block rounded-xl overflow-hidden shadow-md motion-safe:hover:shadow-lg motion-safe:transition border border-slate-100 dark:border-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 bg-white dark:bg-slate-900"
                 >
                   <div className="h-48 overflow-hidden relative">
                     <OptimizedImage
@@ -1053,16 +912,20 @@ export default function Home() {
         </section>
       )}
 
-      <section className="max-w-7xl mx-auto px-4 py-8">
+      <section className="mx-auto max-w-7xl px-4 pb-14 pt-2 sm:px-6 sm:pb-16">
         <Link
           to="/community"
-          className="block text-center py-6 px-4 min-h-[5.5rem] rounded-2xl bg-gradient-to-r from-sky-500/10 via-cyan-500/10 to-emerald-500/10 dark:from-sky-500/5 dark:via-cyan-500/5 dark:to-emerald-500/5 border border-sky-200/80 dark:border-slate-600 hover:border-sky-300 dark:hover:border-sky-600/60 transition"
+          aria-label={t('a11y.homeJoinCommunity')}
+          className="block rounded-2xl border border-slate-200 bg-white px-5 py-6 text-center text-slate-800 shadow-sm transition hover:border-sky-200 hover:bg-sky-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-sky-800 dark:hover:bg-slate-800/80 dark:focus-visible:ring-offset-slate-950"
         >
-          <span className="text-xl">🤝</span>
-          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mt-2">{t('home.joinCommunity')}</h2>
-          <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">{t('home.joinCommunityDesc')}</p>
+          <h2 className="text-base font-bold text-slate-900 dark:text-slate-50">{t('home.joinCommunity')}</h2>
+          <p className="mx-auto mt-2 max-w-lg text-xs leading-relaxed text-slate-600 dark:text-slate-400 sm:text-sm">
+            {t('home.joinCommunityDesc')}
+          </p>
         </Link>
       </section>
+      </>
+      )}
     </div>
   )
 }

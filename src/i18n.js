@@ -1,44 +1,27 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import LanguageDetector from 'i18next-browser-languagedetector'
 import zhCN from './locales/zh-CN.json'
-import en from './locales/en.json'
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    resources: {
-      'zh-CN': { translation: zhCN },
-      en: { translation: en },
-    },
-    /** 根组件未包 Suspense 时，useSuspense:true 会导致首屏白屏 */
-    react: { useSuspense: false },
-    /** 全球访客：浏览器语言优先；缺 key 时先回退英文再中文 */
-    fallbackLng: ['en', 'zh-CN'],
-    supportedLngs: ['en', 'zh-CN'],
-    interpolation: { escapeValue: false },
-    detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
-      caches: ['localStorage'],
-      convertDetectedLanguage: (lng) => {
-        if (!lng || typeof lng !== 'string') return lng
-        const lower = lng.toLowerCase()
-        if (lower === 'zh' || lower.startsWith('zh-')) return 'zh-CN'
-        if (lower === 'en' || lower.startsWith('en-')) return 'en'
-        return lng
-      },
-    },
-  })
+/** 中国版：仅简体中文资源，不加载英文包、不做浏览器语言探测。市场范围见 `src/product/marketScope.js`。 */
+i18n.use(initReactI18next).init({
+  resources: {
+    'zh-CN': { translation: zhCN },
+  },
+  lng: 'zh-CN',
+  fallbackLng: 'zh-CN',
+  supportedLngs: ['zh-CN'],
+  react: { useSuspense: false },
+  interpolation: { escapeValue: false },
+})
 
-function syncDocumentLang(lng) {
+function syncDocumentLang() {
   if (typeof document === 'undefined') return
-  document.documentElement.lang = lng === 'zh-CN' ? 'zh-CN' : lng
+  document.documentElement.lang = 'zh-CN'
 }
 
 i18n.on('languageChanged', syncDocumentLang)
 if (typeof document !== 'undefined') {
-  syncDocumentLang(i18n.language)
+  syncDocumentLang()
 }
 
 export default i18n

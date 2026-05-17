@@ -68,6 +68,20 @@ export default function RouteCard({ item, cover, showUsdApprox, language }) {
               date: formatDate(item.date, language),
             })}
           </p>
+          {item.days > 0 && typeof item.budget === 'number' && item.budget > 0 ? (
+            <p className="mt-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              {(() => {
+                const daily = Math.max(1, Math.round(item.budget / item.days))
+                const usd = showUsdApprox ? approxUsdFromCny(daily) : null
+                return usd != null
+                  ? t('articles.routeCardPerDayUsd', {
+                      cny: formatInteger(daily, language),
+                      usd,
+                    })
+                  : t('articles.routeCardPerDay', { cny: formatInteger(daily, language) })
+              })()}
+            </p>
+          ) : null}
         </div>
       </Link>
       <div className="absolute right-2 top-2 z-10">

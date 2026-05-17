@@ -15,6 +15,7 @@ import CopyPageLinkButton from '../components/CopyPageLinkButton'
 import { assignArticleGridCoversInOrder } from '../utils/homePlaceCover.js'
 import JsonLd from '../components/JsonLd'
 import { absolutePageUrl } from '../utils/siteUrl'
+import { keywordForTopic } from '../data/guideLibrary/topicRouteFilter.js'
 
 const BUDGET_OPTIONS = [
   { value: 'any', labelKey: 'home.budgetAny' },
@@ -59,7 +60,7 @@ export default function Articles() {
   const [destinationFilter, setDestinationFilter] = useState(() => searchParams.get('destination') || 'any')
   const [sortBy, setSortBy] = useState(() => {
     const s = searchParams.get('sort')
-    return s && SORT_SET.has(s) ? s : 'default'
+    return s && SORT_SET.has(s) ? s : 'budgetAsc'
   })
   const [sourceFilter, setSourceFilter] = useState(() => parseSourceFromParams(searchParams))
   const [keyword, setKeyword] = useState(() => searchParams.get('keyword') || '')
@@ -79,9 +80,12 @@ export default function Articles() {
     setDaysFilter(DAYS_SET.has(d) ? d : 'any')
     const dest = searchParams.get('destination')
     setDestinationFilter(dest || 'any')
-    setKeyword(searchParams.get('keyword') || '')
+    const topic = searchParams.get('topic')
+    const kwTopic = topic ? keywordForTopic(topic) : ''
+    const kwParam = (searchParams.get('keyword') || '').trim()
+    setKeyword(kwParam || kwTopic)
     const s = searchParams.get('sort')
-    setSortBy(SORT_SET.has(s) ? s : 'default')
+    setSortBy(SORT_SET.has(s) ? s : 'budgetAsc')
     setSourceFilter(parseSourceFromParams(searchParams))
   }, [searchParams])
 
@@ -93,7 +97,7 @@ export default function Articles() {
       const p = new URLSearchParams()
       if (destinationFilter !== 'any') p.set('destination', destinationFilter)
       if (keyword.trim()) p.set('keyword', keyword.trim())
-      if (sortBy !== 'default') p.set('sort', sortBy)
+      if (sortBy !== 'budgetAsc') p.set('sort', sortBy)
       if (budgetMax !== 'any') p.set('budget', budgetMax)
       if (daysFilter !== 'any') p.set('days', daysFilter)
       if (sourceFilter !== 'all') p.set('source', sourceFilter)
@@ -138,7 +142,7 @@ export default function Articles() {
     budgetMax !== 'any' ||
     daysFilter !== 'any' ||
     destinationFilter !== 'any' ||
-    sortBy !== 'default' ||
+    sortBy !== 'budgetAsc' ||
     sourceFilter !== 'all' ||
     keyword.trim().length > 0
 
@@ -146,7 +150,7 @@ export default function Articles() {
     setBudgetMax('any')
     setDaysFilter('any')
     setDestinationFilter('any')
-    setSortBy('default')
+    setSortBy('budgetAsc')
     setSourceFilter('all')
     setKeyword('')
     setSearchParams({})
@@ -193,6 +197,9 @@ export default function Articles() {
         <Breadcrumbs items={breadcrumbs} />
         <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">{t('articles.title')}</h1>
         <p className="text-slate-600 dark:text-slate-400 mb-1">{t('articles.subtitle')}</p>
+        <p className="text-xs text-slate-600 dark:text-slate-400 mb-2 rounded-lg border border-sky-100 bg-sky-50/80 px-3 py-2 dark:border-sky-900/50 dark:bg-sky-950/25">
+          {t('articles.budgetFirstLead')}
+        </p>
         <p className="text-xs text-slate-500 dark:text-slate-500 mb-6">{t('articles.stickyFiltersLead')}</p>
 
         <StickyFilterBar>
@@ -290,10 +297,9 @@ export default function Articles() {
               aria-label={t('sort.label')}
               className="px-3 py-2 min-h-11 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
-              <option value="default">{t('sort.default')}</option>
+              <option value="budgetAsc">{t('sort.budgetAsc')}</option>
               <option value="dateDesc">{t('sort.dateDesc')}</option>
               <option value="viewsDesc">{t('sort.viewsDesc')}</option>
-              <option value="budgetAsc">{t('sort.budgetAsc')}</option>
               <option value="daysAsc">{t('sort.daysAsc')}</option>
             </select>
           </div>

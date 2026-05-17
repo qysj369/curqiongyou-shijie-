@@ -9,9 +9,9 @@ import { getAllBuddyPosts } from '../data/buddiesStore'
 const BOARD_STORAGE_POSTS = 'budget-travel-board-posts'
 
 const CARDS = [
-  { to: '/community/qa', key: 'qa', icon: '💬', descKey: 'community.qaDesc', cta: '去问答区 · Open Q&A' },
-  { to: '/community/buddies', key: 'buddies', icon: '🤝', descKey: 'community.buddiesDesc', cta: '发布旅伴 · Find buddies' },
-  { to: '/board', key: 'board', icon: '📋', descKey: 'community.boardDesc', cta: '写条留言 · Post to board' },
+  { to: '/community/qa', key: 'qa', icon: '💬', descKey: 'community.qaDesc', ctaKey: 'community.cardCtaQa' },
+  { to: '/community/buddies', key: 'buddies', icon: '🤝', descKey: 'community.buddiesDesc', ctaKey: 'community.cardCtaBuddies' },
+  { to: '/board', key: 'board', icon: '📋', descKey: 'community.boardDesc', ctaKey: 'community.cardCtaBoard' },
 ]
 
 function getBoardPostsCount() {
@@ -74,7 +74,7 @@ export default function Community() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {CARDS.map(({ to, key, icon, descKey, cta }) => (
+          {CARDS.map(({ to, key, icon, descKey, ctaKey }) => (
             <Link
               key={key}
               to={to}
@@ -88,10 +88,10 @@ export default function Community() {
                 {t(descKey)}
               </p>
               <p className="mt-3 text-xs font-medium text-slate-500 dark:text-slate-400">
-                当前 {counts[key] || 0} 条实时内容
+                {t('community.liveCountLine', { count: counts[key] || 0 })}
               </p>
               <span className="mt-4 inline-flex min-h-10 items-center rounded-lg bg-sky-600 px-3 py-2 text-xs font-semibold text-white group-hover:bg-sky-700 transition">
-                {cta}
+                {t(ctaKey)}
               </span>
             </Link>
           ))}
