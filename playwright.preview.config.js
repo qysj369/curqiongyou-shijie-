@@ -14,14 +14,14 @@ export default defineConfig({
   reporter: 'list',
   timeout: 60_000,
   use: {
-    baseURL: 'http://127.0.0.1:4173',
+    baseURL: process.env.PREVIEW_BASE_URL || 'http://127.0.0.1:4173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command: 'npx vite preview --host 127.0.0.1 --port 4173 --strictPort',
-    url: 'http://127.0.0.1:4173',
+    url: process.env.PREVIEW_BASE_URL || 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

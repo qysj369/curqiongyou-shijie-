@@ -58,19 +58,26 @@ jobs:
       - name: Install
         run: npm install
 
-      - name: Check VITE_SITE_URL (repository variable)
+      - name: Resolve Pages build env
+        id: pages_env
         run: |
           if [ -z "${{ vars.VITE_SITE_URL }}" ]; then
-            echo "::error::请在仓库 Settings → Secrets and variables → Actions → Variables 中新增 VITE_SITE_URL（生产站点根 URL，https 开头、无尾斜杠）。"
+            echo "::error::请在仓库 Variables 中设置 VITE_SITE_URL，例如 https://qysj369.github.io/curqiongyou-shijie-（无尾斜杠）"
             exit 1
           fi
+          if [ -n "${{ vars.PAGES_BASE }}" ]; then
+            echo "base=${{ vars.PAGES_BASE }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "base=/${{ github.event.repository.name }}/" >> "$GITHUB_OUTPUT"
+          fi
+          echo "site_url=${{ vars.VITE_SITE_URL }}" >> "$GITHUB_OUTPUT"
+          echo "preview_base=http://127.0.0.1:4173/${{ github.event.repository.name }}/" >> "$GITHUB_OUTPUT"
 
       - name: Build
         run: npm run build
         env:
-          # 未设置 PAGES_BASE 时由 vite 回落为 `/`；子路径部署在 Variables 中设为 `/仓库名/`
-          BASE: ${{ vars.PAGES_BASE }}
-          VITE_SITE_URL: ${{ vars.VITE_SITE_URL }}
+          BASE: ${{ steps.pages_env.outputs.base }}
+          VITE_SITE_URL: ${{ steps.pages_env.outputs.site_url }}
 
       - name: Install Playwright Chromium (preview E2E)
         run: npx playwright install --with-deps chromium
@@ -79,6 +86,7 @@ jobs:
         run: npx playwright test --config=playwright.preview.config.js
         env:
           CI: true
+          PREVIEW_BASE_URL: ${{ steps.pages_env.outputs.preview_base }}
 
       - name: Write CNAME (optional custom domain)
         if: ${{ vars.PAGES_CNAME != '' }}
