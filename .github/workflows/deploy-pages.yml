@@ -61,16 +61,17 @@ jobs:
       - name: Resolve Pages build env
         id: pages_env
         run: |
-          if [ -z "${{ vars.VITE_SITE_URL }}" ]; then
-            echo "::error::请在仓库 Variables 中设置 VITE_SITE_URL，例如 https://qysj369.github.io/curqiongyou-shijie-（无尾斜杠）"
-            exit 1
+          if [ -n "${{ vars.VITE_SITE_URL }}" ]; then
+            echo "site_url=${{ vars.VITE_SITE_URL }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "site_url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}" >> "$GITHUB_OUTPUT"
+            echo "::warning::未设置 Variables「VITE_SITE_URL」，已用默认 GitHub Pages 地址；建议在 Settings → Actions → Variables 中填写正式域名。"
           fi
           if [ -n "${{ vars.PAGES_BASE }}" ]; then
             echo "base=${{ vars.PAGES_BASE }}" >> "$GITHUB_OUTPUT"
           else
             echo "base=/${{ github.event.repository.name }}/" >> "$GITHUB_OUTPUT"
           fi
-          echo "site_url=${{ vars.VITE_SITE_URL }}" >> "$GITHUB_OUTPUT"
           echo "preview_base=http://127.0.0.1:4173/${{ github.event.repository.name }}/" >> "$GITHUB_OUTPUT"
 
       - name: Build
