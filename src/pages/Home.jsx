@@ -26,6 +26,7 @@ import { useMapHomeImmersive } from '../hooks/useMapHomeImmersive'
 import { PLACE_GEO_BY_ID } from '../data/placeGeo.generated'
 import { useToast } from '../contexts/ToastContext'
 import PageFallback from '../components/PageFallback'
+import MapSectionErrorBoundary from '../components/MapSectionErrorBoundary.jsx'
 import { readAutoLocateEnabled, AUTO_LOCATE_PREF_CHANGED } from '../lib/homeAutoLocatePreference.js'
 
 const GlobalMapSearch = lazy(() => import('../components/GlobalMapSearch.jsx'))
@@ -68,7 +69,9 @@ function HomeMapEmbed() {
     <div ref={wrapRef} className="mx-auto max-w-7xl px-2 sm:px-6">
       {mountMap ? (
         <Suspense fallback={skeleton}>
-          <GlobalMapSearch compact embedInHome />
+          <MapSectionErrorBoundary>
+            <GlobalMapSearch compact embedInHome />
+          </MapSectionErrorBoundary>
         </Suspense>
       ) : (
         skeleton
@@ -314,7 +317,9 @@ export default function Home() {
   if (mapHomeImmersive) {
     return (
       <Suspense fallback={<PageFallback />}>
-        <GlobalMapSearch immersive />
+        <MapSectionErrorBoundary>
+          <GlobalMapSearch immersive />
+        </MapSectionErrorBoundary>
       </Suspense>
     )
   }
@@ -452,6 +457,24 @@ export default function Home() {
               </Link>
             ))}
           </nav>
+
+          <Link
+            to="/china-readiness"
+            className="mx-auto mt-6 flex max-w-xl items-start gap-3 rounded-2xl border border-sky-200/90 bg-sky-50/90 px-4 py-3 text-left transition hover:border-sky-300 hover:bg-sky-50 dark:border-sky-800 dark:bg-sky-950/40 dark:hover:bg-sky-950/60 md:mx-0"
+            aria-label={t('home.chinaReadinessCtaAria')}
+          >
+            <span className="mt-0.5 text-lg" aria-hidden>
+              ✓
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold text-sky-900 dark:text-sky-100">
+                {t('home.chinaReadinessCtaTitle')}
+              </span>
+              <span className="mt-0.5 block text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                {t('home.chinaReadinessCtaDesc')}
+              </span>
+            </span>
+          </Link>
 
           {!minimal && (
           <p className="mx-auto mt-4 max-w-xl text-center text-xs text-slate-600 dark:text-slate-400 md:mx-0 md:text-left">

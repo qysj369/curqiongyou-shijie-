@@ -8,6 +8,7 @@ import SkipLink from './components/SkipLink'
 import Header from './components/Header'
 import BottomNav from './components/BottomNav'
 import SiteCapabilityHint from './components/SiteCapabilityHint'
+import NetworkStatusBanner from './components/NetworkStatusBanner'
 import BackToTop from './components/BackToTop'
 import Footer from './components/Footer'
 import PageFallback from './components/PageFallback'
@@ -75,6 +76,7 @@ export function AppLayout() {
       <RecentPathsTracker />
       <div className="min-h-screen flex flex-col bg-transparent dark:bg-slate-950">
         <SkipLink />
+        <NetworkStatusBanner />
         {!isPlannerImmersive && !mapHomeImmersive && <Header />}
         {!isPlannerImmersive && !mapHomeImmersive && !minimalUi && <SiteCapabilityHint />}
         <main

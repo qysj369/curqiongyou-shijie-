@@ -210,6 +210,13 @@ export default function Me() {
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{t('me.cardStewardDesc')}</p>
           </Link>
           <Link
+            to="/china-readiness"
+            className="rounded-xl border border-sky-200 bg-sky-50/80 p-4 transition hover:border-sky-400 dark:border-sky-800 dark:bg-sky-950/40"
+          >
+            <h2 className="font-semibold text-sky-900 dark:text-sky-100">{t('me.cardChinaReadinessTitle')}</h2>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{t('me.cardChinaReadinessDesc')}</p>
+          </Link>
+          <Link
             to="/community"
             className="rounded-xl border border-slate-200 bg-white p-4 transition hover:border-sky-400 sm:col-span-2 dark:border-slate-700 dark:bg-slate-900"
           >
