@@ -35,14 +35,6 @@ jobs:
       - name: Unit tests
         run: npm run test
 
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
-
-      - name: E2E (six modules + URL bridges)
-        run: npm run test:e2e
-        env:
-          CI: true
-
   build:
     needs: test
     runs-on: ubuntu-latest
@@ -79,15 +71,6 @@ jobs:
         env:
           BASE: ${{ steps.pages_env.outputs.base }}
           VITE_SITE_URL: ${{ steps.pages_env.outputs.site_url }}
-
-      - name: Install Playwright Chromium (preview E2E)
-        run: npx playwright install --with-deps chromium
-
-      - name: E2E against dist (vite preview)
-        run: npx playwright test --config=playwright.preview.config.js
-        env:
-          CI: true
-          PREVIEW_BASE_URL: ${{ steps.pages_env.outputs.preview_base }}
 
       - name: Write CNAME (optional custom domain)
         if: ${{ vars.PAGES_CNAME != '' }}

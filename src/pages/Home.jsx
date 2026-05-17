@@ -810,7 +810,7 @@ export default function Home() {
                   </div>
                   <div className="p-4">
                     <div className="flex flex-wrap gap-2 mb-2">
-                      {article.tags.map((tag) => (
+                      {(article.tags ?? []).map((tag) => (
                         <span
                           key={tag}
                           className="text-xs px-2 py-0.5 bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 rounded"
