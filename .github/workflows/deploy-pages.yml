@@ -67,10 +67,20 @@ jobs:
           echo "preview_base=http://127.0.0.1:4173/${{ github.event.repository.name }}/" >> "$GITHUB_OUTPUT"
 
       - name: Build
-        run: npm run build
+        run: npm run build:pages
         env:
-          BASE: ${{ steps.pages_env.outputs.base }}
+          PAGES_BASE: ${{ steps.pages_env.outputs.base }}
           VITE_SITE_URL: ${{ steps.pages_env.outputs.site_url }}
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: Verify dist/assets
+        run: |
+          count=$(find dist/assets -type f 2>/dev/null | wc -l)
+          if [ "$count" -lt 2 ]; then
+            echo "::error::构建产物不完整（dist/assets 文件过少）。请查看 Build 日志。"
+            exit 1
+          fi
+          echo "dist/assets files: $count"
 
       - name: Write CNAME (optional custom domain)
         if: ${{ vars.PAGES_CNAME != '' }}

@@ -6,6 +6,9 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: process.env.BASE || '/',
+  build: {
+    chunkSizeWarningLimit: 1200,
+  },
   // 预览异常时常见原因：5173 被占用（strictPort 会直接退出）、或 localhost 解析异常（可改用 127.0.0.1）
   server: {
     port: 5173,
