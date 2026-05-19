@@ -7,11 +7,11 @@ import Breadcrumbs from '../components/Breadcrumbs'
 import UserGuideForm from '../components/UserGuideForm'
 import EmptyState from '../components/EmptyState'
 import RouteCard from '../components/RouteCard'
-import StickyFilterBar from '../components/StickyFilterBar'
+import ArticlesFilterPanel from '../components/ArticlesFilterPanel'
+import { useMinimalUi } from '../contexts/MinimalUiContext'
 import { matchesGuideCard } from '../utils/searchMatch'
 import { formatInteger } from '../utils/localeFormat'
 import { useUsdApproxDisplay } from '../contexts/UsdApproxPreferenceContext'
-import CopyPageLinkButton from '../components/CopyPageLinkButton'
 import { assignArticleGridCoversInOrder } from '../utils/homePlaceCover.js'
 import JsonLd from '../components/JsonLd'
 import { absolutePageUrl } from '../utils/siteUrl'
@@ -23,24 +23,9 @@ import {
   matchesArticleDestinationFilter,
 } from '../utils/chinaCityFromTitle.js'
 import {
-  ARTICLE_INTENT_FILTER_OPTIONS,
-  INTENT_CHIP_GROUPS,
   isValidArticleIntentFilter,
   matchesArticleIntentFilter,
 } from '../data/chinaIntentVariants.js'
-
-const BUDGET_OPTIONS = [
-  { value: 'any', labelKey: 'home.budgetAny' },
-  { value: '2000', labelKey: 'home.budget0_2000' },
-  { value: '5000', labelKey: 'home.budget2000_5000' },
-  { value: '10000', labelKey: 'home.budget5000_10000' },
-]
-const DAYS_OPTIONS = [
-  { value: 'any', labelKey: 'home.daysAny' },
-  { value: '3', labelKey: 'home.days3' },
-  { value: '7', labelKey: 'home.days7' },
-  { value: '15', labelKey: 'home.days15' },
-]
 
 const SORT_SET = new Set(['dateDesc', 'viewsDesc', 'budgetAsc', 'daysAsc'])
 const BUDGET_SET = new Set(['2000', '5000', '10000'])
@@ -60,6 +45,7 @@ function filtersMatchSearchParams(p, sp) {
 
 export default function Articles() {
   const { t, i18n } = useTranslation()
+  const { minimal } = useMinimalUi()
   const [searchParams, setSearchParams] = useSearchParams()
   const [budgetMax, setBudgetMax] = useState(() => {
     const b = searchParams.get('budget')
@@ -269,162 +255,43 @@ export default function Articles() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         <Breadcrumbs items={breadcrumbs} />
         <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">{t('articles.title')}</h1>
-        <p className="text-slate-600 dark:text-slate-400 mb-1">{t('articles.subtitle')}</p>
-        <p className="text-xs text-slate-600 dark:text-slate-400 mb-2 rounded-lg border border-sky-100 bg-sky-50/80 px-3 py-2 dark:border-sky-900/50 dark:bg-sky-950/25">
-          {t('articles.budgetFirstLead')}
-        </p>
-        <p className="text-xs text-slate-500 dark:text-slate-500 mb-2">{t('articles.stickyFiltersLead')}</p>
-        <p className="text-xs text-violet-800 dark:text-violet-200 mb-6 rounded-lg border border-violet-100 bg-violet-50/80 px-3 py-2 dark:border-violet-900/40 dark:bg-violet-950/25">
-          {t('articles.filterChinaCityHint')}
-        </p>
+        {!minimal ? (
+          <p className="text-slate-600 dark:text-slate-400 mb-1">{t('articles.subtitle')}</p>
+        ) : null}
+        {!minimal ? (
+          <p className="text-xs text-slate-600 dark:text-slate-400 mb-2 rounded-lg border border-sky-100 bg-sky-50/80 px-3 py-2 dark:border-sky-900/50 dark:bg-sky-950/25">
+            {t('articles.budgetFirstLead')}
+          </p>
+        ) : null}
+        {!minimal ? (
+          <p className="text-xs text-violet-800 dark:text-violet-200 mb-4 rounded-lg border border-violet-100 bg-violet-50/80 px-3 py-2 dark:border-violet-900/40 dark:bg-violet-950/25">
+            {t('articles.filterChinaCityHint')}
+          </p>
+        ) : (
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">{t('articles.minimalPageLead')}</p>
+        )}
 
-        <StickyFilterBar>
-        <div className="p-3 md:p-5 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 space-y-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <label htmlFor="articles-keyword" className="sr-only">
-              {t('articles.searchPlaceholder')}
-            </label>
-            <input
-              id="articles-keyword"
-              type="search"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              placeholder={t('articles.searchPlaceholder')}
-              autoComplete="off"
-              className="flex-1 min-w-[min(100%,12rem)] max-w-xl px-4 py-2.5 min-h-11 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-800 dark:bg-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-400"
-            />
-            <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <CopyPageLinkButton />
-              {hasActiveFilters ? (
-                <button
-                  type="button"
-                  onClick={resetFilters}
-                  className="px-4 py-2.5 min-h-11 text-sm font-medium text-sky-800 dark:text-sky-200 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 rounded-xl hover:bg-sky-100 dark:hover:bg-sky-900/30 transition"
-                >
-                  {t('articles.resetFilters')}
-                </button>
-              ) : null}
-            </div>
-          </div>
+        <ArticlesFilterPanel
+          keyword={keyword}
+          setKeyword={setKeyword}
+          sourceFilter={sourceFilter}
+          setSourceFilter={setSourceFilter}
+          budgetMax={budgetMax}
+          setBudgetMax={setBudgetMax}
+          daysFilter={daysFilter}
+          setDaysFilter={setDaysFilter}
+          destinationFilter={destinationFilter}
+          setDestinationFilter={setDestinationFilter}
+          intentFilter={intentFilter}
+          setIntentFilter={setIntentFilter}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          destinationList={destinationList}
+          hasActiveFilters={hasActiveFilters}
+          resetFilters={resetFilters}
+          resultsCount={filteredArticles.length}
+        />
 
-          <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-            <span className="text-slate-600 dark:text-slate-400 font-medium">{t('userGuide.sourceAll')}:</span>
-            {['all', 'editor', 'user'].map((key) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setSourceFilter(key)}
-                className={`px-3 py-2 min-h-11 rounded-lg text-sm font-medium transition ${
-                  sourceFilter === key
-                    ? 'bg-sky-600 text-white'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
-              >
-                {key === 'all' ? t('userGuide.sourceAll') : key === 'editor' ? t('userGuide.sourceEditor') : t('userGuide.sourceUser')}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-            <span className="text-slate-600 dark:text-slate-400 font-medium">{t('articles.filterByBudget')}:</span>
-            <select
-              value={budgetMax}
-              onChange={(e) => setBudgetMax(e.target.value)}
-              aria-label={t('articles.filterByBudget')}
-              className="px-3 py-2 min-h-11 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400"
-            >
-              {BUDGET_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {t(opt.labelKey)}
-                </option>
-              ))}
-            </select>
-            <span className="text-slate-600 dark:text-slate-400 font-medium">{t('articles.filterByDays')}:</span>
-            <select
-              value={daysFilter}
-              onChange={(e) => setDaysFilter(e.target.value)}
-              aria-label={t('articles.filterByDays')}
-              className="px-3 py-2 min-h-11 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400"
-            >
-              {DAYS_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {t(opt.labelKey)}
-                </option>
-              ))}
-            </select>
-            <span className="text-slate-600 dark:text-slate-400 font-medium">{t('articles.filterByDest')}:</span>
-            <select
-              value={destinationFilter}
-              onChange={(e) => setDestinationFilter(e.target.value)}
-              aria-label={t('articles.filterByDest')}
-              className="px-3 py-2 min-h-11 min-w-[8rem] max-w-[14rem] rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400"
-            >
-              <option value="any">{t('articles.destinationAny')}</option>
-              {destinationList.map((dest) => (
-                <option key={dest} value={dest}>
-                  {dest}
-                </option>
-              ))}
-            </select>
-            <span className="text-slate-600 dark:text-slate-400 font-medium">{t('articles.filterByIntent')}:</span>
-            <select
-              value={intentFilter}
-              onChange={(e) => setIntentFilter(e.target.value)}
-              aria-label={t('articles.filterByIntent')}
-              className="px-3 py-2 min-h-11 min-w-[7rem] max-w-[11rem] rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400"
-            >
-              {ARTICLE_INTENT_FILTER_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {t(opt.labelKey)}
-                </option>
-              ))}
-            </select>
-            <span className="text-slate-600 dark:text-slate-400 font-medium">{t('sort.label')}:</span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              aria-label={t('sort.label')}
-              className="px-3 py-2 min-h-11 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400"
-            >
-              <option value="budgetAsc">{t('sort.budgetAsc')}</option>
-              <option value="dateDesc">{t('sort.dateDesc')}</option>
-              <option value="viewsDesc">{t('sort.viewsDesc')}</option>
-              <option value="daysAsc">{t('sort.daysAsc')}</option>
-            </select>
-          </div>
-
-          <div className="space-y-2.5 pt-3 border-t border-slate-100 dark:border-slate-700">
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('articles.intentQuickChipsLabel')}</p>
-            {INTENT_CHIP_GROUPS.map((group) => (
-              <div key={group.id} className="flex flex-wrap items-center gap-2">
-                <span className="shrink-0 text-[11px] font-semibold text-amber-800/90 dark:text-amber-200/90">
-                  {t(group.labelKey)}
-                </span>
-                {group.values.map((value) => {
-                  const opt = ARTICLE_INTENT_FILTER_OPTIONS.find((o) => o.value === value)
-                  if (!opt) return null
-                  const active = intentFilter === value
-                  return (
-                    <button
-                      key={`${group.id}-${value}`}
-                      type="button"
-                      onClick={() => setIntentFilter(active ? 'any' : value)}
-                      aria-pressed={active}
-                      className={`px-2.5 py-1.5 min-h-9 rounded-full text-xs font-medium transition ${
-                        active
-                          ? 'bg-amber-600 text-white'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      {t(opt.labelKey)}
-                    </button>
-                  )
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-        </StickyFilterBar>
 
         {destinationTripHref ? (
           <div className="mb-4 rounded-xl border border-violet-200 bg-violet-50/80 px-4 py-3 text-sm dark:border-violet-900/50 dark:bg-violet-950/30">

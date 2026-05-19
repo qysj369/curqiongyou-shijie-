@@ -105,6 +105,15 @@
     stroke-dashoffset: 0 !important;
     animation: none !important;
   }
+  .rw-routes-filter-shell--burst,
+  .rw-routes-filter-aurora,
+  .rw-routes-filter-spark,
+  .rw-routes-filter-panel-in,
+  .rw-routes-filter-star,
+  .rw-routes-filter-badge,
+  .rw-routes-chip-active {
+    animation: none !important;
+  }
 }
 
 @keyframes fadeIn {
@@ -134,6 +143,147 @@
 @keyframes rw-plan-dash {
   to {
     stroke-dashoffset: 0;
+  }
+}
+
+/* /routes 筛选展开：极光底 + 星屑 + 面板弹入 */
+@keyframes rw-routes-filter-burst {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.97);
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.45);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.01);
+    box-shadow: 0 0 28px 6px rgba(245, 158, 11, 0.35);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 4px 24px rgba(2, 6, 23, 0.08);
+  }
+}
+@keyframes rw-routes-filter-aurora-shift {
+  0% {
+    background-position: 0% 50%;
+    opacity: 0.35;
+  }
+  50% {
+    background-position: 100% 50%;
+    opacity: 0.55;
+  }
+  100% {
+    background-position: 0% 50%;
+    opacity: 0.35;
+  }
+}
+@keyframes rw-routes-filter-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes rw-routes-filter-spark-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.2) rotate(120deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.4) rotate(240deg);
+  }
+}
+@keyframes rw-routes-filter-star-spin {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.15);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+@keyframes rw-routes-filter-badge-pop {
+  0% {
+    transform: scale(0.6);
+  }
+  60% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes rw-routes-chip-glow {
+  0%,
+  100% {
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+  }
+  50% {
+    box-shadow: 0 6px 22px rgba(236, 72, 153, 0.45);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rw-routes-filter-shell--burst {
+    animation: rw-routes-filter-burst 0.65s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+  }
+  .rw-routes-filter-aurora {
+    background: linear-gradient(
+      125deg,
+      rgba(14, 165, 233, 0.22),
+      rgba(168, 85, 247, 0.28),
+      rgba(245, 158, 11, 0.2),
+      rgba(34, 211, 238, 0.22)
+    );
+    background-size: 240% 240%;
+    animation: rw-routes-filter-aurora-shift 2.4s ease-in-out infinite;
+  }
+  .rw-routes-filter-panel-in {
+    animation: rw-routes-filter-panel-in 0.5s cubic-bezier(0.34, 1.25, 0.64, 1) both;
+  }
+  .rw-routes-filter-spark {
+    position: absolute;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #fbbf24, #f472b6);
+    animation: rw-routes-filter-spark-pop 0.85s ease-out both;
+    pointer-events: none;
+  }
+  .rw-routes-filter-spark--1 {
+    top: 12%;
+    right: 18%;
+    animation-delay: 0.05s;
+  }
+  .rw-routes-filter-spark--2 {
+    top: 28%;
+    right: 8%;
+    animation-delay: 0.15s;
+  }
+  .rw-routes-filter-spark--3 {
+    bottom: 20%;
+    left: 12%;
+    animation-delay: 0.22s;
+  }
+  .rw-routes-filter-toggle:hover .rw-routes-filter-star {
+    animation: rw-routes-filter-star-spin 0.7s ease-in-out;
+  }
+  .rw-routes-filter-badge {
+    animation: rw-routes-filter-badge-pop 0.45s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+  .rw-routes-chip-active {
+    animation: rw-routes-chip-glow 1.8s ease-in-out infinite;
   }
 }
 
