@@ -1044,7 +1044,7 @@
     "intentChipGroupCrowd": "人群",
     "intentChipGroupSeason": "季节",
     "intentChipGroupTransport": "交通",
-    "stickyFiltersLead": "向下滚动时筛选条会吸顶；把当前筛选留在地址栏里，方便复制分享给旅伴。",
+    "stickyFiltersLead": "手机端筛选区随页面滚动；电脑宽屏下筛选条会吸顶。地址栏可分享当前筛选。",
     "noResults": "当前筛选下没有匹配的路线。试试放宽预算或天数，或点「重置全部筛选」。",
     "budgetFirstLead": "默认按人均总预算从低到高排序，优先看到更省钱的可走路线；需要「最新」或「热度」时在下方排序里切换即可。",
     "routeCardPerDay": "约 ¥{{cny}}/天（按总预算÷天数粗算，供穷游参考）",

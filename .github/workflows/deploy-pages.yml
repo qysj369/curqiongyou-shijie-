@@ -55,12 +55,17 @@ jobs:
         run: |
           if [ -n "${{ vars.VITE_SITE_URL }}" ]; then
             echo "site_url=${{ vars.VITE_SITE_URL }}" >> "$GITHUB_OUTPUT"
+          elif [ -n "${{ vars.PAGES_CNAME }}" ]; then
+            echo "site_url=https://${{ vars.PAGES_CNAME }}" >> "$GITHUB_OUTPUT"
           else
             echo "site_url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}" >> "$GITHUB_OUTPUT"
             echo "::warning::未设置 Variables「VITE_SITE_URL」，已用默认 GitHub Pages 地址；建议在 Settings → Actions → Variables 中填写正式域名。"
           fi
           if [ -n "${{ vars.PAGES_BASE }}" ]; then
             echo "base=${{ vars.PAGES_BASE }}" >> "$GITHUB_OUTPUT"
+          elif [ -n "${{ vars.PAGES_CNAME }}" ]; then
+            echo "base=/" >> "$GITHUB_OUTPUT"
+            echo "::notice::已配置 PAGES_CNAME，构建 BASE=/（自定义域从根路径提供站点）。"
           else
             echo "base=/${{ github.event.repository.name }}/" >> "$GITHUB_OUTPUT"
           fi
