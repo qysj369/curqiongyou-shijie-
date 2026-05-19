@@ -1,5 +1,6 @@
 import { getPlaceByName } from '../data/placeModel.js'
 import { guideStations } from '../data/guideLibrary/stations/stationsIndex.js'
+import { resolveGuideArticleId } from '../utils/tripArticleLinks.js'
 
 /**
  * 将行程 JSON 与攻略库「国家 place + 城市分站」对齐，写入 `spec._guideMeta` 与 POI 上的 `guideStationKey`（启发式）。
@@ -20,6 +21,7 @@ export function enrichItineraryWithGuideLibrary(spec, destinationName) {
     stationKeys: linkedStations.map((s) => s.key),
   }
 
+  const destLabel = place?.name || destinationName || cloned.destination || ''
   for (const day of cloned.days || []) {
     for (const poi of day.pois || []) {
       const name = String(poi.name || '')
@@ -29,6 +31,8 @@ export function enrichItineraryWithGuideLibrary(spec, destinationName) {
           (st.nameZh.length >= 2 && name.includes(st.nameZh.slice(0, 2))),
       )
       if (hit) poi.guideStationKey = hit.key
+      const articleId = resolveGuideArticleId(poi, destLabel)
+      if (articleId) poi.guideArticleId = articleId
     }
   }
 

@@ -473,6 +473,7 @@ export default function GlobalMapSearch({ compact = false, immersive = false, em
   if (immersive) {
     return (
       <>
+        <h1 className="sr-only">{t('home.heroTitleNew')}</h1>
         <div className="fixed inset-0 z-0 bg-slate-200 dark:bg-slate-950">
           <div ref={mapContainerRef} className="absolute inset-0 h-full w-full" />
         </div>

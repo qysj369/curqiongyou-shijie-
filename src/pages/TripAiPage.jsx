@@ -8,9 +8,26 @@ import {
 } from '../services/aiItinerary'
 import { enrichTripBundleWithGuideLibrary } from '../services/itineraryGuideBridge.js'
 import ItineraryAmapPreview from '../components/itinerary/ItineraryAmapPreview'
+import TripItineraryReadView from '../components/trip/TripItineraryReadView.jsx'
 import { notifyTripDraftsChanged, TRIP_DRAFTS_CHANGED_EVENT } from '../lib/tripDraftsBridge.js'
 import { useToast } from '../contexts/ToastContext'
 import { pickRandomChinaTripDefaults } from '../data/chinaTripDefaultCities.js'
+import { formatItineraryBundleMarkdown } from '../utils/tripItineraryText.js'
+import { findEditorArticleById } from '../utils/tripGuideBridge.js'
+import { articles } from '../data/mockData.js'
+import {
+  buildCommunityBuddiesHref,
+  buildCommunityQaHref,
+  buildTripCommunityBuddiesPrefill,
+  buildTripCommunityQaPrefill,
+} from '../utils/tripCommunityBridge.js'
+
+const TRIP_QUICK_START = [
+  { destination: '成都', days: 5, budget: 4500, departCity: '重庆', pace: 'balanced' },
+  { destination: '厦门', days: 4, budget: 3800, departCity: '福州', pace: 'relaxed' },
+  { destination: '西安', days: 4, budget: 3200, departCity: '郑州', pace: 'balanced' },
+  { destination: '昆明', days: 6, budget: 5200, departCity: '贵阳', pace: 'relaxed' },
+]
 
 const DRAFTS_KEY = 'roamwise:trip-ai-drafts'
 
@@ -81,6 +98,8 @@ export default function TripAiPage() {
   const [meta, setMeta] = useState({ mock: false, loading: false, err: '' })
   const [loadedDraftId, setLoadedDraftId] = useState(null)
   const [draftsTick, setDraftsTick] = useState(0)
+  const [viewMode, setViewMode] = useState('read')
+  const [sourceArticle, setSourceArticle] = useState(null)
 
   useEffect(() => {
     const onDrafts = () => setDraftsTick((n) => n + 1)
@@ -168,7 +187,18 @@ export default function TripAiPage() {
     const departP = searchParams.get('depart')
     const paceP = searchParams.get('pace')
     const notesP = searchParams.get('notes')
-    if (!dest && !daysP && !budgetP && !departP && !paceP && !notesP) return
+    const articleIdP = searchParams.get('articleId')
+    if (!dest && !daysP && !budgetP && !departP && !paceP && !notesP && !articleIdP) return
+
+    if (articleIdP) {
+      const fromArticle = findEditorArticleById(articleIdP)
+      if (fromArticle) {
+        setSourceArticle(fromArticle)
+        if (!dest) setDestination(fromArticle.destination || destination)
+        if (!daysP && fromArticle.days) setDays(Number(fromArticle.days) || days)
+        if (!budgetP && fromArticle.budget) setBudget(Number(fromArticle.budget) || budget)
+      }
+    }
 
     if (dest) {
       try {
@@ -202,7 +232,7 @@ export default function TripAiPage() {
     }
 
     const next = new URLSearchParams(searchParams)
-    ;['destination', 'days', 'budget', 'depart', 'pace', 'notes'].forEach((k) => next.delete(k))
+    ;['destination', 'days', 'budget', 'depart', 'pace', 'notes', 'articleId'].forEach((k) => next.delete(k))
     const qs = next.toString()
     navigate(qs ? `/trip-ai?${qs}` : '/trip-ai', { replace: true })
   }, [searchParams, navigate])
@@ -249,6 +279,39 @@ export default function TripAiPage() {
     return `/advisor?q=${encodeURIComponent(q)}`
   }, [activeSpec, destination, days, budget, t])
 
+  const communityBrowseHref = useMemo(() => {
+    if (!activeSpec) return null
+    const dest = activeSpec.destination || destination
+    if (!dest) return '/community/qa'
+    return buildCommunityQaHref({ destination: dest })
+  }, [activeSpec, destination])
+
+  const communityAskHref = useMemo(() => {
+    if (!activeSpec) return null
+    return buildCommunityQaHref(buildTripCommunityQaPrefill(activeSpec, t))
+  }, [activeSpec, t])
+
+  const buddiesBrowseHref = useMemo(() => {
+    if (!activeSpec) return null
+    const dest = activeSpec.destination || destination
+    if (!dest) return '/community/buddies'
+    return buildCommunityBuddiesHref({ destination: dest })
+  }, [activeSpec, destination])
+
+  const buddiesPostHref = useMemo(() => {
+    if (!activeSpec) return null
+    return buildCommunityBuddiesHref(buildTripCommunityBuddiesPrefill(activeSpec, t))
+  }, [activeSpec, t])
+
+  const relatedGuides = useMemo(() => {
+    if (!activeSpec) return []
+    const dest = activeSpec.destination || destination
+    if (!dest) return []
+    return articles
+      .filter((a) => a.destination === dest && a.id !== sourceArticle?.id)
+      .slice(0, 3)
+  }, [activeSpec, destination, sourceArticle?.id])
+
   const syncToSteward = () => {
     if (!activeSpec) return
     const total = Math.round(Number(activeSpec.totalBudget) || 0)
@@ -283,6 +346,48 @@ export default function TripAiPage() {
     }
   }
 
+  const copyItineraryMarkdown = async () => {
+    if (!bundle) return
+    const text = formatItineraryBundleMarkdown(bundle)
+    try {
+      await navigator.clipboard.writeText(text)
+      toast(t('tripAiPage.copyMarkdownOk'))
+    } catch {
+      toast(t('tripAiPage.copyMarkdownFail'))
+    }
+  }
+
+  const downloadItineraryMarkdown = () => {
+    if (!bundle || !activeSpec) return
+    const text = formatItineraryBundleMarkdown(bundle)
+    const slug = (activeSpec.destination || 'trip').replace(/\s+/g, '-').slice(0, 24)
+    const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `roamwise-${slug}-${activeSpec.days?.length || 0}d.md`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+    toast(t('tripAiPage.downloadMarkdownOk'))
+  }
+
+  const applyQuickStart = (preset) => {
+    setDestination(preset.destination)
+    setDays(preset.days)
+    setBudget(preset.budget)
+    setDepartCity(preset.departCity)
+    setPace(preset.pace)
+    void runGenerate('', {
+      destination: preset.destination,
+      days: preset.days,
+      budget: preset.budget,
+      departCity: preset.departCity,
+      pace: preset.pace,
+    })
+  }
+
   const onDeleteLoadedDraft = () => {
     if (!loadedDraftId) return
     if (!window.confirm(t('tripAiPage.deleteDraftConfirm'))) return
@@ -296,8 +401,8 @@ export default function TripAiPage() {
     <div className="mx-auto max-w-5xl px-4 py-8">
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{t('tripAiPage.title')}</h1>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{t('tripAiPage.lead')}</p>
-        <div className="mt-3 flex flex-wrap gap-2 text-sm">
+        <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400 print:hidden">{t('tripAiPage.lead')}</p>
+        <div className="mt-3 flex flex-wrap gap-2 text-sm print:hidden">
           <Link to="/me" className="text-sky-700 hover:underline dark:text-sky-300">
             {t('tripAiPage.linkMe')}
           </Link>
@@ -321,7 +426,7 @@ export default function TripAiPage() {
       </header>
 
       <section
-        className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900"
+        className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 print:hidden"
         aria-label={t('tripAiPage.draftsSectionTitle')}
       >
         <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">{t('tripAiPage.draftsSectionTitle')}</h2>
@@ -350,7 +455,7 @@ export default function TripAiPage() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 print:hidden">
           <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">{t('tripAiPage.sectionForm')}</h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <label className="block text-xs font-medium text-slate-600 dark:text-slate-400">
@@ -494,13 +599,60 @@ export default function TripAiPage() {
           ) : null}
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <section className="trip-print-root rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
           <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">{t('tripAiPage.sectionResult')}</h2>
           {!bundle || !activeSpec ? (
-            <p className="mt-4 text-sm text-slate-500">{t('tripAiPage.resultEmpty')}</p>
+            <div className="mt-4 space-y-4">
+              <p className="text-sm text-slate-600 dark:text-slate-400">{t('tripAiPage.resultEmpty')}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{t('tripAiPage.resultEmptyHint')}</p>
+              <div>
+                <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">{t('tripAiPage.quickStartTitle')}</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {TRIP_QUICK_START.map((preset) => (
+                    <button
+                      key={preset.destination}
+                      type="button"
+                      disabled={meta.loading}
+                      onClick={() => applyQuickStart(preset)}
+                      className="min-h-9 rounded-full border border-sky-200 bg-sky-50 px-3 text-xs font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50 dark:border-sky-800 dark:bg-sky-950/50 dark:text-sky-100 dark:hover:bg-sky-900"
+                    >
+                      {t('tripAiPage.quickStartChip', {
+                        dest: preset.destination,
+                        days: preset.days,
+                        budget: preset.budget,
+                      })}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           ) : (
             <>
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="mt-3 flex flex-wrap items-center gap-2 print:hidden">
+                <div className="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('read')}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                      viewMode === 'read'
+                        ? 'bg-white text-sky-700 shadow dark:bg-slate-900 dark:text-sky-300'
+                        : 'text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    {t('tripAiPage.viewRead')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('detail')}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                      viewMode === 'detail'
+                        ? 'bg-white text-sky-700 shadow dark:bg-slate-900 dark:text-sky-300'
+                        : 'text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    {t('tripAiPage.viewDetail')}
+                  </button>
+                </div>
                 <div className="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
                   <button
                     type="button"
@@ -533,6 +685,17 @@ export default function TripAiPage() {
               </div>
 
               <h3 className="mt-2 text-lg font-bold text-slate-900 dark:text-slate-100">{activeSpec.title}</h3>
+              {sourceArticle ? (
+                <p className="mt-2 text-xs text-violet-800 dark:text-violet-200 print:hidden">
+                  {t('tripAiPage.sourceArticleLead')}{' '}
+                  <Link
+                    to={`/routes/${sourceArticle.id}`}
+                    className="font-semibold underline underline-offset-2"
+                  >
+                    {sourceArticle.title}
+                  </Link>
+                </p>
+              ) : null}
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 {t('tripAiPage.totalLine', {
                   total: activeSpec.totalBudget,
@@ -540,7 +703,7 @@ export default function TripAiPage() {
                 })}
               </p>
               {activeSpec._guideMeta?.placeName ? (
-                <div className="mt-2 rounded-xl border border-sky-100 bg-sky-50/80 px-3 py-2 text-xs text-sky-900 dark:border-sky-900/50 dark:bg-sky-950/30 dark:text-sky-100">
+                <div className="mt-2 rounded-xl border border-sky-100 bg-sky-50/80 px-3 py-2 text-xs text-sky-900 dark:border-sky-900/50 dark:bg-sky-950/30 dark:text-sky-100 print:hidden">
                   <span className="font-semibold">{t('tripAiPage.guideMetaTitle')}</span>
                   {t('tripAiPage.guideMetaCountry', { place: activeSpec._guideMeta.placeName })}
                   {activeSpec._guideMeta.stationKeys?.length
@@ -559,7 +722,14 @@ export default function TripAiPage() {
                   ) : null}
                 </div>
               ) : null}
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap gap-2 print:hidden">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="inline-flex min-h-10 items-center rounded-lg border border-slate-400 px-3 text-sm font-semibold text-slate-800 dark:border-slate-500 dark:text-slate-100"
+                >
+                  {t('tripAiPage.btnPrint')}
+                </button>
                 {navUri ? (
                   <a
                     href={navUri}
@@ -595,6 +765,20 @@ export default function TripAiPage() {
                 ) : null}
                 <button
                   type="button"
+                  onClick={() => void copyItineraryMarkdown()}
+                  className="inline-flex min-h-10 items-center rounded-lg bg-sky-600 px-3 text-sm font-semibold text-white hover:bg-sky-700"
+                >
+                  {t('tripAiPage.copyMarkdown')}
+                </button>
+                <button
+                  type="button"
+                  onClick={downloadItineraryMarkdown}
+                  className="inline-flex min-h-10 items-center rounded-lg border border-sky-400 px-3 text-sm font-semibold text-sky-800 dark:border-sky-600 dark:text-sky-200"
+                >
+                  {t('tripAiPage.downloadMarkdown')}
+                </button>
+                <button
+                  type="button"
                   onClick={() => void copyItineraryJson()}
                   className="inline-flex min-h-10 items-center rounded-lg border border-slate-300 px-3 text-sm dark:border-slate-600"
                 >
@@ -618,7 +802,11 @@ export default function TripAiPage() {
                 ) : null}
               </div>
 
-              <div className="mt-4">
+              {viewMode === 'read' ? (
+                <TripItineraryReadView spec={activeSpec} destinationFallback={destination} />
+              ) : (
+                <>
+              <div className="mt-4 print:hidden">
                 <ItineraryAmapPreview itinerary={activeSpec} />
               </div>
 
@@ -676,6 +864,68 @@ export default function TripAiPage() {
                     ))}
                   </ul>
                 </div>
+              ) : null}
+                </>
+              )}
+
+              <div className="mt-5 print:hidden rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/25">
+                <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">{t('tripAiPage.communityBlockTitle')}</p>
+                <p className="mt-1 text-xs text-emerald-900/80 dark:text-emerald-200/80">{t('tripAiPage.communityBlockLead')}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {communityBrowseHref ? (
+                    <Link
+                      to={communityBrowseHref}
+                      className="inline-flex min-h-9 items-center rounded-lg border border-emerald-400 px-3 text-xs font-semibold text-emerald-900 dark:border-emerald-700 dark:text-emerald-100"
+                    >
+                      {t('tripAiPage.communityBrowse')}
+                    </Link>
+                  ) : null}
+                  {communityAskHref ? (
+                    <Link
+                      to={communityAskHref}
+                      className="inline-flex min-h-9 items-center rounded-lg bg-emerald-600 px-3 text-xs font-semibold text-white hover:bg-emerald-700"
+                    >
+                      {t('tripAiPage.communityAsk')}
+                    </Link>
+                  ) : null}
+                  {buddiesBrowseHref ? (
+                    <Link
+                      to={buddiesBrowseHref}
+                      className="inline-flex min-h-9 items-center rounded-lg border border-amber-400 px-3 text-xs font-semibold text-amber-950 dark:border-amber-700 dark:text-amber-100"
+                    >
+                      {t('tripAiPage.buddiesBrowse')}
+                    </Link>
+                  ) : null}
+                  {buddiesPostHref ? (
+                    <Link
+                      to={buddiesPostHref}
+                      className="inline-flex min-h-9 items-center rounded-lg bg-amber-500 px-3 text-xs font-semibold text-white hover:bg-amber-600"
+                    >
+                      {t('tripAiPage.buddiesPost')}
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
+
+              {relatedGuides.length > 0 ? (
+                <section className="mt-5 print:hidden" aria-label={t('tripAiPage.relatedGuidesTitle')}>
+                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">{t('tripAiPage.relatedGuidesTitle')}</h4>
+                  <ul className="mt-2 space-y-2">
+                    {relatedGuides.map((a) => (
+                      <li key={a.id}>
+                        <Link
+                          to={`/routes/${a.id}`}
+                          className="block rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm hover:border-sky-300 dark:border-slate-700 dark:bg-slate-900/80 dark:hover:border-sky-700"
+                        >
+                          <span className="font-semibold text-slate-900 dark:text-slate-50">{a.title}</span>
+                          <span className="mt-0.5 block text-xs text-slate-500">
+                            {a.destination} · ¥{a.budget} · {a.days}天
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
               ) : null}
             </>
           )}

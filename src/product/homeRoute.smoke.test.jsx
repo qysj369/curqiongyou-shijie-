@@ -34,6 +34,22 @@ afterEach(() => {
 })
 
 describe('home route /', () => {
+  it('renders search form in minimal mode', async () => {
+    const { unmount } = render(
+      <MemoryRouter initialEntries={['/?minimal=1']} future={ROUTER_FUTURE}>
+        <MinimalUiProvider>
+          <AppLayout />
+        </MinimalUiProvider>
+      </MemoryRouter>,
+    )
+    try {
+      const main = await screen.findByRole('main')
+      await within(main).findByRole('search', {}, { timeout: 8000 })
+    } finally {
+      unmount()
+    }
+  })
+
   it('renders search form without error boundary', async () => {
     const { unmount } = render(
       <MemoryRouter initialEntries={['/']} future={ROUTER_FUTURE}>

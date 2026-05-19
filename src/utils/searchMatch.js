@@ -709,7 +709,17 @@ export function matchesGuideCard(item, rawQuery) {
   const terms = tokenizeQuery(q)
   if (!terms.length) return true
   const tags = item.tags || []
-  const blob = [item.title, item.destination, item.author, ...tags].filter(Boolean).join(' ')
+  const blob = [
+    item.title,
+    item.intentSummary,
+    item.destination,
+    item.city,
+    item.region,
+    item.author,
+    ...tags,
+  ]
+    .filter(Boolean)
+    .join(' ')
   return blobMatchesAllTerms(normalizeSearchText(blob), terms)
 }
 

@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import BrandLogo from './BrandLogo'
 import { useToast } from '../contexts/ToastContext'
 import { useMinimalUi } from '../contexts/MinimalUiContext'
 import { readAutoLocateEnabled, writeAutoLocateEnabled } from '../lib/homeAutoLocatePreference.js'
+import {
+  readHomeClassicLayoutEnabled,
+  writeHomeClassicLayoutEnabled,
+} from '../lib/homeClassicLayoutPreference.js'
 
 /**
  * 极简「更多」：仅穷游延伸工具与品牌说明，不堆功能、不做导购式入口。
@@ -13,7 +17,10 @@ export default function MoreMenuDrawer({ open, onClose }) {
   const { t } = useTranslation()
   const { toast } = useToast()
   const { minimal, toggleMinimal } = useMinimalUi()
+  const navigate = useNavigate()
+  const location = useLocation()
   const [autoLocateOn, setAutoLocateOn] = useState(() => readAutoLocateEnabled())
+  const [classicHome, setClassicHome] = useState(() => readHomeClassicLayoutEnabled())
 
   useEffect(() => {
     if (!open) return
@@ -27,6 +34,7 @@ export default function MoreMenuDrawer({ open, onClose }) {
   useEffect(() => {
     if (!open) return
     setAutoLocateOn(readAutoLocateEnabled())
+    setClassicHome(readHomeClassicLayoutEnabled())
   }, [open])
 
   if (!open) return null
@@ -87,6 +95,25 @@ export default function MoreMenuDrawer({ open, onClose }) {
                   }}
                 >
                   {autoLocateOn ? t('home.autoLocateOn') : t('home.autoLocateOff')}
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  className={`${rowClass} w-full text-left`}
+                  aria-pressed={classicHome}
+                  onClick={() => {
+                    const next = !readHomeClassicLayoutEnabled()
+                    writeHomeClassicLayoutEnabled(next)
+                    setClassicHome(next)
+                    toast(next ? t('home.classicLayoutOn') : t('home.classicLayoutOff'))
+                    onClose()
+                    if (next && (location.pathname === '/' || location.pathname === '/map')) {
+                      navigate({ pathname: location.pathname, search: '?classic=1' }, { replace: true })
+                    }
+                  }}
+                >
+                  {classicHome ? t('home.classicLayoutOnLabel') : t('home.classicLayoutOffLabel')}
                 </button>
               </li>
             </ul>

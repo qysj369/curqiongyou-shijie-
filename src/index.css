@@ -173,4 +173,21 @@
   .print\:shadow-none {
     box-shadow: none;
   }
+  .print\:break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .trip-print-root {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  .trip-print-area {
+    color: #0f172a !important;
+  }
+  .trip-print-area * {
+    color: inherit !important;
+    background: transparent !important;
+    border-color: #cbd5e1 !important;
+  }
 }

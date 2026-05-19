@@ -8,6 +8,7 @@ import { buildCoverUrlPoolForDestination } from './coverPoolUrls.js'
 import { pickWeightedStrongGeoCover } from './geoStrongMarkers.js'
 import { ensureLandmarkInTitle } from './geoLandmarkPools.js'
 import { ALL_DESTINATION_NAMES } from './un193MembersZh.js'
+import { inferChinaCityFromTitle, inferChinaRegionFromTitle } from '../utils/chinaCityFromTitle.js'
 
 /** 全球 193 国 + 地区；与 un193MembersZh / mockData 对齐 */
 export const DESTINATION_NAMES = ALL_DESTINATION_NAMES
@@ -860,7 +861,7 @@ function buildExtraArticle(name, idNum, seqForDest) {
         ? JAPAN_AUTHORS[idNum % JAPAN_AUTHORS.length]
         : AUTHORS[idNum % AUTHORS.length]
 
-  return {
+  const article = {
     id: `a${idNum}`,
     title,
     cover,
@@ -874,6 +875,13 @@ function buildExtraArticle(name, idNum, seqForDest) {
     tags,
     ...(gallery ? { gallery } : {}),
   }
+  if (name === '中国') {
+    const city = inferChinaCityFromTitle(title)
+    const region = inferChinaRegionFromTitle(title)
+    if (city) article.city = city
+    if (region) article.region = region
+  }
+  return article
 }
 
 /**

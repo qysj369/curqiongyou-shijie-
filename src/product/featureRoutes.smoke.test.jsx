@@ -1,9 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { AppLayout } from '../App.jsx'
 import { MinimalUiProvider } from '../contexts/MinimalUiContext.jsx'
 import { FEATURE_MODULE_PATH, FEATURE_MODULE_ROLLOUT_ORDER } from './featureModules.js'
+
+vi.mock('../lib/loadAmapApi.js', () => ({
+  hasAmapKey: () => false,
+  loadAmapApi: vi.fn(() => Promise.reject(new Error('mock: no amap key in tests'))),
+}))
 
 const ROUTER_FUTURE = { v7_startTransition: true, v7_relativeSplatPath: true }
 
@@ -36,7 +41,13 @@ async function expectModuleRouteRenders(path) {
   )
   try {
     const main = await screen.findByRole('main')
-    const h1 = await within(main).findByRole('heading', { level: 1 })
+    await waitFor(
+      () => {
+        expect(within(main).queryByRole('status', { busy: true })).not.toBeInTheDocument()
+      },
+      { timeout: 12_000 },
+    ).catch(() => {})
+    const h1 = await within(main).findByRole('heading', { level: 1 }, { timeout: 12_000 })
     expect(h1.textContent?.trim().length).toBeGreaterThan(0)
   } finally {
     unmount()

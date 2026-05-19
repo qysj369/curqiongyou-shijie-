@@ -56,6 +56,10 @@ function buildDestinationRules() {
           ? /(?<![强])巴林(?!寺)/u
         : name === '海地'
           ? /(?<![黑])海地/u
+        : name === '中非'
+          ? /(?<![\u4e00-\u9fff])中非(?![\u4e00-\u9fff])/u
+        : name === '越南'
+          ? /越南(?!风味)/u
           : new RegExp(escapeRegExp(name), 'u')
     return [
       {
@@ -133,7 +137,7 @@ const GEO_TITLE_LANDMARK_RULES_LEGACY = [
     id: 'cn-chengdu',
     note: '成都常用大熊猫基地/宽窄巷子或川西线名山',
     trigger: /成都/,
-    requireAnyOf: ['大熊猫', '宽窄', '锦里', '武侯', '青城山', '都江堰', '杜甫草堂', '四姑娘', '乐山', '峨眉', '康定', '毕棚沟'],
+    requireAnyOf: ['大熊猫', '熊猫基地', '宽窄', '锦里', '武侯', '青城山', '都江堰', '杜甫草堂', '四姑娘', '乐山', '峨眉', '康定', '毕棚沟'],
   },
   {
     id: 'cn-lhasa',

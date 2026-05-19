@@ -1,6 +1,8 @@
 import { augmentArticlesToMinPerDestination, DESTINATION_NAMES } from './budgetRouteGenerator.js'
 import { HOT_DESTINATION_ARTICLE_MIN, HOT_DESTINATION_NAMES } from './hotDestinations.js'
 import { vietnamArticlesBulk } from './articlesVietnamBulk.js'
+import { chinaFeaturedArticles } from './chinaFeaturedGuides.js'
+import { chinaIntentVariantArticles } from './chinaIntentVariants.js'
 
 const articlesCore = [
   {
@@ -1234,6 +1236,8 @@ const articlesCore = [
     tags: ['公路', '海岸', '公交'],
   },
   ...vietnamArticlesBulk,
+  ...chinaFeaturedArticles,
+  ...chinaIntentVariantArticles,
 ]
 
 const hotArticleOverrides = Object.fromEntries(

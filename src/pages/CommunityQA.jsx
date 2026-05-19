@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useToast } from '../contexts/ToastContext'
 import { containsProfanity } from '../utils/profanityFilter'
@@ -17,7 +17,10 @@ const destinationNames = getDestinationNamesForForms(destinations)
 export default function CommunityQA() {
   const { t } = useTranslation()
   const { toast } = useToast()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const prefillOnceRef = useRef(false)
+  const [tripPrefillHint, setTripPrefillHint] = useState(false)
   const [questions, setQuestions] = useState(getAllQuestions)
   const [destFilter, setDestFilter] = useState('')
   const [formTitle, setFormTitle] = useState('')
@@ -28,8 +31,47 @@ export default function CommunityQA() {
   const destFromUrl = searchParams.get('destination')
   useEffect(() => {
     if (!destFromUrl) return
-    if (destinationNames.includes(destFromUrl)) setDestFilter(destFromUrl)
+    if (destinationNames.includes(destFromUrl)) {
+      setDestFilter(destFromUrl)
+      setFormDest(destFromUrl)
+    }
   }, [destFromUrl])
+
+  useEffect(() => {
+    if (prefillOnceRef.current) return
+    const titleP = searchParams.get('title')
+    const contentP = searchParams.get('content')
+    const focusP = searchParams.get('focus')
+    if (!titleP && !contentP && focusP !== 'ask') return
+    prefillOnceRef.current = true
+    setTripPrefillHint(true)
+
+    if (titleP) {
+      try {
+        setFormTitle(decodeURIComponent(titleP))
+      } catch {
+        setFormTitle(titleP)
+      }
+    }
+    if (contentP) {
+      try {
+        setFormContent(decodeURIComponent(contentP))
+      } catch {
+        setFormContent(contentP)
+      }
+    }
+
+    const next = new URLSearchParams(searchParams)
+    ;['title', 'content', 'focus'].forEach((k) => next.delete(k))
+    const qs = next.toString()
+    navigate(qs ? `/community/qa?${qs}` : '/community/qa', { replace: true })
+
+    if (focusP === 'ask') {
+      window.requestAnimationFrame(() => {
+        document.getElementById('qa-ask-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    }
+  }, [searchParams, navigate])
 
   useEffect(() => {
     if (destFilter && !destinationNames.includes(destFilter)) setDestFilter('')
@@ -93,8 +135,13 @@ export default function CommunityQA() {
 
         <CommunityGuidelines className="mb-6" />
 
-        <form onSubmit={handleAsk} className="bg-white rounded-2xl shadow-sm p-6 mb-8">
+        <form id="qa-ask-form" onSubmit={handleAsk} className="bg-white rounded-2xl shadow-sm p-6 mb-8 scroll-mt-24">
           <h2 className="text-lg font-semibold text-slate-800 mb-4">{t('qa.askQuestion')}</h2>
+          {tripPrefillHint ? (
+            <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+              {t('qa.prefillFromTripHint')}
+            </p>
+          ) : null}
           <div className="space-y-4">
             <div>
               <label htmlFor="qa-form-title" className="block text-sm font-medium text-slate-600 mb-1">

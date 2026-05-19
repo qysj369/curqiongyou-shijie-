@@ -32,6 +32,8 @@ if (!ENABLE_GEO_TITLE_LANDMARK_RULES) {
 }
 
 for (const a of articles) {
+  // 意图变体标题侧重出行场景，地标以深度路书为准，不在此做城市地标硬校验
+  if (String(a.id).startsWith('cn-var-')) continue
   const r = checkLabel(`article ${a.id}`, a.title)
   if (r) problems.push(r)
 }

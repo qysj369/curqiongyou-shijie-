@@ -3,15 +3,16 @@ import { useTranslation } from 'react-i18next'
 import FavoriteButton from './FavoriteButton'
 import OptimizedImage from './OptimizedImage'
 import { approxUsdFromCny, formatDate, formatInteger } from '../utils/localeFormat'
+import { buildTripAiHrefFromArticle } from '../utils/tripGuideBridge.js'
 
 export default function RouteCard({ item, cover, showUsdApprox, language }) {
   const { t } = useTranslation()
 
   return (
-    <div className="relative">
+    <div className="relative app-surface-card overflow-hidden">
       <Link
         to={`/routes/${item.id}`}
-        className="app-surface-card group block overflow-hidden motion-safe:transition motion-safe:hover:shadow-[0_8px_24px_rgba(2,6,23,0.12)]"
+        className="group block motion-safe:transition motion-safe:hover:shadow-[0_8px_24px_rgba(2,6,23,0.12)]"
       >
         <div className="relative h-48 overflow-hidden">
           <OptimizedImage
@@ -47,9 +48,31 @@ export default function RouteCard({ item, cover, showUsdApprox, language }) {
               </span>
             ))}
           </div>
-          <h3 className="line-clamp-2 font-semibold text-slate-800 transition group-hover:text-sky-700 dark:text-slate-100 dark:group-hover:text-sky-300">
-            {item.title}
-          </h3>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="line-clamp-2 flex-1 font-semibold text-slate-800 transition group-hover:text-sky-700 dark:text-slate-100 dark:group-hover:text-sky-300">
+              {item.title}
+            </h3>
+            {item.featured ? (
+              <span className="shrink-0 rounded bg-violet-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                {t('articles.featuredBadge')}
+              </span>
+            ) : null}
+            {item.intentVariant ? (
+              <span className="shrink-0 rounded bg-amber-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                {t('articles.intentVariantBadge')}
+              </span>
+            ) : null}
+            {item.city && item.destination === '中国' ? (
+              <span className="shrink-0 rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700 dark:bg-slate-700 dark:text-slate-200">
+                {item.city}
+              </span>
+            ) : null}
+          </div>
+          {item.intentSummary ? (
+            <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+              {item.intentSummary}
+            </p>
+          ) : null}
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {(() => {
               const usd = approxUsdFromCny(item.budget)
@@ -84,6 +107,16 @@ export default function RouteCard({ item, cover, showUsdApprox, language }) {
           ) : null}
         </div>
       </Link>
+      {item.source !== 'user' ? (
+        <div className="border-t border-slate-100 px-4 py-2.5 dark:border-slate-700">
+          <Link
+            to={buildTripAiHrefFromArticle(item)}
+            className="text-xs font-semibold text-violet-700 hover:text-violet-900 dark:text-violet-300 dark:hover:text-violet-100"
+          >
+            {t('articles.cardTripAi')}
+          </Link>
+        </div>
+      ) : null}
       <div className="absolute right-2 top-2 z-10">
         <FavoriteButton articleId={item.id} />
       </div>

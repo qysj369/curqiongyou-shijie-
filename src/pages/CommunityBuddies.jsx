@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useToast } from '../contexts/ToastContext'
 import { containsProfanity } from '../utils/profanityFilter'
 import { getAllBuddyPosts, addBuddyPost } from '../data/buddiesStore'
@@ -14,6 +15,10 @@ const destinationNames = getDestinationNamesForForms(destinations)
 export default function CommunityBuddies() {
   const { t } = useTranslation()
   const { toast } = useToast()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const prefillOnceRef = useRef(false)
+  const [tripPrefillHint, setTripPrefillHint] = useState(false)
   const [posts, setPosts] = useState(getAllBuddyPosts())
   const [destFilter, setDestFilter] = useState('')
   const [formDest, setFormDest] = useState('')
@@ -27,6 +32,59 @@ export default function CommunityBuddies() {
     if (destFilter) list = list.filter((p) => p.destination === destFilter)
     return list
   }, [posts, destFilter])
+
+  const destFromUrl = searchParams.get('destination')
+  useEffect(() => {
+    if (!destFromUrl) return
+    if (destinationNames.includes(destFromUrl)) {
+      setDestFilter(destFromUrl)
+      setFormDest(destFromUrl)
+    }
+  }, [destFromUrl])
+
+  useEffect(() => {
+    if (prefillOnceRef.current) return
+    const introP = searchParams.get('intro')
+    const dateFromP = searchParams.get('dateFrom')
+    const dateToP = searchParams.get('dateTo')
+    const focusP = searchParams.get('focus')
+    if (!introP && !dateFromP && !dateToP && focusP !== 'post') return
+    prefillOnceRef.current = true
+    setTripPrefillHint(true)
+
+    if (introP) {
+      try {
+        setFormIntro(decodeURIComponent(introP))
+      } catch {
+        setFormIntro(introP)
+      }
+    }
+    if (dateFromP) {
+      try {
+        setFormDateFrom(decodeURIComponent(dateFromP))
+      } catch {
+        setFormDateFrom(dateFromP)
+      }
+    }
+    if (dateToP) {
+      try {
+        setFormDateTo(decodeURIComponent(dateToP))
+      } catch {
+        setFormDateTo(dateToP)
+      }
+    }
+
+    const next = new URLSearchParams(searchParams)
+    ;['intro', 'dateFrom', 'dateTo', 'focus'].forEach((k) => next.delete(k))
+    const qs = next.toString()
+    navigate(qs ? `/community/buddies?${qs}` : '/community/buddies', { replace: true })
+
+    if (focusP === 'post') {
+      window.requestAnimationFrame(() => {
+        document.getElementById('buddies-post-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    }
+  }, [searchParams, navigate])
 
   useEffect(() => {
     if (destFilter && !destinationNames.includes(destFilter)) setDestFilter('')
@@ -86,8 +144,13 @@ export default function CommunityBuddies() {
 
         <CommunityGuidelines className="mb-6" />
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm p-6 mb-8">
+        <form id="buddies-post-form" onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm p-6 mb-8 scroll-mt-24">
           <h2 className="text-lg font-semibold text-slate-800 mb-4">{t('buddies.postLooking')}</h2>
+          {tripPrefillHint ? (
+            <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+              {t('buddies.prefillFromTripHint')}
+            </p>
+          ) : null}
           <div className="space-y-4">
             <div>
               <label htmlFor="buddies-form-dest" className="block text-sm font-medium text-slate-600 mb-1">

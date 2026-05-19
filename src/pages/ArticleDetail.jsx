@@ -22,6 +22,8 @@ import { getLastUpdatedDay, isPossiblyOutdated } from '../utils/articleTimelines
 import { formatDate, formatInteger } from '../utils/localeFormat'
 import { formatGuideBudgetLine } from '../utils/budgetDisplay'
 import { useUsdApproxDisplay } from '../contexts/UsdApproxPreferenceContext'
+import { buildTripAiHrefFromArticle } from '../utils/tripGuideBridge.js'
+import { buildCommunityBuddiesHref, buildCommunityQaHref } from '../utils/tripCommunityBridge.js'
 
 export default function ArticleDetail() {
   const { t, i18n } = useTranslation()
@@ -367,6 +369,46 @@ export default function ArticleDetail() {
                 <FavoriteButton articleId={article.id} className="print:hidden" />
               </div>
             </div>
+            {article.featured ? (
+              <p className="mt-2 print:hidden">
+                <span className="inline-flex rounded-full bg-violet-600 px-2.5 py-0.5 text-xs font-bold text-white">
+                  {t('articleDetail.featuredBadge')}
+                </span>
+              </p>
+            ) : null}
+            {article.intentVariant ? (
+              <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm dark:border-amber-900/40 dark:bg-amber-950/30 print:hidden">
+                <p className="font-semibold text-amber-950 dark:text-amber-100">
+                  {t('articleDetail.intentVariantBannerTitle')}
+                </p>
+                {article.intentSummary ? (
+                  <p className="mt-1 text-xs leading-relaxed text-amber-900/90 dark:text-amber-100/90">
+                    {article.intentSummary}
+                  </p>
+                ) : null}
+                <p className="mt-2 text-xs text-amber-900/80 dark:text-amber-200/80">
+                  {t('articleDetail.intentVariantBannerLead')}
+                </p>
+                {article.guideAnchorId ? (
+                  <Link
+                    to={`/routes/${article.guideAnchorId}`}
+                    className="mt-2 inline-flex min-h-10 items-center text-xs font-semibold text-violet-700 underline underline-offset-2 dark:text-violet-300"
+                  >
+                    {t('articleDetail.intentVariantAnchorLink')}
+                  </Link>
+                ) : null}
+              </div>
+            ) : null}
+            {article.city ? (
+              <p className="mt-1 text-sm text-violet-800 dark:text-violet-200 print:hidden">
+                <Link
+                  to={`/routes?destination=${encodeURIComponent(article.city)}`}
+                  className="font-semibold underline underline-offset-2"
+                >
+                  {t('articleDetail.cityLine', { city: article.city, region: article.region || article.destination })}
+                </Link>
+              </p>
+            ) : null}
             <div className="flex flex-wrap gap-2 mt-3 text-slate-500 dark:text-slate-400 text-sm">
               <span>{t('articleDetail.days', { count: article.days })}</span>
               <span>·</span>
@@ -482,6 +524,24 @@ export default function ArticleDetail() {
                 </article>
               ))}
             </section>
+            <div className="mt-4 print:hidden rounded-xl border border-violet-200 bg-violet-50/80 p-4 dark:border-violet-900/60 dark:bg-violet-950/30">
+              <p className="text-sm font-semibold text-violet-900 dark:text-violet-100">{t('articleDetail.tripCtaTitle')}</p>
+              <p className="mt-1 text-xs leading-relaxed text-violet-900/80 dark:text-violet-200/80">{t('articleDetail.tripCtaLead')}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Link
+                  to={buildTripAiHrefFromArticle(article, { autogenerate: true })}
+                  className="inline-flex min-h-10 items-center rounded-lg bg-violet-600 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-700 transition"
+                >
+                  {t('articleDetail.tripCtaGenerate')}
+                </Link>
+                <Link
+                  to={buildTripAiHrefFromArticle(article)}
+                  className="inline-flex min-h-10 items-center rounded-lg border border-violet-300 px-3 py-2 text-xs font-semibold text-violet-900 hover:bg-violet-100/80 dark:border-violet-700 dark:text-violet-100 dark:hover:bg-violet-950/50 transition"
+                >
+                  {t('articleDetail.tripCtaPrefill')}
+                </Link>
+              </div>
+            </div>
             <div className="mt-4 print:hidden rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/80 dark:bg-sky-950/30 p-4">
               <p className="text-sm font-semibold text-sky-800 dark:text-sky-300">{t('articleDetail.qaBlockTitle')}</p>
               <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{t('articleDetail.qaBlockLeadArticle')}</p>

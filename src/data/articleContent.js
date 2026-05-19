@@ -1,4 +1,6 @@
 import { articles } from './articlesData.js'
+import { chinaFeaturedGuideContents } from './chinaFeaturedGuideContent.js'
+import { buildIntentVariantArticleContent } from './chinaIntentVariantContent.js'
 
 const a1Content = `
 ## 行程概览
@@ -3604,6 +3606,14 @@ export function getArticleDetail(id) {
   if (articleDetails[id]) return articleDetails[id]
   const meta = articles.find((a) => a.id === id)
   if (!meta) return null
+  const featured = chinaFeaturedGuideContents[id]
+  if (featured) return Object.assign({}, meta, { content: featured })
+  if (meta.intentVariant) {
+    const anchor = meta.guideAnchorId ? articles.find((a) => a.id === meta.guideAnchorId) : null
+    return Object.assign({}, meta, {
+      content: buildIntentVariantArticleContent(meta, anchor),
+    })
+  }
   return Object.assign({}, meta, { content: buildFallbackArticleContent(meta) })
 }
 
