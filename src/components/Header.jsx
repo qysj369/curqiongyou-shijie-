@@ -23,8 +23,18 @@ export default function Header() {
     return () => window.removeEventListener('keydown', onKey)
   }, [moreOpen])
 
+  const homeDesigned =
+    (location.pathname === '/' || location.pathname === '/map') &&
+    location.search.indexOf('immersive=1') === -1
+
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <header
+      className={
+        homeDesigned
+          ? 'sticky top-0 z-50 border-b border-transparent bg-white/85 shadow-sm backdrop-blur-md dark:bg-slate-950/80'
+          : 'sticky top-0 z-50 border-b border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900'
+      }
+    >
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2 sm:px-6 lg:px-8" aria-label={t('a11y.mainNavigation')}>
         <Link to="/" className="flex min-w-0 shrink-0 items-center" aria-label={t('a11y.siteHome')}>
           <BrandLogo />

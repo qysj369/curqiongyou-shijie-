@@ -52,5 +52,7 @@ export function useMapHomeImmersive() {
     searchParams.get('classic') === '1' ||
     searchParams.get('layout') === 'classic'
 
-  return !envOff && narrow && mapPaths && !forceClassic
+  /** 默认使用设计稿经典首页；仅 `?immersive=1` 时移动端全屏地图首屏 */
+  const forceImmersive = searchParams.get('immersive') === '1'
+  return !envOff && narrow && mapPaths && forceImmersive && !forceClassic
 }

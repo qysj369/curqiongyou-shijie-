@@ -28,6 +28,8 @@ import { useToast } from '../contexts/ToastContext'
 import PageFallback from '../components/PageFallback'
 import MapSectionErrorBoundary from '../components/MapSectionErrorBoundary.jsx'
 import { readAutoLocateEnabled, AUTO_LOCATE_PREF_CHANGED } from '../lib/homeAutoLocatePreference.js'
+import HomeDesignedHero from '../components/home/HomeDesignedHero.jsx'
+import HomeGuideStrip from '../components/home/HomeGuideStrip.jsx'
 
 const GlobalMapSearch = lazy(() => import('../components/GlobalMapSearch.jsx'))
 
@@ -203,6 +205,19 @@ export default function Home() {
     [filteredFeaturedRoutes],
   )
 
+  /** 设计稿横滑条：优先深度路书，凑满 5 张 */
+  const guideStripItems = useMemo(() => {
+    const deep = articles.filter(
+      (a) => a.featured || String(a.id || '').startsWith('cn-feat-') || a.intentVariant,
+    )
+    const pool = deep.length >= 5 ? deep : featuredRoutesForHome
+    const narrowed = pool.filter(
+      (item) =>
+        matchesGuideCard(item, search) && matchesBudget(item.budget) && matchesDays(item.days),
+    )
+    return assignArticleGridCoversInOrder(narrowed).slice(0, 5)
+  }, [search, budgetMax, daysFilter])
+
   const latestArticleGridItems = useMemo(
     () => assignArticleGridCoversInOrder(filteredLatestArticles),
     [filteredLatestArticles],
@@ -259,6 +274,22 @@ export default function Home() {
         .sort((a, b) => (Number(b.routeCount) || 0) - (Number(a.routeCount) || 0))
         .slice(0, 8),
     [],
+  )
+
+  const handleDesignedSearch = useCallback(
+    (e) => {
+      e.preventDefault()
+      const q = search.trim()
+      if (q) {
+        navigate(`/routes?keyword=${encodeURIComponent(q)}`)
+        return
+      }
+      document.getElementById('home-designed-guides-title')?.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block: 'start',
+      })
+    },
+    [navigate, search],
   )
 
   const locateAndJump = useCallback((fromAuto = false) => {
@@ -325,118 +356,20 @@ export default function Home() {
   }
 
   return (
-    <div className="rw-surface-page home-page">
-      <section
-        className="border-b border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-950"
-        aria-label={t('home.qyStyleSurfaceAria')}
+    <div className="rw-surface-page home-page home-page--designed">
+      <HomeDesignedHero search={search} setSearch={setSearch} onSubmit={handleDesignedSearch} />
+      <HomeGuideStrip items={guideStripItems} />
+
+      <details
+        className="collapse-panel border-b border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-950"
+        aria-label={t('home.designedMoreExplore')}
       >
-        <div className="mx-auto max-w-2xl px-4 pb-6 pt-5 sm:px-6 md:max-w-7xl md:pb-8">
-          <div className="mx-auto max-w-xl text-center md:mx-0 md:text-left">
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-2xl">
-              {t('home.heroTitleNew')}
-            </h1>
-            <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{t('home.heroLeadNew')}</p>
-          </div>
-
-          <form
-            id="home-search-form"
-            role="search"
-            aria-label={t('a11y.homeSearchForm')}
-            className="mx-auto mt-5 max-w-xl md:mx-0"
-            onSubmit={(e) => {
-              e.preventDefault()
-              const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-              const behavior = reduceMotion ? 'auto' : 'smooth'
-              const q = search.trim()
-              if (q) {
-                document.getElementById('home-search-results')?.scrollIntoView({ behavior, block: 'start' })
-                queueMicrotask(() => {
-                  document.getElementById('home-search-results-title')?.focus({ preventScroll: true })
-                })
-              } else {
-                const nextId = minimal ? 'home-map-explore' : 'home-featured'
-                document.getElementById(nextId)?.scrollIntoView({ behavior, block: 'start' })
-                queueMicrotask(() => {
-                  const focusId = minimal ? 'home-map-explore-title' : 'home-featured-title'
-                  document.getElementById(focusId)?.focus({ preventScroll: true })
-                })
-              }
-            }}
-          >
-            <div className="relative">
-              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-base opacity-60" aria-hidden>
-                🔍
-              </span>
-              <label htmlFor="home-search-q" className="sr-only">
-                {t('a11y.homeSearchQueryLabel')}
-              </label>
-              <input
-                id="home-search-q"
-                type="search"
-                placeholder={t('home.homeSearchPlaceholder')}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                autoComplete="off"
-                enterKeyHint="search"
-                className="w-full min-h-[3rem] rounded-full border border-slate-200 bg-slate-50/80 py-2.5 pl-11 pr-[5.5rem] text-[15px] text-slate-900 shadow-inner focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/40 dark:border-slate-600 dark:bg-slate-900/60 dark:text-slate-100 dark:focus:border-sky-500"
-              />
-              <button
-                type="submit"
-                aria-label={t('a11y.homeSearchSubmit')}
-                className="absolute right-1.5 top-1/2 flex min-h-9 -translate-y-1/2 items-center rounded-full bg-sky-600 px-4 text-sm font-semibold text-white transition hover:bg-sky-700"
-              >
-                {t('home.searchBarButton')}
-              </button>
-            </div>
-
-            {!minimal && (
-            <details
-              className="collapse-panel mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 dark:border-slate-600 dark:bg-slate-900/40"
-              aria-label={t('a11y.homeDetailsFilters')}
-            >
-              <summary className="cursor-pointer list-none py-2.5 text-center text-xs font-semibold text-slate-600 marker:text-slate-400 dark:text-slate-300 [&::-webkit-details-marker]:hidden">
-                {t('home.searchFiltersSummary')}
-              </summary>
-              <div className="flex flex-col gap-3 border-t border-slate-200/80 px-3 pb-3 pt-2 dark:border-slate-700 sm:flex-row sm:items-center">
-                <div className="min-w-0 flex-1">
-                  <label htmlFor="home-budget-filter" className="sr-only">
-                    {t('home.budgetFilterLabel')}
-                  </label>
-                  <select
-                    id="home-budget-filter"
-                    value={budgetMax}
-                    onChange={(e) => setBudgetMax(e.target.value)}
-                    className="app-input w-full min-h-10 text-sm"
-                  >
-                    <option value="any">{t('home.budgetAny')}</option>
-                    <option value="2000">{t('home.budget0_2000')}</option>
-                    <option value="5000">{t('home.budget2000_5000')}</option>
-                    <option value="10000">{t('home.budget5000_10000')}</option>
-                  </select>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <label htmlFor="home-days-filter" className="sr-only">
-                    {t('home.daysFilterLabel')}
-                  </label>
-                  <select
-                    id="home-days-filter"
-                    value={daysFilter}
-                    onChange={(e) => setDaysFilter(e.target.value)}
-                    className="app-input w-full min-h-10 text-sm"
-                  >
-                    <option value="any">{t('home.daysAny')}</option>
-                    <option value="3">{t('home.days3')}</option>
-                    <option value="7">{t('home.days7')}</option>
-                    <option value="15">{t('home.days15')}</option>
-                  </select>
-                </div>
-              </div>
-            </details>
-            )}
-          </form>
-
+        <summary className="cursor-pointer list-none px-4 py-3 text-center text-sm font-semibold text-slate-600 dark:text-slate-300 [&::-webkit-details-marker]:hidden sm:px-6">
+          {t('home.designedMoreExplore')}
+        </summary>
+        <div className="mx-auto max-w-2xl px-4 pb-6 sm:px-6 md:max-w-7xl">
           <nav
-            className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-x-4 gap-y-5 sm:max-w-xl sm:grid-cols-4 sm:gap-x-6"
+            className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-4 sm:gap-x-6"
             aria-label={t('a11y.homeCoreShortcuts')}
           >
             {HOME_CORE_NAV.map((item) => (
@@ -458,82 +391,27 @@ export default function Home() {
             ))}
           </nav>
 
-          <Link
-            to="/china-readiness"
-            className="mx-auto mt-6 flex max-w-xl items-start gap-3 rounded-2xl border border-sky-200/90 bg-sky-50/90 px-4 py-3 text-left transition hover:border-sky-300 hover:bg-sky-50 dark:border-sky-800 dark:bg-sky-950/40 dark:hover:bg-sky-950/60 md:mx-0"
-            aria-label={t('home.chinaReadinessCtaAria')}
-          >
-            <span className="mt-0.5 text-lg" aria-hidden>
-              ✓
-            </span>
-            <span className="min-w-0">
-              <span className="block text-sm font-semibold text-sky-900 dark:text-sky-100">
-                {t('home.chinaReadinessCtaTitle')}
-              </span>
-              <span className="mt-0.5 block text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                {t('home.chinaReadinessCtaDesc')}
-              </span>
-            </span>
-          </Link>
-
           {!minimal && (
-          <p className="mx-auto mt-4 max-w-xl text-center text-xs text-slate-600 dark:text-slate-400 md:mx-0 md:text-left">
             <Link
-              to="/trip-ai"
-              className="font-medium text-sky-700 underline-offset-2 hover:underline dark:text-sky-300"
-              aria-label={`${t('home.tripAiTeaser')} ${t('a11y.homeTripAiLink')}`}
+              to="/china-readiness"
+              className="mt-6 flex items-start gap-3 rounded-2xl border border-sky-200/90 bg-sky-50/90 px-4 py-3 text-left transition hover:border-sky-300 hover:bg-sky-50 dark:border-sky-800 dark:bg-sky-950/40 dark:hover:bg-sky-950/60"
+              aria-label={t('home.chinaReadinessCtaAria')}
             >
-              {t('home.tripAiTeaser')}
+              <span className="mt-0.5 text-lg" aria-hidden>
+                ✓
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold text-sky-900 dark:text-sky-100">
+                  {t('home.chinaReadinessCtaTitle')}
+                </span>
+                <span className="mt-0.5 block text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                  {t('home.chinaReadinessCtaDesc')}
+                </span>
+              </span>
             </Link>
-          </p>
-          )}
-
-          {!minimal && (
-          <details
-            className="collapse-panel mx-auto mt-5 max-w-xl rounded-2xl border border-slate-100 bg-slate-50/80 dark:border-slate-700 dark:bg-slate-900/30 md:mx-0"
-            aria-label={t('a11y.homeDetailsSnapshot')}
-            open={subBandOpen}
-            onToggle={(e) => setSubBandOpen(e.currentTarget.open)}
-          >
-            <summary className="cursor-pointer list-none px-3 py-2.5 text-center text-xs font-medium text-slate-600 dark:text-slate-300 [&::-webkit-details-marker]:hidden">
-              {t('home.subBandSummary')}
-            </summary>
-            <div className="space-y-3 border-t border-slate-200/80 px-3 pb-3 pt-3 dark:border-slate-700">
-              <div
-                className="flex flex-wrap justify-center gap-1.5 text-[11px] leading-tight"
-                role="group"
-                aria-label={t('home.heroStatsAria')}
-              >
-                <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
-                  {t('home.heroStatDestinations', { count: siteSnapshot.destinationCount })}
-                </span>
-                <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
-                  {t('home.heroStatGuides', { count: siteSnapshot.guideCount })}
-                </span>
-                <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
-                  {t('home.heroStatRegions', { count: siteSnapshot.continentCount })}
-                </span>
-              </div>
-              <nav className="text-center" aria-label={t('home.hotSearchAria')}>
-                <p className="mb-2 text-xs font-medium text-slate-600 dark:text-slate-300">{t('home.hotSearchTitle')}</p>
-                <div className="flex flex-wrap justify-center gap-1.5">
-                  {hotPickDestinations.map((d) => (
-                    <Link
-                      key={d.id}
-                      to={`/routes?destination=${encodeURIComponent(d.name)}`}
-                      aria-label={t('a11y.homeHotPickFilter', { name: d.name })}
-                      className="min-h-8 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-800 transition hover:border-sky-300 hover:bg-sky-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
-                    >
-                      {d.name}
-                    </Link>
-                  ))}
-                </div>
-              </nav>
-            </div>
-          </details>
           )}
         </div>
-      </section>
+      </details>
 
       <section
         id="home-map-explore"

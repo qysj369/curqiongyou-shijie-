@@ -7,8 +7,6 @@ import Breadcrumbs from '../components/Breadcrumbs'
 import UserGuideForm from '../components/UserGuideForm'
 import EmptyState from '../components/EmptyState'
 import RouteCard from '../components/RouteCard'
-import ArticlesFilterPanel from '../components/ArticlesFilterPanel'
-import { useMinimalUi } from '../contexts/MinimalUiContext'
 import { matchesGuideCard } from '../utils/searchMatch'
 import { formatInteger } from '../utils/localeFormat'
 import { useUsdApproxDisplay } from '../contexts/UsdApproxPreferenceContext'
@@ -45,7 +43,6 @@ function filtersMatchSearchParams(p, sp) {
 
 export default function Articles() {
   const { t, i18n } = useTranslation()
-  const { minimal } = useMinimalUi()
   const [searchParams, setSearchParams] = useSearchParams()
   const [budgetMax, setBudgetMax] = useState(() => {
     const b = searchParams.get('budget')
@@ -70,18 +67,6 @@ export default function Articles() {
 
   const pgcWithSource = useMemo(() => articles.map((a) => ({ ...a, source: 'editor' })), [])
   const ugcCards = useMemo(() => getUserGuidesAsCards(), [])
-  const destinationList = useMemo(() => {
-    const fromData = [
-      ...new Set([...articles.map((a) => a.destination), ...ugcCards.map((c) => c.destination)].filter(Boolean)),
-    ]
-    const chinaCities = fromData.includes('中国') ? CHINA_GUIDE_FILTER_CITIES : []
-    return [...fromData, ...chinaCities.filter((c) => !fromData.includes(c))].sort((a, b) => {
-      if (a === '中国') return -1
-      if (b === '中国') return 1
-      return a.localeCompare(b, 'zh-CN')
-    })
-  }, [ugcCards])
-
   useEffect(() => {
     const b = searchParams.get('budget')
     setBudgetMax(BUDGET_SET.has(b) ? b : 'any')
@@ -254,43 +239,57 @@ export default function Articles() {
       <JsonLd data={listJsonLd} scriptId="jsonld-routes-list" />
       <div className="max-w-6xl mx-auto px-4 py-8">
         <Breadcrumbs items={breadcrumbs} />
-        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">{t('articles.title')}</h1>
-        {!minimal ? (
-          <p className="text-slate-600 dark:text-slate-400 mb-1">{t('articles.subtitle')}</p>
-        ) : null}
-        {!minimal ? (
-          <p className="text-xs text-slate-600 dark:text-slate-400 mb-2 rounded-lg border border-sky-100 bg-sky-50/80 px-3 py-2 dark:border-sky-900/50 dark:bg-sky-950/25">
-            {t('articles.budgetFirstLead')}
-          </p>
-        ) : null}
-        {!minimal ? (
-          <p className="text-xs text-violet-800 dark:text-violet-200 mb-4 rounded-lg border border-violet-100 bg-violet-50/80 px-3 py-2 dark:border-violet-900/40 dark:bg-violet-950/25">
-            {t('articles.filterChinaCityHint')}
-          </p>
-        ) : (
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">{t('articles.minimalPageLead')}</p>
-        )}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 sm:text-3xl">{t('articles.title')}</h1>
+          <Link
+            to="/"
+            className="text-sm font-semibold text-sky-700 underline-offset-2 hover:underline dark:text-sky-300"
+          >
+            ← {t('articles.backHome')}
+          </Link>
+        </div>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">{t('articles.simplePageLead')}</p>
 
-        <ArticlesFilterPanel
-          keyword={keyword}
-          setKeyword={setKeyword}
-          sourceFilter={sourceFilter}
-          setSourceFilter={setSourceFilter}
-          budgetMax={budgetMax}
-          setBudgetMax={setBudgetMax}
-          daysFilter={daysFilter}
-          setDaysFilter={setDaysFilter}
-          destinationFilter={destinationFilter}
-          setDestinationFilter={setDestinationFilter}
-          intentFilter={intentFilter}
-          setIntentFilter={setIntentFilter}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          destinationList={destinationList}
-          hasActiveFilters={hasActiveFilters}
-          resetFilters={resetFilters}
-          resultsCount={filteredArticles.length}
-        />
+        <form
+          role="search"
+          className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center"
+          onSubmit={(e) => {
+            e.preventDefault()
+            const p = new URLSearchParams(searchParams)
+            const q = keyword.trim()
+            if (q) p.set('keyword', q)
+            else p.delete('keyword')
+            setSearchParams(p, { replace: true })
+          }}
+        >
+          <label htmlFor="routes-simple-search" className="sr-only">
+            {t('articles.searchPlaceholder')}
+          </label>
+          <input
+            id="routes-simple-search"
+            type="search"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder={t('articles.searchPlaceholder')}
+            autoComplete="off"
+            enterKeyHint="search"
+            className="app-input min-h-11 flex-1 text-[15px]"
+          />
+          <div className="flex shrink-0 gap-2">
+            <button type="submit" className="min-h-11 rounded-xl bg-sky-600 px-4 text-sm font-semibold text-white hover:bg-sky-700">
+              {t('home.searchBarButton')}
+            </button>
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+              >
+                {t('articles.resetFilters')}
+              </button>
+            ) : null}
+          </div>
+        </form>
 
 
         {destinationTripHref ? (
