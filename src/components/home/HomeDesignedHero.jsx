@@ -1,37 +1,38 @@
 import { useTranslation } from 'react-i18next'
-
-const HERO_FALLBACK =
-  'https://images.unsplash.com/photo-1547981609-a4e886b04c1f?w=1920&q=80'
+import { HOME_HERO_FALLBACK, homeHeroAsset } from '../../utils/homeHeroAsset.js'
 
 /**
- * 设计稿首屏：全宽结伴旅行主图 + 底部胶囊搜索条。
+ * 设计稿首屏：全宽结伴旅行主图（public/hero-home.jpg）+ 底部胶囊搜索条。
  */
 export default function HomeDesignedHero({ search, setSearch, onSubmit }) {
   const { t } = useTranslation()
-  const base = import.meta.env.BASE_URL || '/'
-  const heroBase = `${base}hero-home`.replace(/\/{2,}/g, '/')
+
+  const src640 = homeHeroAsset('hero-home-640w.jpg')
+  const src960 = homeHeroAsset('hero-home-960w.jpg')
+  const src1280 = homeHeroAsset('hero-home-1280w.jpg')
+  const src1920 = homeHeroAsset('hero-home-1920w.jpg')
 
   return (
     <section className="home-designed-hero" aria-label={t('home.designedHeroAria')}>
-      <picture className="home-designed-hero__media">
-        <source
-          type="image/jpeg"
-          srcSet={`${heroBase}-640w.jpg 640w, ${heroBase}-960w.jpg 960w, ${heroBase}-1280w.jpg 1280w, ${heroBase}-1920w.jpg 1920w`}
-          sizes="100vw"
-        />
-        <img
-          src={`${heroBase}-1280w.jpg`}
-          alt=""
-          width={1920}
-          height={1080}
-          decoding="async"
-          fetchPriority="high"
-          className="home-designed-hero__img"
-          onError={(e) => {
-            if (e.currentTarget.src !== HERO_FALLBACK) e.currentTarget.src = HERO_FALLBACK
-          }}
-        />
-      </picture>
+      <img
+        src={src1280}
+        srcSet={`${src640} 640w, ${src960} 960w, ${src1280} 1280w, ${src1920} 1920w`}
+        sizes="100vw"
+        alt=""
+        width={1920}
+        height={1080}
+        decoding="async"
+        fetchPriority="high"
+        className="home-designed-hero__img"
+        onError={(e) => {
+          const img = e.currentTarget
+          if (img.dataset.fallback === '1') return
+          img.dataset.fallback = '1'
+          img.removeAttribute('srcset')
+          img.removeAttribute('sizes')
+          img.src = HOME_HERO_FALLBACK
+        }}
+      />
       <div className="home-designed-hero__scrim" aria-hidden />
       <form
         role="search"
