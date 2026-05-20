@@ -67,6 +67,9 @@ export function AppLayout() {
     location.pathname === '/steward'
   /** 启程全屏页：隐藏顶栏底栏与浮窗 AI，与旧 /globe 行为一致 */
   const isPlannerImmersive = location.pathname === '/plan' || location.pathname === '/globe'
+  /** 设计稿首页不展示全局配置说明条，保持首屏干净 */
+  const hideCapabilityHintOnHome =
+    (location.pathname === '/' || location.pathname === '/map') && !mapHomeImmersive
 
   return (
     <ToastProvider>
@@ -78,7 +81,9 @@ export function AppLayout() {
         <SkipLink />
         <NetworkStatusBanner />
         {!isPlannerImmersive && !mapHomeImmersive && <Header />}
-        {!isPlannerImmersive && !mapHomeImmersive && !minimalUi && <SiteCapabilityHint />}
+        {!isPlannerImmersive && !mapHomeImmersive && !minimalUi && !hideCapabilityHintOnHome && (
+          <SiteCapabilityHint />
+        )}
         <main
           id="main-content"
           tabIndex={-1}
