@@ -41,18 +41,18 @@ export const COVER_URLS_BY_DESTINATION = {
   "美国": [
     "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=600",
     "https://images.unsplash.com/photo-1485738422979-f5c18d67c959?w=600",
-    "https://images.unsplash.com/photo-1506929562872-b94aa2565b4b?w=600",
+    "https://images.unsplash.com/photo-1605836246008-cf8b9492bef4?w=600",
     "https://images.unsplash.com/photo-1617581430595-89734ae4426c?w=600",
-    "https://images.unsplash.com/photo-1513828749310-ddb00316be76?w=600",
-    "https://images.unsplash.com/photo-1494522358652-f3c3b5f45e8d?w=600",
-    "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=600",
     "https://images.unsplash.com/photo-1542259679001-c17332acc90a?w=600",
-    "https://images.unsplash.com/photo-1474044150017-7c79bc86aa21?w=600",
+    "https://images.unsplash.com/photo-1513828749310-ddb00316be76?w=600",
+    "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?w=600",
+    "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=600",
+    "https://images.unsplash.com/photo-1518391846015-55a9cc003b25?w=600",
     "https://images.unsplash.com/photo-1501596812083-862921f1e7e6?w=600",
     "https://images.unsplash.com/photo-1570304816841-906a17d7b067?w=600",
-    "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?w=600",
-    "https://images.unsplash.com/photo-1605836246008-cf8b9492bef4?w=600",
-    "https://images.unsplash.com/photo-1518391846015-55a9cc003b25?w=600",
+    "https://images.unsplash.com/photo-1474044150017-7c79bc86aa21?w=600",
+    "https://images.unsplash.com/photo-1494522358652-f3c3b5f45e8d?w=600",
+    "https://images.unsplash.com/photo-1506929562872-b94aa2565b4b?w=600",
     "https://images.unsplash.com/photo-1519832979-6fa011b87667?w=600",
     "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600"
   ],
@@ -89,27 +89,27 @@ export const COVER_URLS_BY_DESTINATION = {
   ],
   "摩洛哥": [
     "https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?w=600",
-    "https://images.unsplash.com/photo-1469521669194-babb45f83517?w=600",
     "https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=600",
-    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600",
     "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600",
+    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600",
+    "https://images.unsplash.com/photo-1469521669194-babb45f83517?w=600",
     "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=600"
   ],
   "冰岛": [
     "https://images.unsplash.com/photo-1476610182048-b716b8518aae?w=600",
+    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
     "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
-    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
     "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600"
   ],
   "格鲁吉亚": [
     "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=600",
+    "https://images.unsplash.com/photo-1528181304800-259b08848526?w=600",
     "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600",
     "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600",
-    "https://images.unsplash.com/photo-1543785734-4b6e564642f8?w=600",
     "https://images.unsplash.com/photo-1603350576276-24747f7bbf40?w=600",
-    "https://images.unsplash.com/photo-1528127269322-539801943592?w=600",
-    "https://images.unsplash.com/photo-1528181304800-259b08848526?w=600"
+    "https://images.unsplash.com/photo-1543785734-4b6e564642f8?w=600",
+    "https://images.unsplash.com/photo-1528127269322-539801943592?w=600"
   ],
   "韩国": [
     "https://images.unsplash.com/photo-1534274867514-d5b47ef89ed7?w=600",
@@ -122,10 +122,10 @@ export const COVER_URLS_BY_DESTINATION = {
   "葡萄牙": [
     "https://images.unsplash.com/photo-1555881400-74d7eac7b127?w=600",
     "https://images.unsplash.com/photo-1585208798174-6cedd86e019a?w=600",
-    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
     "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600"
+    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600"
   ],
   "埃及": [
     "https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=600",
@@ -137,9 +137,9 @@ export const COVER_URLS_BY_DESTINATION = {
   "法国": [
     "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600",
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
+    "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
     "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
-    "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600"
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600"
   ],
   "德国": [
     "https://images.unsplash.com/photo-1560930950-5cc20e80e392?w=600",
@@ -153,9 +153,9 @@ export const COVER_URLS_BY_DESTINATION = {
     "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600",
     "https://images.unsplash.com/photo-1486299267070-83823f5448dd?w=600",
     "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
-    "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600"
+    "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600"
   ],
   "意大利": [
     "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
@@ -204,17 +204,17 @@ export const COVER_URLS_BY_DESTINATION = {
   "新西兰": [
     "https://images.unsplash.com/photo-1469521669194-babb45f83517?w=600",
     "https://images.unsplash.com/photo-1576828324911-1e301982b17f?w=600",
+    "https://images.unsplash.com/photo-1507699629798-6870a1e2d1d8?w=600",
     "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=600",
-    "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600",
-    "https://images.unsplash.com/photo-1507699629798-6870a1e2d1d8?w=600"
+    "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600"
   ],
   "捷克": [
     "https://images.unsplash.com/photo-1541849546-216549ae216d?w=600",
     "https://images.unsplash.com/photo-1592906209472-a36b1f3782ef?w=600",
     "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
-    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
     "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
-    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600"
+    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
+    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600"
   ],
   "希腊": [
     "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=600",
@@ -255,11 +255,11 @@ export const COVER_URLS_BY_DESTINATION = {
   ],
   "瑞典": [
     "https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600",
+    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
-    "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
     "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600",
     "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
-    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600"
+    "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600"
   ],
   "荷兰": [
     "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=600",
@@ -280,11 +280,11 @@ export const COVER_URLS_BY_DESTINATION = {
   "匈牙利": [
     "https://images.unsplash.com/photo-1559827260-dc66d43bef33?w=600",
     "https://images.unsplash.com/photo-1622115469132-124ec9f88fca?w=600",
-    "https://images.unsplash.com/photo-1541849546-216549ae216d?w=600",
+    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
     "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
     "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
-    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
-    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600"
+    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
+    "https://images.unsplash.com/photo-1541849546-216549ae216d?w=600"
   ],
   "克罗地亚": [
     "https://images.unsplash.com/photo-1559827260-dc66d43bef33?w=600",
@@ -296,11 +296,11 @@ export const COVER_URLS_BY_DESTINATION = {
   ],
   "芬兰": [
     "https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600",
+    "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
     "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
-    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
     "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=600",
     "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
-    "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600"
+    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600"
   ],
   "丹麦": [
     "https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600",
@@ -311,9 +311,9 @@ export const COVER_URLS_BY_DESTINATION = {
   ],
   "智利": [
     "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600",
+    "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600",
     "https://images.unsplash.com/photo-1612296480922-207807b05c99?w=600",
     "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=600",
-    "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600",
     "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=600"
   ],
   "南非": [
@@ -327,10 +327,10 @@ export const COVER_URLS_BY_DESTINATION = {
   "波兰": [
     "https://images.unsplash.com/photo-1541849546-216549ae216d?w=600",
     "https://images.unsplash.com/photo-1573157268794-d13e94d325e6?w=600",
+    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
     "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
-    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600"
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600"
   ],
   "爱尔兰": [
     "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600",
@@ -359,11 +359,11 @@ export const COVER_URLS_BY_DESTINATION = {
   ],
   "巴西": [
     "https://images.unsplash.com/photo-1612296480922-207807b05c99?w=600",
-    "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=600",
+    "https://images.unsplash.com/photo-1518638150340-f706e16654f4?w=600",
     "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=600",
     "https://images.unsplash.com/photo-1518639192441-8fce0a366e2e?w=600",
-    "https://images.unsplash.com/photo-1518638150340-f706e16654f4?w=600",
-    "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600"
+    "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600",
+    "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=600"
   ],
   "坦桑尼亚": [
     "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600",
@@ -388,19 +388,19 @@ export const COVER_URLS_BY_DESTINATION = {
   "缅甸": [
     "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600",
     "https://images.unsplash.com/photo-1676439063812-13eda274e0ec?w=600",
+    "https://images.unsplash.com/photo-1528127269322-539801943592?w=600",
     "https://images.unsplash.com/photo-1528181304800-259b08848526?w=600",
     "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600",
-    "https://images.unsplash.com/photo-1528127269322-539801943592?w=600",
     "https://images.unsplash.com/photo-1543785734-4b6e564642f8?w=600"
   ],
   "老挝": [
     "https://images.unsplash.com/photo-1528181304800-259b08848526?w=600",
     "https://images.unsplash.com/photo-1610426714962-83caa2244105?w=600",
-    "https://images.unsplash.com/photo-1528127269322-539801943592?w=600",
-    "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600",
+    "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600",
     "https://images.unsplash.com/photo-1543785734-4b6e564642f8?w=600",
     "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=600",
-    "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600"
+    "https://images.unsplash.com/photo-1528127269322-539801943592?w=600",
+    "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600"
   ],
   "乌兹别克斯坦": [
     "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=600",
@@ -444,17 +444,17 @@ export const COVER_URLS_BY_DESTINATION = {
   "菲律宾": [
     "https://images.unsplash.com/photo-1584118624014-d89a2c218c60?w=600",
     "https://images.unsplash.com/photo-1607282729548-e1d13feae36f?w=600",
-    "https://images.unsplash.com/photo-1528127269322-539801943592?w=600",
-    "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600",
     "https://images.unsplash.com/photo-1543785734-4b6e564642f8?w=600",
-    "https://images.unsplash.com/photo-1528181304800-259b08848526?w=600"
+    "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600",
+    "https://images.unsplash.com/photo-1528181304800-259b08848526?w=600",
+    "https://images.unsplash.com/photo-1528127269322-539801943592?w=600"
   ],
   "卡塔尔": [
     "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600",
     "https://images.unsplash.com/photo-1539475314840-751cecc1dacd?w=600",
+    "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600",
     "https://images.unsplash.com/photo-1543785734-4b6e564642f8?w=600",
     "https://images.unsplash.com/photo-1528127269322-539801943592?w=600",
-    "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600",
     "https://images.unsplash.com/photo-1528181304800-259b08848526?w=600"
   ],
   "阿曼": [
@@ -467,9 +467,9 @@ export const COVER_URLS_BY_DESTINATION = {
   ],
   "哥伦比亚": [
     "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=600",
+    "https://images.unsplash.com/photo-1612296480922-207807b05c99?w=600",
     "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600",
     "https://images.unsplash.com/photo-1518638150340-f706e16654f4?w=600",
-    "https://images.unsplash.com/photo-1612296480922-207807b05c99?w=600",
     "https://images.unsplash.com/photo-1534943441045-1009d7cb0bb9?w=600",
     "https://images.unsplash.com/photo-1566438480290-6bedf4b00678?w=600",
     "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=600"
@@ -550,12 +550,12 @@ export const COVER_URLS_BY_DESTINATION = {
   ],
   "阿尔巴尼亚": [
     "https://images.unsplash.com/photo-1632353913765-9b56b7b4bd55?w=600",
-    "https://images.unsplash.com/photo-1559827260-dc66d43bef33?w=600",
-    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
     "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
+    "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
     "https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=600",
-    "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600"
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
+    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
+    "https://images.unsplash.com/photo-1559827260-dc66d43bef33?w=600"
   ],
   "阿尔及利亚": [
     "https://images.unsplash.com/photo-1591808274629-fafffe21c310?w=600",
@@ -572,12 +572,12 @@ export const COVER_URLS_BY_DESTINATION = {
     "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=600"
   ],
   "爱沙尼亚": [
-    "https://images.unsplash.com/photo-1541849546-216549ae216d?w=600",
-    "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
-    "https://images.unsplash.com/photo-1575561003164-f36f2e28a524?w=600",
-    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
     "https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600",
+    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
+    "https://images.unsplash.com/photo-1575561003164-f36f2e28a524?w=600",
     "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
+    "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
+    "https://images.unsplash.com/photo-1541849546-216549ae216d?w=600",
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600"
   ],
   "安道尔": [
@@ -597,9 +597,9 @@ export const COVER_URLS_BY_DESTINATION = {
   ],
   "奥地利": [
     "https://images.unsplash.com/photo-1540840454462-646b2f466833?w=600",
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
     "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
     "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600"
   ],
   "巴巴多斯": [
@@ -641,12 +641,12 @@ export const COVER_URLS_BY_DESTINATION = {
     "https://images.unsplash.com/photo-1559827260-dc66d43bef33?w=600"
   ],
   "保加利亚": [
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
-    "https://images.unsplash.com/photo-1519429753079-3b0f0a95dea8?w=600",
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
+    "https://images.unsplash.com/photo-1519429753079-3b0f0a95dea8?w=600",
+    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
     "https://images.unsplash.com/photo-1560930950-5cc20e80e392?w=600",
     "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
-    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
     "https://images.unsplash.com/photo-1559827260-dc66d43bef33?w=600"
   ],
   "北马其顿": [
@@ -663,12 +663,12 @@ export const COVER_URLS_BY_DESTINATION = {
     "https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?w=600"
   ],
   "比利时": [
-    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
     "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=600",
+    "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
     "https://images.unsplash.com/photo-1573995890753-a4f23342db17?w=600",
-    "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600"
+    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600"
   ],
   "波黑": [
     "https://images.unsplash.com/photo-1698784849354-c51de4bf731a?w=600",
@@ -724,9 +724,9 @@ export const COVER_URLS_BY_DESTINATION = {
   ],
   "多米尼克": [
     "https://images.unsplash.com/photo-1649703196751-9019ead6b2f4?w=600",
-    "https://images.unsplash.com/photo-1540202404-a2f29016b523?w=600",
     "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600",
-    "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=600"
+    "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=600",
+    "https://images.unsplash.com/photo-1540202404-a2f29016b523?w=600"
   ],
   "俄罗斯": [
     "https://images.unsplash.com/photo-1513326738671-b96407a66789?w=600",
@@ -785,10 +785,10 @@ export const COVER_URLS_BY_DESTINATION = {
   "古巴": [
     "https://images.unsplash.com/photo-1612296480922-207807b05c99?w=600",
     "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600",
-    "https://images.unsplash.com/photo-1518638150340-f706e16654f4?w=600",
+    "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=600",
     "https://images.unsplash.com/photo-1748646846416-39b01694700d?w=600",
-    "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=600",
-    "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=600"
+    "https://images.unsplash.com/photo-1518638150340-f706e16654f4?w=600",
+    "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=600"
   ],
   "圭亚那": [
     "https://images.unsplash.com/photo-1564858523844-73ee8233a3a2?w=600",
@@ -796,12 +796,12 @@ export const COVER_URLS_BY_DESTINATION = {
     "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600"
   ],
   "哈萨克斯坦": [
-    "https://images.unsplash.com/photo-1543785734-4b6e564642f8?w=600",
-    "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600",
-    "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600",
-    "https://images.unsplash.com/photo-1717486489848-5c79b4d45879?w=600",
     "https://images.unsplash.com/photo-1528181304800-259b08848526?w=600",
-    "https://images.unsplash.com/photo-1528127269322-539801943592?w=600"
+    "https://images.unsplash.com/photo-1543785734-4b6e564642f8?w=600",
+    "https://images.unsplash.com/photo-1528127269322-539801943592?w=600",
+    "https://images.unsplash.com/photo-1717486489848-5c79b4d45879?w=600",
+    "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600",
+    "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600"
   ],
   "海地": [
     "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600",
@@ -875,12 +875,12 @@ export const COVER_URLS_BY_DESTINATION = {
     "https://images.unsplash.com/photo-1523482580671-f216ba185ece?w=600"
   ],
   "拉脱维亚": [
-    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
+    "https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600",
     "https://images.unsplash.com/photo-1685470934582-3636319a3be9?w=600",
     "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600",
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
-    "https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600"
+    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600"
   ],
   "莱索托": [
     "https://images.unsplash.com/photo-1653842045754-59b63ea5a58e?w=600",
@@ -892,11 +892,11 @@ export const COVER_URLS_BY_DESTINATION = {
     "https://images.unsplash.com/photo-1512632579908-17e19e3d2b3e?w=600"
   ],
   "立陶宛": [
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600",
-    "https://images.unsplash.com/photo-1541849546-216549ae216d?w=600",
     "https://images.unsplash.com/photo-1667743350028-e0a17093d7e4?w=600",
     "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600",
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600",
+    "https://images.unsplash.com/photo-1541849546-216549ae216d?w=600",
     "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600"
   ],
   "利比里亚": [
@@ -1063,13 +1063,13 @@ export const COVER_URLS_BY_DESTINATION = {
     "https://images.unsplash.com/photo-1540202404-a2f29016b523?w=600"
   ],
   "沙特阿拉伯": [
-    "https://images.unsplash.com/photo-1528127269322-539801943592?w=600",
-    "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600",
     "https://images.unsplash.com/photo-1543785734-4b6e564642f8?w=600",
-    "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=600",
-    "https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?w=600",
     "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600",
-    "https://images.unsplash.com/photo-1528181304800-259b08848526?w=600"
+    "https://images.unsplash.com/photo-1528181304800-259b08848526?w=600",
+    "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600",
+    "https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?w=600",
+    "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=600",
+    "https://images.unsplash.com/photo-1528127269322-539801943592?w=600"
   ],
   "圣多美和普林西比": [
     "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600",
