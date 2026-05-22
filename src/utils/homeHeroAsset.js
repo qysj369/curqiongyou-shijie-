@@ -1,5 +1,5 @@
 /** 与 public/hero-home.jpg 同步；改图后递增以刷新 CDN/浏览器缓存 */
-export const HOME_HERO_VERSION = '20260523mock'
+export const HOME_HERO_VERSION = 'qianwen-temple-1'
 
 /** 明亮结伴旅行 · Unsplash */
 export const HOME_HERO_FALLBACK =
