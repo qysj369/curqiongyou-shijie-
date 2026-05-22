@@ -6,7 +6,7 @@ export const chinaFeaturedArticles = [
   {
     id: 'cn-feat-chengdu',
     title: '成都5日穷游：熊猫基地·市内地铁·周边一日可选',
-    cover: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600',
+    cover: 'https://images.unsplash.com/photo-1570168007204-dfb528c0f403?w=600',
     author: '蜀行笔记',
     date: '2026-03-01',
     destination: '中国',
@@ -206,7 +206,7 @@ export const chinaFeaturedArticles = [
   {
     id: 'cn-feat-wuhan',
     title: '武汉4日穷游：黄鹤楼远观·东湖绿道·热干面地图',
-    cover: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600',
+    cover: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=600',
     author: '江城味道',
     date: '2026-02-18',
     destination: '中国',
@@ -406,7 +406,7 @@ export const chinaFeaturedArticles = [
   {
     id: 'cn-feat-changsha',
     title: '长沙4日穷游：橘子洲·岳麓山·太平街·文和友排队策略',
-    cover: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600',
+    cover: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=600',
     author: '湘味地图',
     date: '2026-03-10',
     destination: '中国',
@@ -546,7 +546,7 @@ export const chinaFeaturedArticles = [
   {
     id: 'cn-feat-dalian',
     title: '大连4日穷游：滨海路·星海广场·老虎滩·金石滩取舍',
-    cover: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600',
+    cover: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=600',
     author: '滨城行记',
     date: '2026-03-28',
     destination: '中国',
@@ -1366,7 +1366,7 @@ export const chinaFeaturedArticles = [
   {
     id: 'cn-feat-nantong',
     title: '南通2日穷游：狼山·濠河风景区·张謇故居·文蛤',
-    cover: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600',
+    cover: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=600',
     author: '江海行记',
     date: '2026-07-10',
     destination: '中国',
@@ -1646,7 +1646,7 @@ export const chinaFeaturedArticles = [
   {
     id: 'cn-feat-zhuzhou',
     title: '株洲3日穷游：神农城·方特取舍·工业博物馆·湘江风光带',
-    cover: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600',
+    cover: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=600',
     author: '湘江笔记',
     date: '2026-08-12',
     destination: '中国',
@@ -1686,7 +1686,7 @@ export const chinaFeaturedArticles = [
   {
     id: 'cn-feat-yueyang',
     title: '岳阳3日穷游：岳阳楼·洞庭湖·君山岛·巴陵烤串',
-    cover: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600',
+    cover: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=600',
     author: '巴陵行记',
     date: '2026-08-18',
     destination: '中国',
@@ -1766,7 +1766,7 @@ export const chinaFeaturedArticles = [
   {
     id: 'cn-feat-xiangtan',
     title: '湘潭2日穷游：韶山冲·彭德怀故居·窑湾老街·剁椒',
-    cover: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600',
+    cover: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=600',
     author: '莲城笔记',
     date: '2026-08-28',
     destination: '中国',

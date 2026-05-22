@@ -214,17 +214,29 @@ export default function Home() {
     [filteredFeaturedRoutes],
   )
 
-  /** 设计稿横滑条：优先深度路书，凑满 5 张 */
+  /** 设计稿横滑条：固定 5 城精选，直接用路书封面（避免去重替换成黑图/灰底） */
   const guideStripItems = useMemo(() => {
-    const deep = articles.filter(
-      (a) => a.featured || String(a.id || '').startsWith('cn-feat-') || a.intentVariant,
-    )
-    const pool = deep.length >= 5 ? deep : featuredRoutesForHome
+    const stripIds = [
+      'cn-feat-chengdu',
+      'cn-feat-xian',
+      'cn-feat-xiamen',
+      'cn-feat-chongqing',
+      'cn-feat-hangzhou',
+    ]
+    let pool = stripIds
+      .map((id) => articles.find((a) => a.id === id))
+      .filter(Boolean)
+    if (pool.length < 5) {
+      pool = featuredRoutesForHome.slice(0, 5)
+    }
     const narrowed = pool.filter(
       (item) =>
         matchesGuideCard(item, search) && matchesBudget(item.budget) && matchesDays(item.days),
     )
-    return assignArticleGridCoversInOrder(narrowed).slice(0, 5)
+    return narrowed.slice(0, 5).map((item) => ({
+      item,
+      cover: item.cover || item.image,
+    }))
   }, [search, budgetMax, daysFilter])
 
   const latestArticleGridItems = useMemo(
