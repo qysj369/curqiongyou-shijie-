@@ -6,13 +6,16 @@ import { useTranslation } from 'react-i18next'
  */
 export default function BottomNav({ mapHomeImmersive = false } = {}) {
   const { t } = useTranslation()
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
 
-  const homeActive = pathname === '/' || pathname === '/map'
+  const onHomePath = pathname === '/' || pathname === '/map'
+  const guidesSectionActive = onHomePath && hash === '#guides'
+  const homeActive = onHomePath && !guidesSectionActive
   const exploreActive =
     pathname === '/routes' ||
     pathname.startsWith('/routes/') ||
-    pathname.startsWith('/articles/')
+    pathname.startsWith('/articles/') ||
+    guidesSectionActive
   const aiActive = pathname === '/trip-ai'
   const budgetActive = pathname === '/budget'
   const meActive = pathname === '/me'
@@ -30,7 +33,7 @@ export default function BottomNav({ mapHomeImmersive = false } = {}) {
       aria-label={t('a11y.bottomTabBar')}
     >
       <div className="mx-auto grid h-[4.25rem] max-w-7xl grid-cols-5 items-end gap-0 px-0.5">
-        <Link to="/map" className={tabClass(homeActive)} aria-current={homeActive ? 'page' : undefined}>
+        <Link to="/" className={tabClass(homeActive)} aria-current={homeActive ? 'page' : undefined}>
           <span className={`text-xl leading-none ${homeActive ? '' : 'opacity-90'}`} aria-hidden>
             ⌂
           </span>
@@ -38,7 +41,7 @@ export default function BottomNav({ mapHomeImmersive = false } = {}) {
         </Link>
 
         <Link
-          to="/routes"
+          to="/#guides"
           className={tabClass(exploreActive)}
           aria-current={exploreActive ? 'page' : undefined}
         >

@@ -200,7 +200,11 @@ export default function Articles() {
     (filteredArticles.length === 0 && hasActiveFilters) ||
     (filteredArticles.length > 0 && filteredArticles.length <= 2 && keyword.trim().length > 0)
 
-  const breadcrumbs = [{ label: t('common.navMap'), to: '/map' }, { label: t('articles.title') }]
+  const breadcrumbs = [
+    { label: t('common.bottomNavHome'), to: '/' },
+    { label: t('home.designedGuidesTitle'), to: '/#guides' },
+    { label: t('articles.title') },
+  ]
 
   const listJsonLd = useMemo(() => {
     if (typeof window === 'undefined') return null
@@ -237,18 +241,18 @@ export default function Articles() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <JsonLd data={listJsonLd} scriptId="jsonld-routes-list" />
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8">
         <Breadcrumbs items={breadcrumbs} />
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 sm:text-3xl">{t('articles.title')}</h1>
           <Link
-            to="/"
+            to={t('articles.backHomeHref')}
             className="text-sm font-semibold text-sky-700 underline-offset-2 hover:underline dark:text-sky-300"
           >
             ← {t('articles.backHome')}
           </Link>
         </div>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">{t('articles.simplePageLead')}</p>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-5">{t('articles.simplePageLead')}</p>
 
         <form
           role="search"
@@ -328,12 +332,8 @@ export default function Articles() {
           </div>
         ) : null}
 
-        <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">
+        <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">
           {t('articles.resultsCount', { count: filteredArticles.length })}
-        </p>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-          {t('common.fxDisclaimer')}{' '}
-          <span className="text-slate-400 dark:text-slate-500">({t('common.usdToggleLead')})</span>
         </p>
 
         {filteredArticles.length === 0 ? (
@@ -359,10 +359,14 @@ export default function Articles() {
           </div>
         )}
 
-        <section className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">{t('userGuide.formTitle')}</h2>
-          <UserGuideForm onSuccess={() => window.location.reload()} />
-        </section>
+        <details className="collapse-panel mt-10 rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900/40">
+          <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 [&::-webkit-details-marker]:hidden">
+            {t('articles.submitGuideSummary')}
+          </summary>
+          <div className="border-t border-slate-200 px-4 pb-4 pt-3 dark:border-slate-700">
+            <UserGuideForm onSuccess={() => window.location.reload()} />
+          </div>
+        </details>
       </div>
     </div>
   )

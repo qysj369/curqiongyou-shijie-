@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   featuredRoutesForHome,
@@ -121,6 +121,7 @@ export default function Home() {
   const mapHomeImmersive = useMapHomeImmersive()
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const { toast } = useToast()
   const { minimal } = useMinimalUi()
@@ -135,6 +136,14 @@ export default function Home() {
     window.addEventListener(AUTO_LOCATE_PREF_CHANGED, sync)
     return () => window.removeEventListener(AUTO_LOCATE_PREF_CHANGED, sync)
   }, [])
+
+  useEffect(() => {
+    if (mapHomeImmersive || location.hash !== '#guides') return
+    const el = document.getElementById('guides')
+    if (!el) return
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+  }, [location.hash, mapHomeImmersive])
 
   /** 首屏主路径预取，降低首次点击白屏概率（与 Vite base 一致） */
   useEffect(() => {

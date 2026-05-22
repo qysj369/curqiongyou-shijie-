@@ -11,7 +11,11 @@ export default function HomeGuideStrip({ items }) {
   if (!items?.length) return null
 
   return (
-    <section className="home-designed-guides bg-white dark:bg-slate-950" aria-labelledby="home-designed-guides-title">
+    <section
+      id="guides"
+      className="home-designed-guides scroll-mt-24 bg-white dark:bg-slate-950"
+      aria-labelledby="home-designed-guides-title"
+    >
       <div className="mx-auto max-w-6xl px-4 pt-8 pb-6 sm:px-6">
         <div className="flex items-end justify-between gap-3 mb-5">
           <h2
@@ -21,10 +25,10 @@ export default function HomeGuideStrip({ items }) {
             {t('home.designedGuidesTitle')}
           </h2>
           <Link
-            to="/routes"
+            to="/routes?sort=budgetAsc"
             className="shrink-0 text-xs font-semibold text-sky-700 underline-offset-2 hover:underline dark:text-sky-300"
           >
-            {t('home.viewAll')}
+            {t('home.viewAllGuides')}
           </Link>
         </div>
         <ul className="home-designed-guides__list touch-scroll-x flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory scrollbar-hide">

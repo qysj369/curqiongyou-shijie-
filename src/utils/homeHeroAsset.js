@@ -1,5 +1,5 @@
 /** 与 public/hero-home.jpg 同步；改图后递增以刷新 CDN/浏览器缓存 */
-export const HOME_HERO_VERSION = '20260521'
+export const HOME_HERO_VERSION = '20260522'
 
 /** Matheus Ferrero · Unsplash — 与 hero-home.jpg 同场景 */
 export const HOME_HERO_FALLBACK =
