@@ -125,6 +125,16 @@ export default function MoreMenuDrawer({ open, onClose }) {
             </p>
             <ul className="space-y-1">
               <li>
+                <Link to="/#guides" className={rowClass} onClick={onClose}>
+                  {t('home.designedGuidesTitle')}
+                </Link>
+              </li>
+              <li>
+                <Link to="/routes?sort=budgetAsc" className={rowClass} onClick={onClose}>
+                  {t('articles.title')}
+                </Link>
+              </li>
+              <li>
                 <Link to="/map-hub" className={rowClass} onClick={onClose}>
                   {t('common.navMapHub')}
                 </Link>

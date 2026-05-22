@@ -86,6 +86,12 @@ jobs:
             exit 1
           fi
           echo "dist/assets files: $count"
+          for f in hero-home-1280w.jpg hero-home.jpg; do
+            if [ ! -f "dist/$f" ]; then
+              echo "::error::缺少首页主图 dist/$f（请确认 public/ 已提交且 prebuild resize-hero 成功）"
+              exit 1
+            fi
+          done
 
       - name: Write CNAME (optional custom domain)
         if: ${{ vars.PAGES_CNAME != '' }}

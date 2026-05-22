@@ -13,6 +13,7 @@
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
+    scroll-padding-top: 4.5rem;
   }
   body {
     @apply text-slate-800 antialiased text-base;
@@ -47,8 +48,8 @@
   .home-designed-hero {
     position: relative;
     width: 100%;
-    min-height: min(52vh, 28rem);
-    max-height: 36rem;
+    min-height: min(58vh, 32rem);
+    max-height: 40rem;
     overflow: hidden;
     background: #0f172a;
   }

@@ -85,7 +85,7 @@ function HomeMapEmbed() {
 /** 首页仅保留四条穷游主路径；进阶地图与规划入口见右上角「更多」 */
 const HOME_CORE_NAV = [
   { to: '/map', labelKey: 'common.navMap', emoji: '🗺️', circle: 'bg-sky-500 shadow-sky-500/30' },
-  { to: '/routes', labelKey: 'common.navRoutes', emoji: '📖', circle: 'bg-amber-500 shadow-amber-500/25' },
+  { to: '/#guides', labelKey: 'common.navRoutes', emoji: '📖', circle: 'bg-amber-500 shadow-amber-500/25' },
   { to: '/budget', labelKey: 'common.navBudget', emoji: '🧮', circle: 'bg-emerald-500 shadow-emerald-500/25' },
   { to: '/trip-ai', labelKey: 'common.navTripAi', emoji: '✈️', circle: 'bg-violet-500 shadow-violet-500/25' },
 ]
@@ -419,27 +419,25 @@ export default function Home() {
               </span>
             </Link>
           )}
+
+          <section
+            id="home-map-explore"
+            className="mt-6 scroll-mt-24 border-t border-slate-200/80 pt-6 dark:border-slate-700"
+            aria-labelledby="home-map-explore-title"
+            aria-describedby="home-map-explore-lead"
+          >
+            <h2 id="home-map-explore-title" tabIndex={-1} className="text-base font-bold text-slate-900 dark:text-slate-50 sm:text-lg">
+              {t('home.mapExploreTitle')}
+            </h2>
+            <p id="home-map-explore-lead" className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400 sm:text-sm">
+              {t('home.mapExploreLead')}
+            </p>
+            <div className="mt-3 -mx-1 sm:mx-0">
+              <HomeMapEmbed />
+            </div>
+          </section>
         </div>
       </details>
-
-      <section
-        id="home-map-explore"
-        className="scroll-mt-24 border-b border-slate-200/80 bg-slate-50 py-6 dark:border-slate-800 dark:bg-slate-950 sm:py-8"
-        aria-labelledby="home-map-explore-title"
-        aria-describedby="home-map-explore-lead"
-      >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <h2 id="home-map-explore-title" tabIndex={-1} className="text-base font-bold text-slate-900 dark:text-slate-50 sm:text-lg">
-            {t('home.mapExploreTitle')}
-          </h2>
-          <p id="home-map-explore-lead" className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400 sm:text-sm">
-            {t('home.mapExploreLead')}
-          </p>
-        </div>
-        <div className="mx-auto max-w-7xl px-2 sm:px-6">
-          <HomeMapEmbed />
-        </div>
-      </section>
 
       {searchTrimmed ? (
         <section id="home-search-results" className="mx-auto max-w-7xl scroll-mt-24 px-4 pb-4 pt-10 sm:px-6" aria-labelledby="home-search-results-title">
@@ -528,7 +526,15 @@ export default function Home() {
 
       {!minimal && (
       <>
-      <section id="home-featured" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-14 sm:px-6 sm:py-16">
+      <details
+        className="collapse-panel border-b border-slate-200/80 bg-slate-50 dark:border-slate-800 dark:bg-slate-950"
+        aria-label={t('home.moreListsSummary')}
+      >
+        <summary className="cursor-pointer list-none px-4 py-3 text-center text-sm font-semibold text-slate-600 dark:text-slate-300 [&::-webkit-details-marker]:hidden sm:px-6">
+          {t('home.moreListsSummary')}
+        </summary>
+        <div className="border-t border-slate-200/80 dark:border-slate-700">
+      <section id="home-featured" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-10 sm:px-6 sm:py-12">
         <div className="mb-10 flex flex-col gap-5 sm:mb-12 md:flex-row md:items-end md:justify-between">
           <HomeSectionTitle id="home-featured-title" tabIndex={-1}>
             {t('home.featuredRoutes')}
@@ -821,6 +827,9 @@ export default function Home() {
           </div>
         </section>
       )}
+
+        </div>
+      </details>
 
       <section className="mx-auto max-w-7xl px-4 pb-14 pt-2 sm:px-6 sm:pb-16">
         <Link

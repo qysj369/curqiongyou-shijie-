@@ -146,14 +146,14 @@ export default function ArticleDetail() {
 
   const breadcrumbs = article
     ? [
-        { label: t('common.navMap'), to: '/map' },
-        { label: t('common.navRoutes'), to: '/routes' },
+        { label: t('common.bottomNavHome'), to: '/' },
+        { label: t('home.designedGuidesTitle'), to: '/#guides' },
         { label: article.title },
       ]
     : userGuide
       ? [
-          { label: t('common.navMap'), to: '/map' },
-          { label: t('common.navRoutes'), to: '/routes' },
+          { label: t('common.bottomNavHome'), to: '/' },
+          { label: t('home.designedGuidesTitle'), to: '/#guides' },
           { label: userGuide.title },
         ]
       : []
@@ -207,7 +207,7 @@ export default function ArticleDetail() {
         <div className="max-w-3xl mx-auto px-4 py-8">
           <Breadcrumbs items={breadcrumbs} className="print:hidden" />
           <Link
-            to="/routes"
+            to="/#guides"
             className="text-sky-700 dark:text-sky-300 hover:underline mb-4 min-h-11 inline-flex items-center print:hidden"
           >
             {t('articleDetail.backToList')}
@@ -337,7 +337,7 @@ export default function ArticleDetail() {
       <div className="max-w-3xl mx-auto px-4 py-8">
         <Breadcrumbs items={breadcrumbs} className="print:hidden" />
         <Link
-          to="/routes"
+          to="/#guides"
           className="text-sky-700 dark:text-sky-300 hover:underline mb-4 min-h-11 inline-flex items-center print:hidden"
         >
           {t('articleDetail.backToList')}

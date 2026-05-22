@@ -28,6 +28,7 @@ import {
 const SORT_SET = new Set(['dateDesc', 'viewsDesc', 'budgetAsc', 'daysAsc'])
 const BUDGET_SET = new Set(['2000', '5000', '10000'])
 const DAYS_SET = new Set(['3', '7', '15'])
+const HOT_CITY_CHIPS = ['成都', '西安', '重庆', '杭州', '厦门', '青岛', '大理', '丽江']
 function parseSourceFromParams(sp) {
   const src = sp.get('source')
   return src === 'editor' || src === 'user' ? src : 'all'
@@ -295,6 +296,27 @@ export default function Articles() {
           </div>
         </form>
 
+        <nav className="mb-5 flex flex-wrap items-center gap-2" aria-label={t('articles.hotCityChipsLabel')}>
+          {HOT_CITY_CHIPS.map((city) => (
+            <Link
+              key={city}
+              to={`/routes?destination=${encodeURIComponent(city)}&sort=budgetAsc`}
+              className={`min-h-9 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                destinationFilter === city
+                  ? 'border-sky-400 bg-sky-50 text-sky-800 dark:border-sky-600 dark:bg-sky-950/50 dark:text-sky-100'
+                  : 'border-slate-200 bg-white text-slate-700 hover:border-sky-300 hover:bg-sky-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+              }`}
+            >
+              {city}
+            </Link>
+          ))}
+          <Link
+            to="/routes?sort=budgetAsc"
+            className="min-h-9 rounded-full border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 hover:border-sky-300 dark:border-slate-600 dark:text-slate-400"
+          >
+            {t('articles.allGuidesLink')}
+          </Link>
+        </nav>
 
         {destinationTripHref ? (
           <div className="mb-4 rounded-xl border border-violet-200 bg-violet-50/80 px-4 py-3 text-sm dark:border-violet-900/50 dark:bg-violet-950/30">
