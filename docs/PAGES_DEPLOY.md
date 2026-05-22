@@ -25,16 +25,26 @@
 
 仓库 **Settings → Pages** 中填写 Custom domain，并等待 HTTPS 证书生效（常见 10 分钟～24 小时）。
 
-## 本地与线上主图一致
+## 换上你自己设计的首页主图（重要）
+
+线上 Hero **只读** 仓库里的 `public/hero-home.jpg`。设计稿若没放进这个文件，线上会一直显示旧图。
 
 ```powershell
-cd "项目目录\budget-travel"
-# 覆盖 public\hero-home.jpg 后：
-npm run resize-hero
-npm run build:pages
+cd "C:\Users\Administrator\Desktop\新建文件夹 (5)\budget-travel"
+
+# 把「你的那张图」路径换成实际路径（支持 jpg/png）
+.\scripts\install-hero.ps1 "你的设计主图.jpg"
 ```
 
-改 `src/utils/homeHeroAsset.js` 里的 `HOME_HERO_VERSION` 可强制浏览器刷新 Hero 缓存。
+然后：
+
+1. 打开 `src/utils/homeHeroAsset.js`，把 `HOME_HERO_VERSION` 改成当天日期（如 `20260522b`）  
+2. `git add public\hero-home*.jpg src/utils/homeHeroAsset.js src/locales/zh-CN.json`  
+3. `git commit -m "chore: update homepage hero from design"`  
+4. `git push origin main`  
+5. 等 Actions 绿勾后，浏览器 **Ctrl+Shift+R** 强刷首页  
+
+也可手动：复制图片覆盖 `public\hero-home.jpg` → `npm run resize-hero` → 同上提交推送。
 
 ## 部署后自检
 
