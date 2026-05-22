@@ -37,7 +37,7 @@ export default function Header() {
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2 sm:px-6 lg:px-8" aria-label={t('a11y.mainNavigation')}>
         <Link to="/" className="flex min-w-0 shrink-0 items-center" aria-label={t('a11y.siteHome')}>
-          <BrandLogo />
+          <BrandLogo lockupOnDark={homeDesigned} />
         </Link>
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <NotificationBell />

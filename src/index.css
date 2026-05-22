@@ -63,18 +63,18 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center 40%;
-    filter: saturate(1.12) contrast(1.04);
+    object-position: center 35%;
+    filter: saturate(1.15) contrast(1.05) brightness(1.03);
   }
   .home-designed-hero__scrim {
     position: absolute;
     inset: 0;
     background: linear-gradient(
       180deg,
-      rgba(15, 23, 42, 0.28) 0%,
-      rgba(15, 23, 42, 0.02) 38%,
-      rgba(255, 255, 255, 0.08) 72%,
-      rgba(255, 255, 255, 0.55) 100%
+      rgba(15, 23, 42, 0.22) 0%,
+      rgba(15, 23, 42, 0) 42%,
+      rgba(255, 255, 255, 0.12) 78%,
+      rgba(255, 255, 255, 0.62) 100%
     );
     pointer-events: none;
   }
