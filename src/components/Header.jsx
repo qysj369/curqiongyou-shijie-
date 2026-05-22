@@ -31,7 +31,7 @@ export default function Header() {
     <header
       className={
         homeDesigned
-          ? 'sticky top-0 z-50 border-b border-transparent bg-white/85 shadow-sm backdrop-blur-md dark:bg-slate-950/80'
+          ? 'absolute top-0 left-0 right-0 z-50 border-0 bg-gradient-to-b from-black/30 via-black/10 to-transparent shadow-none'
           : 'sticky top-0 z-50 border-b border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900'
       }
     >
@@ -44,7 +44,11 @@ export default function Header() {
           <button
             type="button"
             onClick={() => setMoreOpen(true)}
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+            className={
+              homeDesigned
+                ? 'flex min-h-11 min-w-11 items-center justify-center rounded-lg text-white/95 hover:bg-white/15'
+                : 'flex min-h-11 min-w-11 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+            }
             aria-label={t('a11y.openMoreMenu')}
             aria-expanded={moreOpen}
           >

@@ -44,14 +44,18 @@
 }
 
 @layer components {
-  /** 设计稿首页：全宽 Hero + 底部胶囊搜索 */
+  /** 明亮设计稿首页 */
+  .home-page--vibrant {
+    @apply bg-white dark:bg-slate-950;
+  }
+
   .home-designed-hero {
     position: relative;
     width: 100%;
-    min-height: min(58vh, 32rem);
-    max-height: 40rem;
+    min-height: min(68vh, 38rem);
+    max-height: 46rem;
     overflow: hidden;
-    background: #0f172a;
+    background: #38bdf8;
   }
   .home-designed-hero__img {
     position: absolute;
@@ -59,32 +63,34 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* 设计稿构图：人物在画面下方，缆车与山海在上方 */
-    object-position: center 72%;
+    object-position: center 40%;
+    filter: saturate(1.12) contrast(1.04);
   }
   .home-designed-hero__scrim {
     position: absolute;
     inset: 0;
     background: linear-gradient(
       180deg,
-      rgba(15, 23, 42, 0.15) 0%,
-      rgba(15, 23, 42, 0.05) 40%,
-      rgba(15, 23, 42, 0.55) 100%
+      rgba(15, 23, 42, 0.28) 0%,
+      rgba(15, 23, 42, 0.02) 38%,
+      rgba(255, 255, 255, 0.08) 72%,
+      rgba(255, 255, 255, 0.55) 100%
     );
     pointer-events: none;
   }
   .home-designed-hero__search {
     position: absolute;
     left: 50%;
-    bottom: 1.25rem;
+    bottom: 1.5rem;
     z-index: 2;
     display: flex;
-    width: min(92%, 28rem);
+    width: min(88%, 22rem);
+    min-height: 3.25rem;
     transform: translateX(-50%);
-    align-items: stretch;
+    align-items: center;
     border-radius: 9999px;
     background: #fff;
-    box-shadow: 0 12px 40px rgba(2, 6, 23, 0.22);
+    box-shadow: 0 16px 48px rgba(2, 6, 23, 0.18);
     overflow: hidden;
   }
   .home-designed-hero__input {
@@ -92,33 +98,56 @@
     min-width: 0;
     border: none;
     background: transparent;
-    padding: 0.85rem 0.25rem 0.85rem 1.25rem;
-    font-size: 0.95rem;
+    padding: 0.9rem 0.5rem 0.9rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
     color: #0f172a;
     outline: none;
   }
   .home-designed-hero__input::placeholder {
-    color: #64748b;
+    color: #94a3b8;
+    font-weight: 400;
   }
   .home-designed-hero__submit {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 3.25rem;
-    padding: 0 1rem;
+    min-width: 3.5rem;
+    padding: 0 1.1rem;
     background: transparent;
-    color: #475569;
-    font-size: 1.35rem;
+    color: #64748b;
+    font-size: 1.4rem;
     line-height: 1;
     transition: color 0.15s ease;
   }
   .home-designed-hero__submit:hover {
     color: #0284c7;
   }
+
+  .home-designed-guides {
+    @apply bg-white dark:bg-slate-950;
+  }
   .home-designed-guides__list {
     list-style: none;
     margin: 0;
     padding: 0;
+  }
+  .home-designed-guides__thumb {
+    width: 6.5rem;
+    height: 6.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+    border: 2px solid #fff;
+  }
+  @media (min-width: 640px) {
+    .home-designed-guides__thumb {
+      width: 7.5rem;
+      height: 7.5rem;
+      border-radius: 1.125rem;
+    }
+  }
+  .home-designed-guides__card:hover .home-designed-guides__thumb {
+    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.28);
   }
 
   /** 穷游主站页面衬底：高德式大块白/浅灰分区，与 body 渐变叠加时仍显干净 */

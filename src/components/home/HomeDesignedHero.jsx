@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { HOME_HERO_FALLBACK, homeHeroAsset } from '../../utils/homeHeroAsset.js'
 
 /**
- * 设计稿首屏：全宽结伴旅行主图（public/hero-home.jpg）+ 底部胶囊搜索条。
+ * 设计稿首屏：明亮结伴主图 + 底部胶囊「搜索」。
  */
 export default function HomeDesignedHero({ search, setSearch, onSubmit }) {
   const { t } = useTranslation()
@@ -48,7 +48,7 @@ export default function HomeDesignedHero({ search, setSearch, onSubmit }) {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder={t('home.designedSearchPlaceholder')}
+          placeholder={t('home.designedSearchShort')}
           autoComplete="off"
           enterKeyHint="search"
           className="home-designed-hero__input"

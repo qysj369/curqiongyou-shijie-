@@ -365,7 +365,7 @@ export default function Home() {
   }
 
   return (
-    <div className="rw-surface-page home-page home-page--designed">
+    <div className="rw-surface-page home-page home-page--designed home-page--vibrant">
       <HomeDesignedHero search={search} setSearch={setSearch} onSubmit={handleDesignedSearch} />
       <HomeGuideStrip items={guideStripItems} />
 
